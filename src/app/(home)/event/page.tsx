@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
 import Header from "@/app/components/Header";
-import HomePageEvents from "@/app/components/HomePageEvents";
+import HomePageEvents from "@/app/components/_web/HomePageEvents";
 
 const page = () => {
   return (
