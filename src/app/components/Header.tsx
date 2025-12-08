@@ -10,6 +10,8 @@ import ThemeToggle from "./ToggleTeam";
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const renderComp =
+    typeof window !== "undefined" ? window.location.pathname : "";
   const isActive = (link: string) => {
     if (link === "/") return pathname === "/";
     return pathname.startsWith(link);
@@ -25,7 +27,7 @@ const Header = () => {
     },
     {
       label: "Pricing",
-      link: "/pricing",
+      link: "/pricing-page",
     },
     {
       label: "Solutions",
@@ -61,10 +63,11 @@ const Header = () => {
             ))}
           </ul>
           <div className="flex items-center gap-6">
-            <ThemeToggle />
+            {typeof window !== "undefined" && <ThemeToggle />}
+            {/* <ThemeToggle /> */}
             <div className="">
               <Link
-                href="/logIn"
+                href="/login"
                 className="px-3 py-[11px] text-[20px] text-foreground font-medium border-2 border-[#0052CC85] rounded-lg dark:hover:bg-[#0052cc18] transition duration-300 no-underline">
                 Login
               </Link>

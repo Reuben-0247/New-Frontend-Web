@@ -1,11 +1,11 @@
-import HomePageEvents from "../components/HomePageEvents";
-import Features from "../components/Features";
-import TrustPilotSection from "../components/trustPilot";
-import FAQSection from "../components/AskedQuestion";
-import ImageView from "../components/ImageView";
+import HomePageEvents from "../components/_web/HomePageEvents";
+import Features from "../components/_web/Features";
+import TrustPilotSection from "../components/_web/trustPilot";
+import FAQSection from "../components/_web/AskedQuestion";
+import ImageView from "../components/_web/ImageView";
 import Header from "@/app/components/Header";
-import { HomeHero } from "../components/Hero";
-import { PlayImg } from "../components/PlayTumb";
+import { HomeHero } from "../components/_web/Hero";
+import { PlayImg } from "../components/_web/PlayTumb";
 
 export default function Home() {
   return (

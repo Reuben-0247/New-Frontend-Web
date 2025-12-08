@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, SunMedium } from "lucide-react";
+import { THEME } from "@/utils/constant";
+import { Button } from "@/components/ui/button";
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("theme") as "light" | "dark" | null;
+      const stored = localStorage.getItem(THEME) as "light" | "dark" | null;
       if (stored) return stored;
       return "light";
     }
@@ -15,7 +17,7 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
+    localStorage.setItem(THEME, theme);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -23,15 +25,14 @@ export default function ThemeToggle() {
   };
 
   return (
-    <button
+    <Button
       onClick={toggleTheme}
-      className="p-1 rounded-full cursor-pointer border border-border bg-card  transition"
-      aria-label="Toggle theme">
+      className="p-1 rounded-full cursor-pointer border border-border bg-card  transition">
       {theme === "light" ? (
-        <Moon size={24} className="text-background" />
+        <Moon className="text-background" />
       ) : (
-        <Sun size={24} className=" text-amber-500" />
+        <SunMedium className=" text-amber-500" />
       )}
-    </button>
+    </Button>
   );
 }
