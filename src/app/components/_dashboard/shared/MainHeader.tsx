@@ -21,11 +21,14 @@ import { TOKEN_NAME, USER_ID } from "@/utils/constant";
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import ThemeToggle from "../../ToggleTeam";
+import { useAuthStore } from "@/app/store/auth.store";
 // import NotificationModal from "./modal/NotificationModal";
 
-const MainHeader: React.FC<{ toggleAside: () => void }> = ({ toggleAside }) => {
+const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
+  toggleAside,
+}) => {
   const router = useRouter();
-  // const { auth } = useAuthStore();
+  const { auth } = useAuthStore();
 
   const logout = () => {
     Cookies.remove(TOKEN_NAME);
@@ -53,7 +56,11 @@ const MainHeader: React.FC<{ toggleAside: () => void }> = ({ toggleAside }) => {
           alt="checkCITE logo"
         />
       </div>
-      <h3 className="text-foreground md:block hidden font-bold">Dashboard</h3>
+      <div className="text-foreground md:block hidden font-bold ">
+        <p className="flex gap-2">
+          <span>{auth?.firstName}</span> <span>{auth?.lastName}</span>
+        </p>
+      </div>
 
       <div className="flex items-center gap-6 justify-end w-full">
         <Bell className="text-primary cursor-pointer" />
@@ -71,10 +78,10 @@ const MainHeader: React.FC<{ toggleAside: () => void }> = ({ toggleAside }) => {
               </div>
               <div className="min-w-0 flex-auto">
                 <p className="hidden md:flex text-md font-semibold leading-6 text-foreground mb-0">
-                  John Doe
+                  {auth?.firstName} {auth?.lastName}
                 </p>
                 <p className="hidden md:flex truncate text-xs leading-5 text-foreground">
-                  doe@gmail.com
+                  {auth?.email}
                 </p>
               </div>
               <span className="sr-only">Toggle user menu</span>
@@ -84,7 +91,7 @@ const MainHeader: React.FC<{ toggleAside: () => void }> = ({ toggleAside }) => {
             align="end"
             className="flex bg-background flex-col">
             <DropdownMenuLabel className="text-foreground">
-              <span className="text-foreground"> User</span>
+              <span className="text-foreground"> {auth?.email}</span>
             </DropdownMenuLabel>
 
             <DropdownMenuSeparator />

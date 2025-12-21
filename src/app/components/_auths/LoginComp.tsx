@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ToastContent, toast } from "react-toastify";
 // import Cookies from "js-cookie";
 // import axiosApi from "@/lib/axios";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { formatError } from "@/utils/helper";
 import Cookies from "js-cookie";
 import { TOKEN_NAME } from "@/utils/constant";
@@ -39,7 +39,7 @@ const formSchema = z.object({
 const LoginComp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  // const router = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,19 +54,24 @@ const LoginComp = () => {
     const token = searchParams.get("token");
     if (token) {
       Cookies.set(TOKEN_NAME, token);
+      router.push("/events");
     }
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   // const email = form.watch("email");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true);
-      // const { data } = await axiosApi.post<{ message: string }>(
-      //   "/auth/login",
-      //   values
-      // );
-      console.log("Login response:", values);
+      const { data } = await axios.post<{ message: string }>(
+        "/auth/login",
+        values
+      );
+      // console.log("Login response:", values);
+      if (data) {
+        toast.success("Login successful");
+        // window.location.href = "/events";
+      }
 
       // if (data.message) {
       //   toast.success("Login successful");

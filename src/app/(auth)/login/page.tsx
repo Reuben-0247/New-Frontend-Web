@@ -6,7 +6,7 @@ import React from "react";
 
 const Page = () => {
   return (
-    <div className="mt-6">
+    <div className="mt-6  ">
       <div className="flex justify-center mb-6">
         <Link href="/" className="text-primary link font-semibold ">
           <img
