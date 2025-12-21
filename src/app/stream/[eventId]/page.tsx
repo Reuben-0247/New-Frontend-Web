@@ -5,7 +5,12 @@ import EventReviewsComp from "@/app/components/stream-comps/EventReviewsComp";
 import HostComments from "@/app/components/stream-comps/HostComments";
 import SoftwareProp from "@/app/components/stream-comps/SoftwareProp";
 import StreamInfo from "@/app/components/stream-comps/StreamInfo";
+import { IStreamData } from "@/app/interfaces/castr.interface";
+import { useEventStore } from "@/app/store/event.store";
 import { Button } from "@/components/ui/button";
+import axiosApi from "@/lib/axios";
+import { formatError } from "@/utils/helper";
+import { AxiosError } from "axios";
 import {
   Airplay,
   ArrowLeft,
@@ -15,10 +20,12 @@ import {
   Volume2,
   Webcam,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 // import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HiMiniSignal } from "react-icons/hi2";
 import { ThreeDots } from "react-loader-spinner";
+import { toast, ToastContent } from "react-toastify";
 const tabs: { name: string }[] = [
   {
     name: "Board",
@@ -46,23 +53,110 @@ const videoSrcData: { label: string; icon: React.ReactNode }[] = [
 
 const StreamPage = () => {
   const [active, setActive] = useState<string>("Board");
+  const [loading, setLoading] = useState(false);
   const [isPublished, setIsPublished] = useState(true);
   const [videoSrc, setVideoSrc] = useState("Streaming Sofware");
-  const [loading] = useState(true);
-  const streamData = {};
-  const isLive = {};
+  const { event, setStreamData, streamData } = useEventStore();
+  const router = useRouter();
+  const [isLive, setIslive] = useState(false);
+
+  const createStream = async () => {
+    try {
+      const body = {
+        name: event?.title,
+        eventId: event?._id,
+        enabled: true,
+        settings: {
+          abr: false,
+          cloud_recording: false,
+        },
+      };
+      setLoading(true);
+
+      const { data } = await axiosApi.post<{ data: { stream: IStreamData } }>(
+        `/stream/castr/create`,
+        body
+      );
+      setStreamData(data.data.stream);
+      console.log(data?.data?.stream);
+
+      toast.success("Stream Created Successfully", { delay: 3000 });
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const formattedError = formatError(axiosError);
+      toast.error(formattedError.message as ToastContent);
+      console.error("Error fetching event:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const goLive = async () => {
+    try {
+      // setIsLoading(true);
+      const { data } = await axiosApi.patch(`/events/live/${event?._id}`, {
+        evenId: event?._id,
+        streamPlatform: "castr",
+      });
+
+      console.log(data);
+      // Update the enabled state after successful API call
+      setIslive(!isLive);
+      toast.success(isLive ? "Event is now offline" : "Event is now live", {
+        delay: 3000,
+      });
+
+      // sessionStorage.setItem("isEventLive", JSON.stringify(true));
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const formattedError = formatError(axiosError);
+      toast.error(formattedError.message as ToastContent);
+    } finally {
+      // setLoading(false);
+      // setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    // if (!streamData?.castrStreamId) return;
+    const castrId = streamData?.castrStreamId || event?.castrStreamId;
+    const getStreamStats = async () => {
+      try {
+        const { data } = await axiosApi.get(`/stream/castr/${castrId}/stats`);
+        console.log(data);
+        //  setStats(response?.data?.response);
+      } catch (error) {
+        console.error("Error fetching stream stats:", error);
+      }
+    };
+    getStreamStats();
+
+    // const interval = setInterval(() => {
+    //   getStreamStats();
+    // }, 5000);
+
+    // return () => clearInterval(interval);
+  }, [streamData?.castrStreamId, event?.castrStreamId]);
+
+  useEffect(() => {
+    if (videoSrc === "Streaming Sofware") {
+      setIsPublished(true);
+    } else {
+      setIsPublished(false);
+    }
+  }, [videoSrc]);
+  const playBackUrl = streamData?.playBack?.embedUrl;
 
   return (
     <div>
       <div className="flex  justify-between">
         <div>
           <Button
+            onClick={() => router.back()}
             size={"sm"}
             variant={"outline"}
             className="text-foreground font-semibold cursor-pointer">
             <ArrowLeft /> <span>Back</span>
           </Button>
-          <p className="mt-4 text-2xl font-bold text-foreground">Title</p>
+          {/* <p className="mt-4 text-2xl font-bold text-foreground">Title</p> */}
         </div>
         <p className="font-bold text-2xl text-foreground">Stream Setup</p>
       </div>
@@ -99,22 +193,22 @@ const StreamPage = () => {
           <hr />
           {isPublished ? (
             <div className="w-full h-[300px] relative flex mt-2 rounded-md items-center border justify-center bg-[#151E37] ">
-              {!streamData ? (
+              {streamData ? (
                 <div className="w-full  h-full ">
                   <iframe
-                    src={""}
+                    src={playBackUrl}
                     className="w-full h-full border-none"
                     allowFullScreen
                     allow="autoplay; encrypted-media"
                     title="Castr Live Stream"
                   />
                   <div>
-                    {isLive ? (
+                    {event?.isLive ? (
                       <div className="w-full flex absolute bottom-[150px] items-center justify-center">
                         <button
                           // onClick={goLive}
                           // disabled={isLoading}
-                          className=" rounded-[5px] text-[14px] flex items-center font-nuni bg-[#720013] \ px-2 h-[45px] ">
+                          className=" cursor-pointer rounded-[5px] text-[14px] flex items-center font-nuni bg-[#720013] \ px-2 h-[45px] ">
                           <HiMiniSignal size={13} color="white" />
                           <span className="ml-2 text-white text-[14px]">
                             Go live
@@ -125,7 +219,7 @@ const StreamPage = () => {
                       <div className="w-full flex absolute bottom-5 items-center justify-center">
                         <button
                           // onClick={openEndStreamModal}
-                          className=" rounded-[5px] text-[14px] font-nuni bg-[#720013] text-white px-2 h-[45px] ">
+                          className=" cursor-pointer rounded-[5px] text-[14px] font-nuni bg-[#720013] text-white px-2 h-[45px] ">
                           End Stream
                         </button>
                       </div>
@@ -133,8 +227,10 @@ const StreamPage = () => {
                   </div>
                 </div>
               ) : (
-                <button className="flex items-center   mb-3 rounded-lg bg-[#0062FF] px-2 h-[45px] ">
-                  {!loading ? (
+                <button
+                  onClick={createStream}
+                  className="flex items-center cursor-pointer  mb-3 rounded-lg bg-[#0062FF] px-2 h-[45px] ">
+                  {loading ? (
                     <ThreeDots color="white" />
                   ) : (
                     <span className="text-white flex items-center gap-1 ml-2 text-[18px]">

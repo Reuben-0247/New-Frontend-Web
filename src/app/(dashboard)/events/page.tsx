@@ -1,108 +1,55 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { ListFilter } from "lucide-react";
+import { Bookmark, ListFilter } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React, { useMemo } from "react";
-import { FaSearch } from "react-icons/fa";
+// import { usePathname } from "next/navigation";
+import React, { useEffect, useMemo, useState } from "react";
+import { FaCalendar, FaSearch } from "react-icons/fa";
 import { IoAdd } from "react-icons/io5";
 import {
-  DropdownMenuCheckboxItemProps,
+  // DropdownMenuCheckboxItemProps,
   DropdownMenuItem,
 } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
+  // DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-type Checked = DropdownMenuCheckboxItemProps["checked"];
-const events = [
-  {
-    id: "1",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Music",
-    live: true,
-  },
-  {
-    id: "2",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Health",
-  },
-  {
-    id: "3",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Food",
-    live: true,
-  },
-  {
-    id: "4",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Art",
-    live: false,
-  },
-  {
-    id: "5",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Carear",
-    live: false,
-  },
-];
+import { useAuthStore } from "@/app/store/auth.store";
+import axiosApi from "@/lib/axios";
+import { IEvent } from "@/app/interfaces/event.interface";
+import { useEventStore } from "@/app/store/event.store";
+import { toast, ToastContent } from "react-toastify";
+import { AxiosError } from "axios";
+import { formatError } from "@/utils/helper";
+import { useCategoryStore } from "@/app/store/category.store";
+import { FiCalendar, FiMapPin } from "react-icons/fi";
+// type Checked = DropdownMenuCheckboxItemProps["checked"];
 
 const EventPage = () => {
-  const pathName = usePathname();
+  const { auth } = useAuthStore();
+  const { categories } = useCategoryStore();
   const [search, setSearch] = React.useState("");
-  const [showActivie, setShowActive] = React.useState<Checked>(false);
+  const [components, setComponents] = useState<string>("Published");
+  // const [loadingSave, setLoadingSave] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // const [showActivie, setShowActive] = React.useState<Checked>(false);
+  const labels = ["Published", "Drafts", "Saved", "Registered", "Past"];
+
+  const { setEvents, events } = useEventStore();
   const filteredEvents = useMemo(() => {
-    const data = events.filter(
-      (event) =>
-        event.name.toLowerCase().includes(search.toLowerCase()) ||
-        event.category.toLowerCase().includes(search.toLowerCase()) ||
-        event.date.toLowerCase().includes(search.toLowerCase())
+    const data = events?.filter((event) =>
+      event.title?.toLowerCase().includes(search.toLowerCase())
     );
     return data;
-  }, [search]);
+  }, [search, events]);
 
   const eventTypes = [
     "Published Events",
@@ -110,6 +57,81 @@ const EventPage = () => {
     "Registered Events",
     "Past Events",
   ];
+
+  const fetchEvents = async (url: string) => {
+    try {
+      setLoading(true);
+
+      if (components === "Saved") {
+        const { data } = await axiosApi.get<{ data: IEvent[] }>(url);
+        if (data.data) {
+          setEvents(data.data);
+        }
+      } else {
+        const { data } = await axiosApi.get<{ data: { events: IEvent[] } }>(
+          url
+        );
+        setEvents(data.data.events);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    switch (components) {
+      case "Registered":
+        fetchEvents(`/events/register/100`);
+        break;
+      case "Past":
+        fetchEvents(`/events/previously-attended/${auth?._id}/10`);
+        break;
+      case "Published":
+        fetchEvents(`/events?userId=${auth?._id}&isPublished=true`);
+        break;
+      case "Saved":
+        fetchEvents(`/events/saved/all`);
+        break;
+      case "Drafts":
+        fetchEvents(`/events?userId=${auth?._id}&isPublished=false`);
+        break;
+      default:
+        break;
+    }
+  }, [components, auth?._id]);
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find((c) => c._id === categoryId);
+    return category ? category.name : "Unknown";
+  };
+
+  const handleSaveEvent = async (eventId: string) => {
+    if (!eventId) {
+      toast.error("You must be logged in to save an event.");
+
+      return;
+    }
+
+    try {
+      // setLoadingSave(true);
+      const res = await axiosApi.patch(`/events/saved/update`, { eventId });
+
+      if (res.status === 200 || res.status === 201) {
+        toast.success("Event saved successfully.");
+      } else {
+        throw new Error(res.data?.message || "Unable to save this event.");
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const formattedError = formatError(axiosError);
+      toast.error(formattedError.message as ToastContent);
+    } finally {
+      // setLoadingSave(false);
+    }
+  };
 
   return (
     <div>
@@ -154,9 +176,10 @@ const EventPage = () => {
             <DropdownMenuLabel>Event Filters</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {eventTypes.map((ev, i) => (
+              {labels.map((ev, i) => (
                 <DropdownMenuItem
                   className="py-2 hover:border-none! outline-none hover:bg-dash-gray cursor-pointer"
+                  onClick={() => setComponents(ev)}
                   key={i}>
                   {ev}
                 </DropdownMenuItem>
@@ -166,8 +189,21 @@ const EventPage = () => {
         </DropdownMenu>
       </div>
 
+      <div className="flex event-scroll  gap-1 md:gap-3 my-6  overflow-x-scroll md:w-[900px] w-[500px]">
+        {labels.map((labelName) => (
+          <button
+            key={labelName}
+            onClick={() => setComponents(labelName)}
+            className={`text-[10px] md:text-base px-1  md:px-4 w-full md:w-0 cursor-pointer mx-1 md:mx-2 py-2 rounded-lg min-w-1 border md:min-w-45 transition-colors duration-300
+                ${components === labelName ? "ring-2 ring-blue-500" : ""}
+                dark:bg-transparent text-gray-700 dark:text-white border-gray-200 dark:border-gray-700`}>
+            {labelName} Events
+          </button>
+        ))}
+      </div>
+
       <div className="events">
-        {events.length <= 0 ? (
+        {events?.length <= 0 ? (
           <div className="border border-blue-300 rounded-lg p-6 md:p-10 text-center max-w-3xl mx-auto">
             <div className="flex justify-center mb-4">
               <div className="bg-blue-100 p-2 rounded-full">
@@ -205,63 +241,143 @@ const EventPage = () => {
           </div>
         ) : (
           <div>
-            {filteredEvents.length ? (
-              <div className="events grid md:grid-cols-3 grid-cols-1 gap-4 mt-10">
-                {filteredEvents.map((event) => (
-                  <Link
-                    href={`/events/${event.id}`}
-                    className="item z-9 rounded-xl border border-border shadow-md "
-                    key={event.id}>
-                    <div
-                      className={`img flex flex-col justify-between p-1 bg-[url('/images/rect.png')]  bg-cover bg-center w-full h-[137px]`}>
-                      <p className="">
-                        {event.live == true && (
-                          <span className="bg-red-500 text-white py-1 px-2 rounded-lg w-max">
-                            Live
-                          </span>
-                        )}
-                      </p>
-                      <p className="bg-[#000826] text-white px-4 py-1 rounded-bl-[20px] rounded-tr-[20px]  w-max">
-                        {event.category}
-                      </p>
-                    </div>
-                    <div className="content flex justify-between  p-2">
-                      <div>
-                        <div className="flex items-center justify-between gap-4 ">
-                          <p className="font-bold ">{event.name}</p>
+            <main className=" pb-16">
+              {loading ? (
+                <div className="flex items-center justify-center text-gray-500 dark:text-gray-300 h-32">
+                  Loading events...
+                </div>
+              ) : filteredEvents?.length === 0 ? (
+                <div className="flex items-center justify-center text-gray-500 dark:text-gray-300 h-32">
+                  {`No ${components.toLowerCase()} events found.`}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                  {filteredEvents?.map((event: IEvent) => {
+                    const eventId = event._id || event._id || event.eventId;
+                    const shareUrl = `https://www.feroevent.com/findEvents/${event._id}?label=${components}`;
+
+                    return (
+                      <Link
+                        key={eventId}
+                        href={`/events/${event._id}?label=${components}`}
+                        className="block link w-full">
+                        <div className="rounded-xl cursor-pointer shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.02] h-fit  border  border-gray-200 dark:border-gray-700">
+                          <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
+                            <img
+                              src={event.displayImage}
+                              alt={event.title}
+                              className="w-full h-full object-cover"
+                            />
+                            {event.isLive && (
+                              <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow-md animate-pulse">
+                                LIVE
+                              </div>
+                            )}
+                            <p className="absolute bottom-0  m-0 left-0 text-sm p-3  h-[25px] w-[95px] flex justify-center items-center  rounded-tl-none rounded-tr-xl  rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
+                              {getCategoryName(event?.categoryId || "")}
+                            </p>
+                          </div>
+                          <div className="ps-2 pe-3 flex flex-col gap-2  h-1/2">
+                            <div className="flex justify-between items-center mt-3">
+                              <h3 className="text-[18px] font-semibold  truncate m-0  text-gray-900 dark:text-white leading-tight ">
+                                {event.title}
+                              </h3>
+
+                              {components !== "Saved" && (
+                                <button
+                                  onClick={() =>
+                                    handleSaveEvent(event?._id || "")
+                                  }
+                                  disabled={loading}
+                                  className="right-3  bg-opacity-90 z-999 cursor-pointer"
+                                  title="Save Event"
+                                  type="button">
+                                  <Bookmark className="w-4 h-4 text-gray-500 dark:text-white   hover:text-gray-700 dark:hover:text-white" />
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-5 text-sm">
+                              <FiCalendar className="w-4 h-4 text-[#434343] dark:text-white " />
+                              <span className="truncate text-[#434343] dark:text-white ">
+                                {new Date(
+                                  event.startDate || ""
+                                ).toLocaleDateString(undefined, {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-5 text-sm ">
+                              <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white " />
+                              <span className="truncate text-[#434343] dark:text-white ">
+                                {event.location?.address ||
+                                  "addres not specifield"}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-5 text-sm ">
+                              <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white " />
+                              <p className="w-3 h-4 text-[#434343] dark:text-white  m-0">
+                                {" "}
+                                {new Date(
+                                  event.startDate as string
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
+
+                            <div>
+                              <div className="flex items-center justify-between mb-2 text-sm">
+                                <p className="text-xs text-gray-400 dark:text-white  mb-1">
+                                  {" "}
+                                  {
+                                    event?.totalParticipants?.length
+                                  } registerd{" "}
+                                </p>
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    const eventShareUrl = `https://www.feroevent.com/findEvents/${event._id}`;
+                                    if (navigator.share) {
+                                      navigator
+                                        .share({
+                                          title: event.title,
+                                          text: `Check out this live event: ${event.title}`,
+                                          url: eventShareUrl,
+                                        })
+                                        .catch((err) =>
+                                          console.error("Sharing failed:", err)
+                                        );
+                                    } else {
+                                      navigator.clipboard.writeText(shareUrl);
+                                      alert("Event link copied to clipboard!");
+                                    }
+                                  }}
+                                  className="mb-1"
+                                  title="Share Event"
+                                  type="button">
+                                  <p className="text-xs flex items-center gap-2 m-0 text-gray-400">
+                                    {" "}
+                                    Share{" "}
+                                    <img
+                                      src="/share.png"
+                                      className="dark:brightness-200"
+                                      alt=""
+                                    />
+                                  </p>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <p className="flex items-center gap-2 py-2">
-                          <img
-                            src={event.locationIcon}
-                            alt="loc"
-                            className="ml-1"
-                          />
-                          <small>{event.location}</small>
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <img src={event.dateIcon} alt="date" />
-                          <small>{event.date}</small>
-                        </p>
-                        <small className="text-xs">99+ registered</small>
-                      </div>
-                      <div className="flex flex-col  justify-between items-end gap-2 mt-2 ">
-                        <img
-                          src={event.saveIcon}
-                          alt={event.saveIcon}
-                          className=" cursor-pointer"
-                        />
-                        <p className="flex  z-10 items-center gap-2 cursor-pointer">
-                          <small>{event.share}</small>
-                          <img src={event.shareIcon} alt="" />
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-2xl w-full">No event found!</p>
-            )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </main>
           </div>
         )}
       </div>

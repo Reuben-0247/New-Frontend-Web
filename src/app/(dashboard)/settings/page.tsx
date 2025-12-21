@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import NotificationSettings from "@/app/components/_dashboard/NotificationSetting";
+import ThemeToggle from "@/app/components/ToggleTeam";
 import React, { useState } from "react";
 import { BsEyeFill, BsEyeSlashFill } from "react-icons/bs";
 
@@ -98,6 +99,7 @@ const SettingsPage = () => {
                   }`}
                 />
               </button> */}
+              <ThemeToggle />
             </div>
           </div>
 

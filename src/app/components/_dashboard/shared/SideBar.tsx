@@ -37,18 +37,18 @@ const SideBar: React.FC<{
 }> = ({ showAside, toggleAside, collapsAside, collapse }) => {
   const pathname = usePathname();
   const navLinks: INav[] = [
-    {
-      label: "Dashboard",
-      icon: (
-        <BsFillGrid1X2Fill
-          className={`text-[#171717] dark:text-primary ${
-            pathname.startsWith("/dashboard") && "text-primary"
-          }`}
-        />
-      ),
-      href: "/dashboard",
-      show: true,
-    },
+    // {
+    //   label: "Dashboard",
+    //   icon: (
+    //     <BsFillGrid1X2Fill
+    //       className={`text-[#171717] dark:text-primary ${
+    //         pathname.startsWith("/dashboard") && "text-primary"
+    //       }`}
+    //     />
+    //   ),
+    //   href: "/dashboard",
+    //   show: true,
+    // },
     {
       label: "My Events",
       icon: (
