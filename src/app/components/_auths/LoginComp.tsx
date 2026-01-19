@@ -65,7 +65,7 @@ const LoginComp = () => {
       setLoading(true);
       const { data } = await axios.post<{ message: string }>(
         "/auth/login",
-        values
+        values,
       );
       // console.log("Login response:", values);
       if (data) {
@@ -156,7 +156,7 @@ const LoginComp = () => {
             <div className="flex justify-end text-sm">
               <Link
                 href="/forgot-password"
-                className="text-foreground underline italic">
+                className="text-black underline italic">
                 Forgot password?
               </Link>
             </div>

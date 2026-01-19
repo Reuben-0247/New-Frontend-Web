@@ -12,6 +12,8 @@ import { IEvent } from "../interfaces/event.interface";
 import { Spinner } from "../components/Spinner";
 import { useCategoryStore } from "../store/category.store";
 import { ICategory } from "../interfaces/category.interface";
+import Cookies from "js-cookie";
+import { TOKEN_NAME } from "@/utils/constant";
 
 export default function DashboardLayout({
   children,
@@ -24,6 +26,7 @@ export default function DashboardLayout({
   const { setAuth } = useAuthStore();
   const { setEvents } = useEventStore();
   const { setCategories } = useCategoryStore();
+  const token = Cookies.get(TOKEN_NAME);
   const toggleCollapse = () => {
     setCollapse(!collapse);
   };
@@ -40,7 +43,7 @@ export default function DashboardLayout({
     const getMe = async () => {
       try {
         const { data } = await axiosApi.get<{ data: { user: IUser } }>(
-          "/auth/reload-user"
+          "/auth/reload-user",
         );
         setAuth(data.data.user);
       } catch (error) {
@@ -51,10 +54,10 @@ export default function DashboardLayout({
     const getEvents = async () => {
       try {
         const { data } = await axiosApi.get<{ data: { events: IEvent[] } }>(
-          "/events"
+          "/events",
         );
         setEvents(data.data.events);
-        console.log(data.data.events);
+        // console.log(data.data.events);
       } catch (error) {
         console.log(error);
       }
@@ -72,7 +75,7 @@ export default function DashboardLayout({
     getCategories();
 
     Promise.all([getMe(), getEvents(), getCategories()]).finally(() =>
-      setLoading(false)
+      setLoading(false),
     );
   }, [setAuth, setEvents, setCategories]);
 
@@ -86,16 +89,20 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen">
-      <SideBar
-        showAside={showAside}
-        toggleAside={toggleAside}
-        collapsAside={toggleCollapse}
-        collapse={collapse}
-      />
+      {token && (
+        <SideBar
+          showAside={showAside}
+          toggleAside={toggleAside}
+          collapsAside={toggleCollapse}
+          collapse={collapse}
+        />
+      )}
       <div className="flex-1 flex flex-col bg-dash-gray h-screen">
         <MainHeader toggleAside={toggleAside} />
         <main className="overflow-y-scroll h-[92vh]">
-          <div className=" py-6  container mx-auto px-8">{children}</div>
+          <div className=" py-6  container mx-auto md:px-6 px-2">
+            {children}
+          </div>
         </main>
       </div>
     </div>

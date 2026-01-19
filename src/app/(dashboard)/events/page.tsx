@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { Bookmark, ListFilter } from "lucide-react";
+import { Forward, ListFilter, Radio, Rss } from "lucide-react";
 import Link from "next/link";
 // import { usePathname } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
@@ -25,63 +25,69 @@ import { useAuthStore } from "@/app/store/auth.store";
 import axiosApi from "@/lib/axios";
 import { IEvent } from "@/app/interfaces/event.interface";
 import { useEventStore } from "@/app/store/event.store";
-import { toast, ToastContent } from "react-toastify";
-import { AxiosError } from "axios";
-import { formatError } from "@/utils/helper";
+// import { toast, ToastContent } from "react-toastify";
+// import { AxiosError } from "axios";
+// import { formatError } from "@/utils/helper";
 import { useCategoryStore } from "@/app/store/category.store";
 import { FiCalendar, FiMapPin } from "react-icons/fi";
+import { useSearchParams } from "next/navigation";
 // type Checked = DropdownMenuCheckboxItemProps["checked"];
 
 const EventPage = () => {
   const { auth } = useAuthStore();
+  const searchParams = useSearchParams();
+
   const { categories } = useCategoryStore();
   const [search, setSearch] = React.useState("");
   const [components, setComponents] = useState<string>("Published");
   // const [loadingSave, setLoadingSave] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // const [showActivie, setShowActive] = React.useState<Checked>(false);
+  const [isLive, setIsLive] = useState(false);
   const labels = ["Published", "Drafts", "Saved", "Registered", "Past"];
 
   const { setEvents, events } = useEventStore();
   const filteredEvents = useMemo(() => {
-    const data = events?.filter((event) =>
-      event.title?.toLowerCase().includes(search.toLowerCase())
-    );
-    return data;
-  }, [search, events]);
+    return events?.filter((event) => {
+      const matchesSearch = event.title
+        ?.toLowerCase()
+        .includes(search.toLowerCase());
 
-  const eventTypes = [
-    "Published Events",
-    "Saved Events",
-    "Registered Events",
-    "Past Events",
-  ];
+      const matchesLive = isLive ? event.isLive === true : true;
 
-  const fetchEvents = async (url: string) => {
-    try {
-      setLoading(true);
-
-      if (components === "Saved") {
-        const { data } = await axiosApi.get<{ data: IEvent[] }>(url);
-        if (data.data) {
-          setEvents(data.data);
-        }
-      } else {
-        const { data } = await axiosApi.get<{ data: { events: IEvent[] } }>(
-          url
-        );
-        setEvents(data.data.events);
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-      setEvents([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return matchesSearch && matchesLive;
+    });
+  }, [search, events, isLive]);
 
   useEffect(() => {
+    const tab = searchParams.get("tab") || "Published";
+    if (tab) {
+      setComponents(tab);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const fetchEvents = async (url: string) => {
+      try {
+        setLoading(true);
+
+        if (components === "Saved") {
+          const { data } = await axiosApi.get<{ data: IEvent[] }>(url);
+          if (data.data) {
+            setEvents(data.data);
+          }
+        } else {
+          const { data } = await axiosApi.get<{ data: { events: IEvent[] } }>(
+            url,
+          );
+          setEvents(data.data.events);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
     switch (components) {
       case "Registered":
         fetchEvents(`/events/register/100`);
@@ -101,37 +107,37 @@ const EventPage = () => {
       default:
         break;
     }
-  }, [components, auth?._id]);
+  }, [components, auth?._id, setEvents, searchParams]);
 
   const getCategoryName = (categoryId: string) => {
     const category = categories.find((c) => c._id === categoryId);
     return category ? category.name : "Unknown";
   };
 
-  const handleSaveEvent = async (eventId: string) => {
-    if (!eventId) {
-      toast.error("You must be logged in to save an event.");
+  // const handleSaveEvent = async (eventId: string) => {
+  //   if (!eventId) {
+  //     toast.error("You must be logged in to save an event.");
 
-      return;
-    }
+  //     return;
+  //   }
 
-    try {
-      // setLoadingSave(true);
-      const res = await axiosApi.patch(`/events/saved/update`, { eventId });
+  //   try {
+  //     // setLoadingSave(true);
+  //     const res = await axiosApi.patch(`/events/saved/update`, { eventId });
 
-      if (res.status === 200 || res.status === 201) {
-        toast.success("Event saved successfully.");
-      } else {
-        throw new Error(res.data?.message || "Unable to save this event.");
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      const formattedError = formatError(axiosError);
-      toast.error(formattedError.message as ToastContent);
-    } finally {
-      // setLoadingSave(false);
-    }
-  };
+  //     if (res.status === 200 || res.status === 201) {
+  //       toast.success("Event saved successfully.");
+  //     } else {
+  //       throw new Error(res.data?.message || "Unable to save this event.");
+  //     }
+  //   } catch (error) {
+  //     const axiosError = error as AxiosError;
+  //     const formattedError = formatError(axiosError);
+  //     toast.error(formattedError.message as ToastContent);
+  //   } finally {
+  //     // setLoadingSave(false);
+  //   }
+  // };
 
   return (
     <div>
@@ -155,7 +161,7 @@ const EventPage = () => {
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between mb-8 w-full">
+      <div className="flex items-center justify-between mb-8 gap-6 w-full">
         <div className="flex   items-center px-3 py-2 border bg-white dark:bg-input rounded-md md:w-[500px] w-full">
           <FaSearch className="text-primary mr-4 text-sm shrink-0" />
           <input
@@ -169,7 +175,8 @@ const EventPage = () => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
-              Filters <ListFilter />
+              <span className="md:block hidden"> Filters </span>
+              <ListFilter />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-background w-40">
@@ -179,7 +186,10 @@ const EventPage = () => {
               {labels.map((ev, i) => (
                 <DropdownMenuItem
                   className="py-2 hover:border-none! outline-none hover:bg-dash-gray cursor-pointer"
-                  onClick={() => setComponents(ev)}
+                  onClick={() => {
+                    setIsLive(false);
+                    setComponents(ev);
+                  }}
                   key={i}>
                   {ev}
                 </DropdownMenuItem>
@@ -189,11 +199,14 @@ const EventPage = () => {
         </DropdownMenu>
       </div>
 
-      <div className="flex event-scroll  gap-1 md:gap-3 my-6  overflow-x-scroll md:w-[900px] w-[500px]">
+      <div className="flex event-scroll  gap-1 md:gap-3 my-6  overflow-x-scroll md:w-[900px] sm:w-[500px] ">
         {labels.map((labelName) => (
           <button
             key={labelName}
-            onClick={() => setComponents(labelName)}
+            onClick={() => {
+              setIsLive(false);
+              setComponents(labelName);
+            }}
             className={`text-[10px] md:text-base px-1  md:px-4 w-full md:w-0 cursor-pointer mx-1 md:mx-2 py-2 rounded-lg min-w-1 border md:min-w-45 transition-colors duration-300
                 ${components === labelName ? "ring-2 ring-blue-500" : ""}
                 dark:bg-transparent text-gray-700 dark:text-white border-gray-200 dark:border-gray-700`}>
@@ -241,6 +254,24 @@ const EventPage = () => {
           </div>
         ) : (
           <div>
+            <hr className="my-6" />
+            {components === "Published" && (
+              <div className="flex gap-4 mb-4">
+                <Button
+                  onClick={() => setIsLive((prev) => !prev)}
+                  className="cursor-pointer"
+                  variant={isLive ? "outline" : "default"}>
+                  <Rss />
+                </Button>
+                <Button
+                  onClick={() => setIsLive((prev) => !prev)}
+                  className="cursor-pointer bg-red-600 text-white text-xs hover:bg-red-500 font-semibold px-2 py-0.5  shadow-md animate-pulse"
+                  variant={isLive ? "default" : "outline"}>
+                  <Radio className={`${isLive ? "" : "text-red-500"}`} />
+                </Button>
+              </div>
+            )}
+
             <main className=" pb-16">
               {loading ? (
                 <div className="flex items-center justify-center text-gray-500 dark:text-gray-300 h-32">
@@ -254,125 +285,130 @@ const EventPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
                   {filteredEvents?.map((event: IEvent) => {
                     const eventId = event._id || event._id || event.eventId;
-                    const shareUrl = `https://www.feroevent.com/findEvents/${event._id}?label=${components}`;
+                    const shareUrl = `${window.origin}/find-events/${event._id}?label=${components}`;
 
                     return (
-                      <Link
+                      <div
                         key={eventId}
-                        href={`/events/${event._id}?label=${components}`}
-                        className="block link w-full">
-                        <div className="rounded-xl cursor-pointer shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.02] h-fit  border  border-gray-200 dark:border-gray-700">
-                          <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
-                            <img
-                              src={event.displayImage}
-                              alt={event.title}
-                              className="w-full h-full object-cover"
-                            />
-                            {event.isLive && (
-                              <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow-md animate-pulse">
-                                LIVE
-                              </div>
-                            )}
-                            <p className="absolute bottom-0  m-0 left-0 text-sm p-3  h-[25px] w-[95px] flex justify-center items-center  rounded-tl-none rounded-tr-xl  rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
-                              {getCategoryName(event?.categoryId || "")}
+                        className="rounded-xl  shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.01] h-fit  border  border-gray-200 dark:border-gray-700">
+                        <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
+                          <img
+                            src={event.displayImage}
+                            alt={event.title}
+                            className="w-full h-full object-cover"
+                          />
+                          {event.isLive && (
+                            <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow-md animate-pulse">
+                              LIVE
+                            </div>
+                          )}
+                          <p className="absolute bottom-0  m-0 left-0 text-sm p-3  h-[25px] w-[95px] flex justify-center items-center  rounded-tl-none rounded-tr-xl  rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
+                            {getCategoryName(event?.categoryId || "")}
+                          </p>
+                        </div>
+                        <div className="ps-2 pe-3 flex flex-col gap-2  h-1/2">
+                          <div className="flex justify-between items-center mt-3">
+                            <h3 className="text-[18px] font-semibold  truncate m-0  text-gray-900 dark:text-white leading-tight ">
+                              {event.title}
+                            </h3>
+
+                            {/* {components !== "Saved" && (
+                              <button
+                                onClick={() =>
+                                  handleSaveEvent(event?._id || "")
+                                }
+                                disabled={loading}
+                                className="right-3  bg-opacity-90 z-999 cursor-pointer"
+                                title="Save Event"
+                                type="button">
+                                <Bookmark className="w-4 h-4 text-gray-500 dark:text-white   hover:text-gray-700 dark:hover:text-white" />
+                              </button>
+                            )} */}
+                          </div>
+
+                          <div className="flex items-center gap-5 text-sm">
+                            <FiCalendar className="w-4 h-4 text-[#434343] dark:text-white " />
+                            <span className="truncate text-[#434343] dark:text-white ">
+                              {new Date(
+                                event.startDate || "",
+                              ).toLocaleDateString(undefined, {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-5 text-sm ">
+                            <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white " />
+                            <span className="truncate text-[#434343] dark:text-white ">
+                              {event.location?.address ||
+                                "addres not specifield"}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-5 text-sm ">
+                            <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white " />
+                            <p className="w-3 h-4 text-[#434343] dark:text-white  m-0">
+                              {" "}
+                              {new Date(
+                                event.startDate as string,
+                              ).toLocaleDateString()}
                             </p>
                           </div>
-                          <div className="ps-2 pe-3 flex flex-col gap-2  h-1/2">
-                            <div className="flex justify-between items-center mt-3">
-                              <h3 className="text-[18px] font-semibold  truncate m-0  text-gray-900 dark:text-white leading-tight ">
-                                {event.title}
-                              </h3>
 
-                              {components !== "Saved" && (
-                                <button
-                                  onClick={() =>
-                                    handleSaveEvent(event?._id || "")
-                                  }
-                                  disabled={loading}
-                                  className="right-3  bg-opacity-90 z-999 cursor-pointer"
-                                  title="Save Event"
-                                  type="button">
-                                  <Bookmark className="w-4 h-4 text-gray-500 dark:text-white   hover:text-gray-700 dark:hover:text-white" />
-                                </button>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-5 text-sm">
-                              <FiCalendar className="w-4 h-4 text-[#434343] dark:text-white " />
-                              <span className="truncate text-[#434343] dark:text-white ">
-                                {new Date(
-                                  event.startDate || ""
-                                ).toLocaleDateString(undefined, {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                })}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-5 text-sm ">
-                              <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white " />
-                              <span className="truncate text-[#434343] dark:text-white ">
-                                {event.location?.address ||
-                                  "addres not specifield"}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-5 text-sm ">
-                              <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white " />
-                              <p className="w-3 h-4 text-[#434343] dark:text-white  m-0">
+                          <div>
+                            <div className="flex items-center justify-between mb-2 text-sm">
+                              <p className="text-xs text-gray-400 dark:text-white  mb-1">
                                 {" "}
-                                {new Date(
-                                  event.startDate as string
-                                ).toLocaleDateString()}
+                                {event?.totalParticipants?.length}{" "}
+                                registerd{" "}
                               </p>
-                            </div>
-
-                            <div>
-                              <div className="flex items-center justify-between mb-2 text-sm">
-                                <p className="text-xs text-gray-400 dark:text-white  mb-1">
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  const eventShareUrl = `https://www.feroevent.com/findEvents/${event._id}`;
+                                  if (navigator.share) {
+                                    navigator
+                                      .share({
+                                        title: event.title,
+                                        text: `Check out this live event: ${event.title}`,
+                                        url: eventShareUrl,
+                                      })
+                                      .catch((err) =>
+                                        console.error("Sharing failed:", err),
+                                      );
+                                  } else {
+                                    navigator.clipboard.writeText(shareUrl);
+                                    alert("Event link copied to clipboard!");
+                                  }
+                                }}
+                                className="mb-1 cursor-pointer"
+                                title="Share Event"
+                                type="button">
+                                <p className="text-xs flex items-center gap-1 m-0 text-gray-400">
                                   {" "}
-                                  {
-                                    event?.totalParticipants?.length
-                                  } registerd{" "}
+                                  Share <Forward />
+                                  {/* <img
+                                    src="/share.png"
+                                    className="dark:brightness-200"
+                                    alt=""
+                                  /> */}
                                 </p>
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    const eventShareUrl = `https://www.feroevent.com/findEvents/${event._id}`;
-                                    if (navigator.share) {
-                                      navigator
-                                        .share({
-                                          title: event.title,
-                                          text: `Check out this live event: ${event.title}`,
-                                          url: eventShareUrl,
-                                        })
-                                        .catch((err) =>
-                                          console.error("Sharing failed:", err)
-                                        );
-                                    } else {
-                                      navigator.clipboard.writeText(shareUrl);
-                                      alert("Event link copied to clipboard!");
-                                    }
-                                  }}
-                                  className="mb-1"
-                                  title="Share Event"
-                                  type="button">
-                                  <p className="text-xs flex items-center gap-2 m-0 text-gray-400">
-                                    {" "}
-                                    Share{" "}
-                                    <img
-                                      src="/share.png"
-                                      className="dark:brightness-200"
-                                      alt=""
-                                    />
-                                  </p>
-                                </button>
-                              </div>
+                              </button>
                             </div>
                           </div>
+                          <div className="w-full">
+                            <Link
+                              href={`/events/${event._id}?label=${components}`}
+                              className="block link cursor-pointer text-center w-full border border-primary py-2 px-4 rounded-lg mb-3">
+                              View
+                            </Link>
+
+                            {/* <Button></Button> */}
+                          </div>
                         </div>
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>

@@ -1,11 +1,13 @@
 "use client";
+import ModalComp from "@/app/components/ModalComp";
 import EventBoardComp from "@/app/components/stream-comps/EventBoardComp";
 import EventParticipantComp from "@/app/components/stream-comps/EventParticipantComp";
 import EventReviewsComp from "@/app/components/stream-comps/EventReviewsComp";
 import HostComments from "@/app/components/stream-comps/HostComments";
 import SoftwareProp from "@/app/components/stream-comps/SoftwareProp";
 import StreamInfo from "@/app/components/stream-comps/StreamInfo";
-import { IStreamData } from "@/app/interfaces/castr.interface";
+import WebcamP from "@/app/components/stream-comps/Webcam";
+import { IStreamData, IStreamStats } from "@/app/interfaces/castr.interface";
 import { useEventStore } from "@/app/store/event.store";
 import { Button } from "@/components/ui/button";
 import axiosApi from "@/lib/axios";
@@ -14,10 +16,10 @@ import { AxiosError } from "axios";
 import {
   Airplay,
   ArrowLeft,
-  EyeIcon,
-  Ratio,
-  Signal,
-  Volume2,
+  // EyeIcon,
+  // Ratio,
+  // Signal,
+  // Volume2,
   Webcam,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -53,12 +55,25 @@ const videoSrcData: { label: string; icon: React.ReactNode }[] = [
 
 const StreamPage = () => {
   const [active, setActive] = useState<string>("Board");
-  const [loading, setLoading] = useState(false);
+  const [loadingS, setLoadingS] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [isPublished, setIsPublished] = useState(true);
+  const [loadingT, setLoadingT] = useState(false);
+  const [enabled, setEnabled] = useState(false);
+
   const [videoSrc, setVideoSrc] = useState("Streaming Sofware");
-  const { event, setStreamData, streamData } = useEventStore();
+  const { event, setStreamData, streamData, loading, goLiveEvent, endStream } =
+    useEventStore();
   const router = useRouter();
   const [isLive, setIslive] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [streamStats, setStreamStats] = useState<IStreamStats>();
+  useEffect(() => {
+    const saved = sessionStorage.getItem("cloud_recording");
+    if (saved !== null) {
+      setEnabled(JSON.parse(saved));
+    }
+  }, []);
 
   const createStream = async () => {
     try {
@@ -71,14 +86,13 @@ const StreamPage = () => {
           cloud_recording: false,
         },
       };
-      setLoading(true);
+      setLoadingS(true);
 
-      const { data } = await axiosApi.post<{ data: { stream: IStreamData } }>(
+      const { data } = await axiosApi.post<{ stream: IStreamData }>(
         `/stream/castr/create`,
-        body
+        body,
       );
-      setStreamData(data.data.stream);
-      console.log(data?.data?.stream);
+      setStreamData(data?.stream);
 
       toast.success("Stream Created Successfully", { delay: 3000 });
     } catch (error) {
@@ -87,53 +101,44 @@ const StreamPage = () => {
       toast.error(formattedError.message as ToastContent);
       console.error("Error fetching event:", error);
     } finally {
-      setLoading(false);
+      setLoadingS(false);
     }
   };
   const goLive = async () => {
-    try {
-      // setIsLoading(true);
-      const { data } = await axiosApi.patch(`/events/live/${event?._id}`, {
-        evenId: event?._id,
-        streamPlatform: "castr",
-      });
+    // setIsLoading(true);
+    await goLiveEvent(event?._id || "");
+    setIslive(!isLive);
+    toast.success(isLive ? "Event is now offline" : "Event is now live", {
+      delay: 3000,
+    });
+    // setIsLoading(false);
+  };
 
-      console.log(data);
-      // Update the enabled state after successful API call
-      setIslive(!isLive);
-      toast.success(isLive ? "Event is now offline" : "Event is now live", {
-        delay: 3000,
-      });
-
-      // sessionStorage.setItem("isEventLive", JSON.stringify(true));
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      const formattedError = formatError(axiosError);
-      toast.error(formattedError.message as ToastContent);
-    } finally {
-      // setLoading(false);
-      // setIsLoading(false);
-    }
+  const endEventStream = async () => {
+    endStream(event?._id || "");
+    setOpenModal(false);
   };
   useEffect(() => {
-    // if (!streamData?.castrStreamId) return;
-    const castrId = streamData?.castrStreamId || event?.castrStreamId;
+    if (!streamData?.castrStreamId) return;
     const getStreamStats = async () => {
+      const castrId = streamData?.castrStreamId || event?.castrStreamId;
       try {
-        const { data } = await axiosApi.get(`/stream/castr/${castrId}/stats`);
-        console.log(data);
+        const { data } = await axiosApi.get<{ response: IStreamStats }>(
+          `/stream/castr/${castrId}/stats`,
+        );
+        // console.log(data.response);
+        setStreamStats(data.response);
         //  setStats(response?.data?.response);
       } catch (error) {
         console.error("Error fetching stream stats:", error);
       }
     };
-    getStreamStats();
 
-    // const interval = setInterval(() => {
-    //   getStreamStats();
-    // }, 5000);
+    const interval = setInterval(() => {
+      getStreamStats();
+    }, 5000);
 
-    // return () => clearInterval(interval);
+    return () => clearInterval(interval);
   }, [streamData?.castrStreamId, event?.castrStreamId]);
 
   useEffect(() => {
@@ -143,10 +148,78 @@ const StreamPage = () => {
       setIsPublished(false);
     }
   }, [videoSrc]);
+
+  const enableCloudRecord = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+
+    if (!streamData?.castrStreamId) {
+      toast.warn("Please create a stream...");
+      return;
+    }
+
+    if (loadingT) return;
+    setLoadingT(true);
+    setEnabled(checked);
+    sessionStorage.setItem("cloud_recording", JSON.stringify(checked));
+
+    const body = {
+      settings: {
+        abr: false,
+        cloud_recording: checked,
+      },
+    };
+
+    try {
+      const res = await axiosApi.patch(
+        `/stream/castr/${streamData?.castrStreamId}`,
+        body,
+      );
+
+      if (res) {
+        toast.success(
+          checked
+            ? "Cloud Recording enabled..."
+            : "Cloud Recording disabled...",
+        );
+
+        setLoadingT(false);
+      }
+    } catch (error) {
+      setEnabled(!checked);
+      console.error(error);
+    } finally {
+      setLoadingT(false);
+    }
+  };
+
   const playBackUrl = streamData?.playBack?.embedUrl;
 
   return (
     <div>
+      <ModalComp onClose={() => setOpenModal(false)} open={openModal}>
+        <div className="absolute inset-0 flex items-center justify-center z-9999 bg-slate-900 bg-opacity-50">
+          <div className="bg-[#1B2440] rounded-[5px] w-[400px] h-fit p-4">
+            <p className="text-white font-nuni text-[16px] text-center mb-3">
+              Are you sure you want to end this stream?
+            </p>
+
+            <div className="flex items-center justify-center gap-x-5">
+              <Button
+                disabled={loading}
+                onClick={endEventStream}
+                className="flex items-center justify-center w-fit text-[15px] cursor-pointer text-white rounded-lg bg-[#720013] hover:bg-[#44010d]   transition-colors duration-200">
+                End Stream
+              </Button>
+              <Button
+                variant={"outline"}
+                onClick={() => setOpenModal(false)}
+                className="cursor-pointer">
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      </ModalComp>
       <div className="flex  justify-between">
         <div>
           <Button
@@ -161,13 +234,13 @@ const StreamPage = () => {
         <p className="font-bold text-2xl text-foreground">Stream Setup</p>
       </div>
 
-      <div className="flex gap-4 mt-8">
-        <div className="event-details w-[50%]">
-          <div className="tabs w-full flex items-center justify-between  text-white  py-2 px-4 bg-black rounded-md">
+      <div className="md:flex  gap-4 mt-8">
+        <div className="event-details md:w-[50%] w-full">
+          <div className="tabs w-full flex items-center justify-between  text-white  py-2 px-4  bg-black rounded-md">
             {tabs.map((tab) => (
               <p
                 onClick={() => setActive(tab.name)}
-                className={`cursor-pointer py-2 px-6   ${
+                className={`cursor-pointer py-2 md:px-6 px-2   ${
                   active === tab.name ? "border-b-2 pb-2" : ""
                 }`}
                 key={tab.name}>
@@ -180,16 +253,18 @@ const StreamPage = () => {
             {active === "Board" ? (
               <EventBoardComp />
             ) : active === "Participants" ? (
-              <EventParticipantComp />
+              <EventParticipantComp eventId={event?._id || ""} />
             ) : active === "Chats" ? (
-              <HostComments eventId=":" />
+              <HostComments eventId={event?._id || ""} />
             ) : (
-              active === "Reviews" && <EventReviewsComp eventId="1" />
+              active === "Reviews" && (
+                <EventReviewsComp eventId={event?._id || ""} />
+              )
             )}
           </div>
         </div>
-        <div className="stream-tab w-[50%] p-4 bg-[#151e37]">
-          <StreamInfo />
+        <div className="stream-tab md:w-[50%] w-full p-4 bg-[#151e37]">
+          <StreamInfo stats={streamStats} />
           <hr />
           {isPublished ? (
             <div className="w-full h-[300px] relative flex mt-2 rounded-md items-center border justify-center bg-[#151E37] ">
@@ -203,22 +278,23 @@ const StreamPage = () => {
                     title="Castr Live Stream"
                   />
                   <div>
-                    {event?.isLive ? (
+                    {!event?.isLive ? (
                       <div className="w-full flex absolute bottom-[150px] items-center justify-center">
                         <button
-                          // onClick={goLive}
-                          // disabled={isLoading}
+                          onClick={goLive}
+                          disabled={loading}
                           className=" cursor-pointer rounded-[5px] text-[14px] flex items-center font-nuni bg-[#720013] \ px-2 h-[45px] ">
                           <HiMiniSignal size={13} color="white" />
                           <span className="ml-2 text-white text-[14px]">
-                            Go live
+                            {loading ? <ThreeDots color="white" /> : " Go live"}
+                            {/* Go live */}
                           </span>
                         </button>
                       </div>
                     ) : (
                       <div className="w-full flex absolute bottom-5 items-center justify-center">
                         <button
-                          // onClick={openEndStreamModal}
+                          onClick={() => setOpenModal(true)}
                           className=" cursor-pointer rounded-[5px] text-[14px] font-nuni bg-[#720013] text-white px-2 h-[45px] ">
                           End Stream
                         </button>
@@ -230,7 +306,7 @@ const StreamPage = () => {
                 <button
                   onClick={createStream}
                   className="flex items-center cursor-pointer  mb-3 rounded-lg bg-[#0062FF] px-2 h-[45px] ">
-                  {loading ? (
+                  {loadingS ? (
                     <ThreeDots color="white" />
                   ) : (
                     <span className="text-white flex items-center gap-1 ml-2 text-[18px]">
@@ -241,8 +317,8 @@ const StreamPage = () => {
               )}
             </div>
           ) : (
-            // <Webcam data={event} />
-            <p>WebCam</p>
+            <WebcamP data={event} />
+            // <p>WebCam</p>
           )}
 
           <div className="vsrc flex justify-between items-center p-2 rounded-md bg-[#2e3c65] my-4">
@@ -263,9 +339,9 @@ const StreamPage = () => {
                 <input
                   type="checkbox"
                   className="sr-only peer"
-                  // checked={enabled}
-                  // disabled={loadingT}
-                  // onChange={enableCloudRecord}
+                  checked={enabled}
+                  disabled={loadingT}
+                  onChange={enableCloudRecord}
                 />
                 <div className="w-8 h-[19px] border-[#ccc] border-2 peer-focus:outline-none peer-focus:ring-2 peer-focus:bg-[#0f1525] rounded-full peer peer-checked:bg-[#151e37] p-1 transition-all duration-300"></div>
                 <div className="absolute left-[3px] top-0.4 bg-[#FFFFFF] w-[13px] h-[13px] rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
@@ -274,7 +350,9 @@ const StreamPage = () => {
             </div>
           </div>
           <div className="vsrc flex justify-between items-center   my-4">
-            {active && <SoftwareProp streamType={videoSrc} />}
+            {active && (
+              <SoftwareProp streamType={videoSrc} streamData={streamData} />
+            )}
           </div>
         </div>
       </div>

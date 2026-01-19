@@ -37,11 +37,11 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchEventAndRelated() {
+    async function fetchEvent() {
       setLoading(true);
       try {
         const { data } = await axiosApi.get<{ data: { event: IEvent } }>(
-          `/events/${id}`
+          `/events/${id}`,
         );
 
         setEvent(data.data.event);
@@ -51,8 +51,10 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
         setLoading(false);
       }
     }
-    fetchEventAndRelated();
-  }, [id, setEvent]);
+    if (!event || event._id !== id) {
+      fetchEvent();
+    }
+  }, [id, event, setEvent]);
 
   const SaveEvent = async () => {
     try {
@@ -71,7 +73,7 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
     }
   };
   const shareEvent = () => {
-    const eventShareUrl = `https://www.feroevent.com/findEvents/${event?._id}?label=${label}`;
+    const eventShareUrl = `${window.origin}/find-events/${event?._id}?label=${label}`;
     if (navigator.share) {
       navigator
         .share({
@@ -174,20 +176,21 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
           <div className="mt-6 ">
             {event?.isPublished === false ? (
               <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">
-                <button
+                <Button
                   // onClick={() =>
                   //   publishEvent(event, () => window.location.reload())
                   // }
-                  className="bg-blue-600 text-white w-[214px] h-[47px] rounded-lg font-medium hover:bg-blue-700 transition">
+                  className="cursor-pointer">
                   Publish Event
-                </button>
-                <button
-                  // onClick={() =>
-                  //   navigate("/create-event", { state: { event } })
-                  // }
-                  className="border border-gray-300 text-gray-700 dark:text-gray-300 w-[214px] h-[47px] rounded-lg font-medium hover:bg-gray-100 transition">
+                </Button>
+                <Button
+                  variant={"outline"}
+                  className="cursor-pointer"
+                  onClick={() =>
+                    router.push(`/events/${event._id}/update-event`)
+                  }>
                   Continue Editing event
-                </button>
+                </Button>
               </div>
             ) : event?.isPublished === true ? (
               <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">

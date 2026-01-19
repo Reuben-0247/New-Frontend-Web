@@ -1,18 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import Link from "next/link";
 import Image from "next/image";
-
-import { BsFillGrid1X2Fill } from "react-icons/bs";
-import { FaVideo } from "react-icons/fa";
 
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   CalendarCheck,
   CircleDollarSign,
-  CircleHelp,
   LogOut,
   Medal,
   MonitorPlay,
@@ -21,6 +17,10 @@ import {
 } from "lucide-react";
 import { BiChevronRight, BiChevronLeft } from "react-icons/bi";
 import { HiOutlineXMark } from "react-icons/hi2";
+import Cookies from "js-cookie";
+import { TOKEN_NAME } from "@/utils/constant";
+import { useMounted } from "@/app/hooks/useOnmount";
+import { useThemeStore } from "@/app/store/theme.store";
 
 interface INav {
   label: string;
@@ -30,25 +30,30 @@ interface INav {
 }
 
 const SideBar: React.FC<{
-  showAside: boolean;
-  collapse: boolean;
+  showAside?: boolean;
+  collapse?: boolean;
   toggleAside: () => void;
   collapsAside: () => void;
 }> = ({ showAside, toggleAside, collapsAside, collapse }) => {
+  const mounted = useMounted();
+  const { theme } = useThemeStore();
+
   const pathname = usePathname();
+  const token = Cookies.get(TOKEN_NAME);
+
   const navLinks: INav[] = [
-    // {
-    //   label: "Dashboard",
-    //   icon: (
-    //     <BsFillGrid1X2Fill
-    //       className={`text-[#171717] dark:text-primary ${
-    //         pathname.startsWith("/dashboard") && "text-primary"
-    //       }`}
-    //     />
-    //   ),
-    //   href: "/dashboard",
-    //   show: true,
-    // },
+    {
+      label: "Find Events",
+      icon: (
+        <CalendarCheck
+          className={`text-[#171717] dark:text-primary ${
+            pathname.startsWith("/find-events") && "text-primary"
+          }`}
+        />
+      ),
+      href: "/find-events",
+      show: true,
+    },
     {
       label: "My Events",
       icon: (
@@ -59,7 +64,7 @@ const SideBar: React.FC<{
         />
       ),
       href: "/events",
-      show: true,
+      show: !!token,
     },
     {
       label: "Go Live",
@@ -71,7 +76,7 @@ const SideBar: React.FC<{
         />
       ),
       href: "/go-live",
-      show: true,
+      show: !!token,
     },
     {
       label: "Fero points",
@@ -83,7 +88,7 @@ const SideBar: React.FC<{
         />
       ),
       href: "/fero-points",
-      show: true,
+      show: !!token,
     },
     {
       label: "Pricing",
@@ -95,7 +100,7 @@ const SideBar: React.FC<{
         />
       ),
       href: "/pricing",
-      show: true,
+      show: !!token,
     },
     {
       label: "Profile",
@@ -107,7 +112,7 @@ const SideBar: React.FC<{
         />
       ),
       href: "/profile",
-      show: true,
+      show: !!token,
     },
     {
       label: "Settings",
@@ -119,9 +124,10 @@ const SideBar: React.FC<{
         />
       ),
       href: "/settings",
-      show: true,
+      show: !!token,
     },
   ];
+  if (!mounted) return null;
 
   return (
     <div
@@ -134,23 +140,43 @@ const SideBar: React.FC<{
           className={`${
             collapse ? "p-2 w-full" : "p-4"
           } flex  items-center border-b-line border-b  h-[8vh] justify-between `}>
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            {collapse ? (
-              <Image
-                src={`/images/logo-f.png`}
-                alt="fero's logo"
-                width={51}
-                height={45}
-              />
-            ) : (
-              <Image
-                src={`/images/logo-f.png`}
-                width={144}
-                height={65}
-                alt="fero's logo"
-              />
-            )}
-          </Link>
+          {theme === "dark" ? (
+            <Link href="/" className="flex items-center gap-2 font-semibold">
+              {collapse ? (
+                <Image
+                  src={`/svgs/FERO_LOGO_light.svg`}
+                  alt="fero's logo"
+                  width={51}
+                  height={45}
+                />
+              ) : (
+                <Image
+                  src={`/svgs/FERO_LOGO_light.svg`}
+                  width={110}
+                  height={30}
+                  alt="fero's logo"
+                />
+              )}
+            </Link>
+          ) : (
+            <Link href="/" className="flex items-center gap-2 font-semibold">
+              {collapse ? (
+                <Image
+                  src={`/svgs/Fero_logo_dark.svg`}
+                  alt="fero's logo"
+                  width={51}
+                  height={45}
+                />
+              ) : (
+                <Image
+                  src={`/svgs/Fero_logo_dark.svg`}
+                  width={110}
+                  height={30}
+                  alt="fero's logo"
+                />
+              )}
+            </Link>
+          )}
           <HiOutlineXMark
             size={30}
             className="text-primary md:hidden block font-bold cursor-pointer"
@@ -188,6 +214,7 @@ const SideBar: React.FC<{
                     <Link
                       key={index}
                       href={item.href}
+                      onClick={toggleAside}
                       className={`${
                         pathname.startsWith(item.href)
                           ? "text-white rounded-lg font-bold border bg-primary  dark:bg-dash-gray border-none"

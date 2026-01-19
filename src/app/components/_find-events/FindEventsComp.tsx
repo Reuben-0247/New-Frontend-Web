@@ -1,254 +1,327 @@
 "use client";
 
-/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
-import { ListFilter, LocateIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React, { useMemo } from "react";
-import { FaSearch } from "react-icons/fa";
-import { IoAdd } from "react-icons/io5";
 import {
-  DropdownMenuCheckboxItemProps,
-  DropdownMenuItem,
-} from "@radix-ui/react-dropdown-menu";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Calendar,
+  Forward,
+  Radio,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
+import React, { useMemo, useState } from "react";
 import { IEvent } from "@/app/interfaces/event.interface";
-type Checked = DropdownMenuCheckboxItemProps["checked"];
+import Link from "next/link";
+import { FiCalendar, FiMapPin } from "react-icons/fi";
+import { FaCalendar } from "react-icons/fa";
+import { ICategory } from "@/app/interfaces/category.interface";
+import { Button } from "@/components/ui/button";
+import EventSlide from "./EventSlide";
 
-const events = [
-  {
-    id: "1",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Music",
-    live: true,
-  },
-  {
-    id: "2",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Health",
-  },
-  {
-    id: "3",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Food",
-    live: true,
-  },
-  {
-    id: "4",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Art",
-    live: false,
-  },
-  {
-    id: "5",
-    name: "CONFIG Watch Party, PH Chapter",
-    saveIcon: "/icons/save.png",
-    locationIcon: "/icons/locate.png",
-    location: "Onsite & Virtual",
-    date: "5th May, 2025",
-    dateIcon: "/icons/cal.png",
-    share: "Share",
-    shareIcon: "/icons/shar.png",
-    category: "Carear",
-    live: false,
-  },
-];
-
-// const FindEventsComp: React.FC<{ events: IEvent[] }> = ({ events }) => {
-const FindEventsComp = () => {
-  const pathName = usePathname();
-  const [search, setSearch] = React.useState("");
-  const [showActivie, setShowActive] = React.useState<Checked>(false);
-
-  //   const filteredEvents = useMemo(() => {
-  //     const safeEvents = Array.isArray(events) ? events : [];
-
-  //     return safeEvents.filter((event) => {
-  //       const searchText = search.toLowerCase();
-
-  //       return (
-  //         event.title.toLowerCase().includes(searchText) ||
-  //         event.startDate?.toLowerCase().includes(searchText)
-  //       );
-  //     });
-  //   }, [search, events]);
+const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
+  events,
+  cats,
+}) => {
+  const [showTrending, setShowTrending] = useState(true);
+  const [search, setSearch] = useState("");
 
   const filteredEvents = useMemo(() => {
     const data = events.filter(
       (event) =>
-        event.name.toLowerCase().includes(search.toLowerCase()) ||
-        event.category.toLowerCase().includes(search.toLowerCase()) ||
-        event.date.toLowerCase().includes(search.toLowerCase())
+        event?.channelName?.toLowerCase().includes(search.toLowerCase()) ||
+        event.location?.address?.toLowerCase().includes(search.toLowerCase()),
     );
     return data;
-  }, [search]);
+  }, [search, events]);
 
-  const eventTypes = [
-    "Published Events",
-    "Saved Events",
-    "Registered Events",
-    "Past Events",
-  ];
+  const showLiveEvent = () => {
+    setSearch("");
+
+    setShowTrending(false);
+  };
+  const showTrendingEvent = () => {
+    setSearch("");
+    setShowTrending(true);
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = cats.find((c) => c._id === categoryId);
+    return category ? category.name : "Unknown";
+  };
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8  pb-8">
-        <div className="md:col-span-2">
-          <p className="text-xl font-semibold leading-6 text-foreground">
-            Events page
-          </p>
-          <p className="mt-1 truncate text-sm leading-5 text-foreground">
-            Find Add and manage events across different streams.
-          </p>
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-1">
+        <div>
+          <div className="relative flex w-[80%] my-9 sm:px-2 md:w-[600px]">
+            <Search
+              className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5"
+              aria-hidden="true"
+            />
+            <input
+              type="text"
+              placeholder="Search events"
+              value={search || ""}
+              onChange={(e) => setSearch(e.target.value)}
+              className={`w-full pl-10 pr-3 py-2.5 border bg-background text-foreground dark:placeholder-gray-500 placeholder-gray-400 dark:border-gray-700 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 `}
+              aria-label="Search events"
+            />
+            <SlidersHorizontal
+              className="w-5 h-5 absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              aria-hidden="true"
+            />
+          </div>
         </div>
       </div>
-      <div className="flex items-center justify-between mb-8 w-full">
-        <div className="flex   items-center px-3 py-2 border bg-white dark:bg-input rounded-md md:w-[500px] w-full">
-          <FaSearch className="text-primary mr-4 text-sm shrink-0" />
-          <input
-            type="text"
-            placeholder="Search Events"
-            className="w-full md:w-[500px] outline-none text-lg placeholder:text-foreground "
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+      <EventSlide events={events} />
+
+      <div className="flex flex-wrap items-center justify-center md:justify-start ps-3 gap-4 mb-4 mt-6">
+        <Button
+          onClick={showTrendingEvent}
+          className="cursor-pointer"
+          variant={showTrending == true ? "default" : "outline"}>
+          Trending Events
+        </Button>
+
+        <Button
+          onClick={showLiveEvent}
+          className="cursor-pointer"
+          variant={!showTrending === false ? "outline" : "default"}>
+          <Radio className="text-red-500" />
+          Live Events
+        </Button>
       </div>
 
-      <div className="events">
-        {events.length <= 0 ? (
-          <div className="border border-blue-300 rounded-lg p-6 md:p-10 text-center max-w-3xl mx-auto">
-            <div className="flex justify-center mb-4">
-              <div className="bg-blue-100 p-2 rounded-full">
-                <svg
-                  className="w-6 h-6 text-blue-500"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-            </div>
-            <h2 className="text-lg md:text-2xl font-semibold mb-2 dark:text-white">
-              You haven't{" "}
-              <span className="font-bold">
-                created or joined any events yet
-              </span>
-            </h2>
-            <p className="text-gray-600 dark:text-white text-sm md:text-base mb-6">
-              Your events will appear here once you create them. You can host or
-              join webinars, livestreams, workshops, and more.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-3">
-              <Link
-                href={"/events/create-event"}
-                className="bg-blue-600 text-white font-medium px-4 py-2.5 rounded-md hover:bg-blue-700 transition">
-                + Create Event
-              </Link>
-            </div>
+      <div className="">
+        {showTrending ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+            {filteredEvents
+              .filter((ev) => ev.featuredEvent == true)
+              .map((event) => {
+                const eventId = event._id;
+                const eventUrl = `${window.origin}/find-events/${eventId}?label=Live`;
+                return (
+                  <div
+                    key={eventId}
+                    className="rounded-xl cursor-pointer shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.02] h-fit w-full border  border-gray-200 dark:border-gray-700">
+                    <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
+                      <img
+                        src={
+                          event.displayImage ||
+                          "https://via.placeholder.com/400x300"
+                        }
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                      />
+
+                      <p className="absolute bottom-0 m-0 left-0 text-sm p-3 h-[25px] w-[95px] flex justify-center items-center rounded-tl-none rounded-tr-xl rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
+                        {getCategoryName(event?.categoryId || "")}
+                      </p>
+                    </div>
+
+                    <div className="p-2 flex flex-col gap-2  h-1/2">
+                      <h3
+                        className={`text-lg font-semibold link dark:text-white text-foreground mt-2 word-break truncate `}>
+                        {event.title}
+                      </h3>
+
+                      <div className="flex items-center gap-5 text-sm">
+                        <FiCalendar className="w-4 h-4 text-[#434343] dark:text-white" />
+                        <span className="truncate text-[#434343] dark:text-white ">
+                          {new Date(event.startDate || "").toLocaleDateString(
+                            undefined,
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-5 text-sm ">
+                        <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white" />
+                        <span className="truncate link text-[#434343] dark:text-white  ">
+                          {event.location?.address}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-5 text-sm ">
+                        <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white" />
+                        <p className="w-3 h-4 text-[#434343] m-0 dark:text-white">
+                          {" "}
+                          {new Date(event.startDate || "").toLocaleDateString()}
+                        </p>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between text-sm">
+                          <p className="text-xs m-0 text-gray-400 dark:text-white">
+                            {" "}
+                            +{event?.totalParticipants?.length} registerd{" "}
+                          </p>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (navigator.share) {
+                                navigator
+                                  .share({
+                                    title: event?.title,
+                                    text: `Check out this live event: ${event?.title}`,
+                                    url: eventUrl,
+                                  })
+                                  .catch((err) =>
+                                    console.error("Sharing failed:", err),
+                                  );
+                              } else {
+                                navigator.clipboard.writeText(eventUrl);
+                                alert("Event link copied to clipboard!");
+                              }
+                            }}
+                            className="m-0"
+                            title="Share Event"
+                            type="button">
+                            <p className="text-xs flex items-center gap-2 m-0 text-gray-400">
+                              {" "}
+                              Share <Forward />
+                              {/* <img
+                                      src="/share.png"
+                                      className="dark:brightness-200"
+                                      alt=""
+                                    /> */}
+                            </p>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-2 w-full">
+                      <Link
+                        href={`/find-events/${eventId}`}
+                        className=" w-full p-2 border border-primary flex rounded-lg justify-center">
+                        view
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         ) : (
-          <div>
-            {filteredEvents.length ? (
-              <div className="events grid md:grid-cols-3 grid-cols-1 gap-4 mt-10">
-                {filteredEvents.map((event) => (
-                  <Link
-                    href={`/find-events/${event.id}`}
-                    className="item  rounded-xl border border-border shadow-md "
-                    key={event.id}>
-                    <div
-                      className={`img flex flex-col justify-between p-1 bg-[url('/images/rect.png')]  bg-cover bg-center w-full h-[137px]`}>
-                      <p className="">
-                        {event.live == true && (
-                          <span className="bg-red-500 text-white py-1 px-2 rounded-lg w-max">
-                            Live
-                          </span>
-                        )}
-                      </p>
-                      <p className="bg-[#000826] text-white px-4 py-1 rounded-bl-[20px] rounded-tr-[20px]  w-max">
-                        {event.category}
-                      </p>
-                    </div>
-                    <div className="content flex justify-between z-10  p-2">
-                      <div>
-                        <div className="flex items-center justify-between gap-4 ">
-                          <p className="font-bold ">{event.name}</p>
-                        </div>
-                        <p className="flex items-center gap-2 py-2">
-                          <img
-                            src={event.locationIcon}
-                            alt="loc"
-                            className="ml-1"
-                          />
-                          <small>{event.location}</small>
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <img src={event.dateIcon} alt="date" />
-                          <small>{event.date}</small>
-                        </p>
-                        <small className="text-xs">99+ registered</small>
-                      </div>
-                      <div className="flex flex-col  justify-between items-end gap-2 mt-2 ">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 max-w-7xl">
+            {filteredEvents
+              .filter((ev) => ev.isLive == true)
+              .map((event) => {
+                const eventId = event._id;
+                const eventUrl = `https://www.feroevent.com/find-events/${eventId}?label=Live`;
+
+                return (
+                  <div key={eventId} className="block w-full">
+                    {/* <Link href={`/find-events/${eventId}`} className="link"> */}
+                    <div className="rounded-xl cursor-pointer shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.02] h-fit w-full border  border-gray-200 dark:border-gray-700">
+                      <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
                         <img
-                          src={event.saveIcon}
-                          alt={event.saveIcon}
-                          className=" cursor-pointer"
+                          src={
+                            event.displayImage ||
+                            "https://via.placeholder.com/400x300"
+                          }
+                          alt={event.title}
+                          className="w-full h-full object-cover"
                         />
-                        <p className="flex  z-20 items-center gap-2 cursor-pointer">
-                          <small>{event.share}</small>
-                          <img src={event.shareIcon} alt="" />
+                        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow-md animate-pulse">
+                          LIVE
+                        </div>
+                        <p className="absolute bottom-0 m-0 left-0 text-sm p-3 h-[25px] w-[95px] flex justify-center items-center rounded-tl-none rounded-tr-xl rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
+                          {getCategoryName(event?.categoryId || "")}
                         </p>
                       </div>
+
+                      <div className="p-2 flex flex-col gap-2  h-1/2">
+                        <h3
+                          className={`text-lg font-semibold link dark:text-white text-foreground mt-2 word-break truncate `}>
+                          {event.title}
+                        </h3>
+
+                        <div className="flex items-center gap-5 text-sm">
+                          <FiCalendar className="w-4 h-4 text-[#434343] dark:text-white" />
+                          <span className="truncate text-[#434343] dark:text-white ">
+                            {new Date(event.startDate || "").toLocaleDateString(
+                              undefined,
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-5 text-sm ">
+                          <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white" />
+                          <span className="truncate link text-[#434343] dark:text-white  ">
+                            {event.location?.address}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-5 text-sm ">
+                          <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white" />
+                          <p className="w-3 h-4 text-[#434343] m-0 dark:text-white">
+                            {" "}
+                            {new Date(
+                              event.startDate || "",
+                            ).toLocaleDateString()}
+                          </p>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between text-sm">
+                            <p className="text-xs m-0 text-gray-400 dark:text-white">
+                              {" "}
+                              +{event?.totalParticipants?.length} registerd{" "}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (navigator.share) {
+                                  navigator
+                                    .share({
+                                      title: event?.title,
+                                      text: `Check out this live event: ${event?.title}`,
+                                      url: eventUrl,
+                                    })
+                                    .catch((err) =>
+                                      console.error("Sharing failed:", err),
+                                    );
+                                } else {
+                                  navigator.clipboard.writeText(eventUrl);
+                                  alert("Event link copied to clipboard!");
+                                }
+                              }}
+                              className="m-0"
+                              title="Share Event"
+                              type="button">
+                              <p className="text-xs flex items-center gap-2 m-0 text-gray-400">
+                                {" "}
+                                Share <Forward />
+                                {/* <img
+                                      src="/share.png"
+                                      className="dark:brightness-200"
+                                      alt=""
+                                    /> */}
+                              </p>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-2 w-full">
+                        <Link
+                          href={`/find-events/${eventId}`}
+                          className=" w-full p-2 border border-primary flex rounded-lg justify-center">
+                          view
+                        </Link>
+                      </div>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-2xl w-full">No event found!</p>
-            )}
+                    {/* </Link> */}
+                  </div>
+                );
+              })}
           </div>
         )}
       </div>

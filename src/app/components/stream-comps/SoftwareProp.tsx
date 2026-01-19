@@ -1,3 +1,4 @@
+import { IStreamData } from "@/app/interfaces/castr.interface";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -8,10 +9,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CopyIcon, Eye } from "lucide-react";
+import { CopyIcon, Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
-const SoftwareProp: React.FC<{ streamType: string }> = ({ streamType }) => {
+const SoftwareProp: React.FC<{
+  streamType: string;
+  streamData: IStreamData | null;
+}> = ({ streamType, streamData }) => {
   const [vOut, setVOut] = useState("Source Setup");
+  const [showUrl, setShowUrl] = useState(false);
+  const [showKey, setShowKey] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [copied2, setCopied2] = useState(false);
+  const handleCopy = (text: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Copy failed", err);
+      });
+  };
+
+  const handleCopy2 = (text: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied2(true);
+        setTimeout(() => setCopied2(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Copy failed", err);
+      });
+  };
+
+  const africa = [
+    { name: "Nigeria", flag: "🇳🇬" },
+    { name: "Ghana", flag: "🇬🇭" },
+    { name: "Kenya", flag: "🇰🇪" },
+    { name: "Algeria", flag: "🇩🇿" },
+    { name: "Cameroon", flag: "🇨🇲" },
+    { name: "Senegal", flag: "🇸🇳" },
+  ];
+
   return (
     <div className="w-full">
       <div className="flex justify-between items-center w-full bg-[#2e3c65] p-2 rounded-md mb-4">
@@ -80,44 +121,85 @@ const SoftwareProp: React.FC<{ streamType: string }> = ({ streamType }) => {
               </div>
               <div className="my-6">
                 <label>Stream Url</label>
-                <div className="relative mt-2">
-                  <Input
-                    type={"password"}
-                    value={"hshshshshshhshsh"}
-                    disabled
-                  />
+                <div className="relative mt-2 w-full  border p-2 rounded-lg bg-[#2e3c65]">
+                  <div className="truncate w-70">
+                    {showUrl
+                      ? streamData?.ingestInfo.primaryUrl || "Url not available"
+                      : "xxxxxxxxxxxxxxxxx"}
+                  </div>
                   <div className="flex gap-4 absolute right-2 top-1.5">
-                    <Eye className=" cursor-pointer" />
-                    <CopyIcon className=" cursor-pointer" />
+                    <div onClick={() => setShowUrl(!showUrl)}>
+                      {showUrl ? (
+                        <Eye className=" cursor-pointer" />
+                      ) : (
+                        <EyeOff className=" cursor-pointer" />
+                      )}
+                    </div>
+                    {copied2 && (
+                      <span className="text-white absolute top-6 right-0 border bg-black rounded-md p-3 text-[12px] w-max ">
+                        Stream URL Copied!
+                      </span>
+                    )}
+
+                    <div
+                      onClick={() =>
+                        handleCopy2(streamData?.ingestInfo.primaryUrl || "")
+                      }
+                      className="cursor-pointer">
+                      {copied2 ? (
+                        <CopyIcon size={14} scale={1} />
+                      ) : (
+                        <CopyIcon />
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
               <div className="my-6">
                 <label>Stream Key</label>
-                <div className="relative mt-2">
-                  <Input
-                    type={"password"}
-                    value={"hshshshshshhshsh"}
-                    disabled
-                  />
+                <div className="relative mt-2 w-full  border p-2 rounded-lg bg-[#2e3c65]">
+                  <div className="truncate w-70">
+                    {showKey
+                      ? streamData?.ingestInfo.streamKey || "Key not available"
+                      : "xxxxxxxxxxxxxxxxx"}
+                  </div>
+
                   <div className="flex gap-4 absolute right-2 top-1.5">
-                    <Eye className=" cursor-pointer" />
-                    <CopyIcon className=" cursor-pointer" />
+                    <div onClick={() => setShowKey(!showKey)}>
+                      {showKey ? (
+                        <Eye className=" cursor-pointer" />
+                      ) : (
+                        <EyeOff className=" cursor-pointer" />
+                      )}
+                    </div>
+                    {copied && (
+                      <span className="text-white absolute top-6 right-0 border bg-black rounded-md p-3 text-[12px] w-max ">
+                        Stream Key Copied!
+                      </span>
+                    )}
+
+                    <div
+                      onClick={() =>
+                        handleCopy(streamData?.ingestInfo?.streamKey || "")
+                      }
+                      className="cursor-pointer">
+                      {copied ? <CopyIcon size={14} scale={1} /> : <CopyIcon />}
+                    </div>
                   </div>
                 </div>
               </div>
               <Select>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full cursor-pointer">
                   <SelectValue placeholder="Choose your region" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup className="bg-[#2e3c65]">
                     <SelectLabel>regions</SelectLabel>
-                    <SelectItem value="apple">Apple</SelectItem>
-                    <SelectItem value="banana">Banana</SelectItem>
-                    <SelectItem value="blueberry">Blueberry</SelectItem>
-                    <SelectItem value="grapes">Grapes</SelectItem>
-                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                    {africa.map((a) => (
+                      <SelectItem key={a.flag} value={a.name}>
+                        {a.name}
+                      </SelectItem>
+                    ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>

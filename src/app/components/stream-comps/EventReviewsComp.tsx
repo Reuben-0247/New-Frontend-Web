@@ -1,4 +1,5 @@
 import { IReview } from "@/app/interfaces/event.interface";
+import axiosApi from "@/lib/axios";
 import React, { useEffect, useState } from "react";
 
 const EventReviewsComp: React.FC<{ eventId: string }> = ({ eventId }) => {
@@ -8,19 +9,10 @@ const EventReviewsComp: React.FC<{ eventId: string }> = ({ eventId }) => {
   useEffect(() => {
     const getReview = async () => {
       try {
-        const res = await fetch(`${""}/events/${eventId}/reviews`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-          },
-        });
-        const responseJson = await res.json();
-        console.log("Review", responseJson);
+        const { data } = await axiosApi(`/events/${eventId}/reviews`);
 
-        if (responseJson.status === "success") {
-          setReviews(responseJson.data.eventReviews || []);
+        if (data) {
+          setReviews(data.data.eventReviews || []);
         }
       } catch (error) {
         console.error(error);
@@ -50,7 +42,7 @@ const EventReviewsComp: React.FC<{ eventId: string }> = ({ eventId }) => {
                     <span
                       key={star}
                       className={`text-xl ${
-                        review.rating >= star
+                        review?.rating || 0 >= star
                           ? "text-yellow-400"
                           : "text-gray-300"
                       }`}>
@@ -66,11 +58,14 @@ const EventReviewsComp: React.FC<{ eventId: string }> = ({ eventId }) => {
                     {/* {review.userId?.firstName} {review.userId?.lastName} */}
                   </span>
                   <span>
-                    {new Date(review.createdAt).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    {new Date(review?.createdAt || "").toLocaleDateString(
+                      "en-GB",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      }
+                    )}
                   </span>
                 </div>
               </div>

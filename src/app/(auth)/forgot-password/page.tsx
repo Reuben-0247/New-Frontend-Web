@@ -25,7 +25,7 @@ const PasswordResetPage = () => {
 
       if (response) {
         toast.success(
-          "Reset password link has been sent to your email. Please check your inbox."
+          "Reset password link has been sent to your email. Please check your inbox.",
         );
         setLoading(false);
       }
@@ -39,7 +39,7 @@ const PasswordResetPage = () => {
   };
 
   return (
-    <div className="h-screen p-6 mx-auto flex flex-col gap-4">
+    <div className="h-auto p-6 mx-auto flex flex-col gap-4">
       <div className="flex justify-center mb-6">
         <Link href="/" className="text-primary link font-semibold ">
           <img
@@ -52,7 +52,7 @@ const PasswordResetPage = () => {
       <div className="mt-10 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
           <div className="mb-6 text-center">
-            <h1 className="text-2xl md:text-2xl font-semibold">
+            <h1 className="text-2xl text-black md:text-2xl font-semibold">
               Forgot Password
             </h1>
             <p className="text-sm text-muted-foreground mt-2">
@@ -68,6 +68,7 @@ const PasswordResetPage = () => {
               <Input
                 type="email"
                 name="email"
+                className="text-black"
                 value={input.email}
                 placeholder="you@example.com"
                 required

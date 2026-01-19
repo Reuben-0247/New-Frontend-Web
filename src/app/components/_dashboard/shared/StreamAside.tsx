@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { BiChevronRight, BiChevronLeft } from "react-icons/bi";
 import { HiOutlineXMark } from "react-icons/hi2";
+import { useThemeStore } from "@/app/store/theme.store";
 
 interface INav {
   label: string;
@@ -33,6 +34,8 @@ const StreamAside: React.FC<{
   param: string;
 }> = ({ showAside, toggleAside, collapsAside, collapse, param }) => {
   const pathname = usePathname();
+  const { theme } = useThemeStore();
+
   const navLinks: INav[] = [
     {
       label: "Livestream",
@@ -52,12 +55,12 @@ const StreamAside: React.FC<{
       icon: (
         <ScissorsLineDashed
           className={`text-[#171717] dark:text-primary ${
-            pathname.startsWith(`/stream/${param}/liveclipping`) &&
+            pathname.startsWith(`/stream/${param}/live-clipping`) &&
             "text-primary"
           }`}
         />
       ),
-      href: `/stream/${param}/liveclipping`,
+      href: `/stream/${param}/live-clipping`,
       id: "tour2-step2",
       show: true,
     },
@@ -79,12 +82,12 @@ const StreamAside: React.FC<{
       icon: (
         <MapPinHouse
           className={`text-[#171717] dark:text-primary ${
-            pathname.startsWith(`/stream/${param}/destinations`) &&
+            pathname.startsWith(`/stream/${param}/destination`) &&
             "text-primary"
           }`}
         />
       ),
-      href: `/stream/${param}/destinations`,
+      href: `/stream/${param}/destination`,
       id: "",
       show: true,
     },
@@ -120,25 +123,43 @@ const StreamAside: React.FC<{
           className={`${
             collapse ? "p-2 w-full" : "p-4"
           } flex  items-center border-b-line border-b  h-[8vh] justify-between `}>
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            {collapse ? (
-              <Image
-                src={`/images/logo-f.png`}
-                alt="fero's logo"
-                className="dark:brightness-200"
-                width={51}
-                height={45}
-              />
-            ) : (
-              <Image
-                src={`/images/logo-f.png`}
-                width={144}
-                height={65}
-                className="dark:brightness-200"
-                alt="fero's logo"
-              />
-            )}
-          </Link>
+          {theme === "dark" ? (
+            <Link href="/" className="flex items-center gap-2 font-semibold">
+              {collapse ? (
+                <Image
+                  src={`/svgs/FERO_LOGO_light.svg`}
+                  alt="fero's logo"
+                  width={51}
+                  height={45}
+                />
+              ) : (
+                <Image
+                  src={`/svgs/FERO_LOGO_light.svg`}
+                  width={110}
+                  height={30}
+                  alt="fero's logo"
+                />
+              )}
+            </Link>
+          ) : (
+            <Link href="/" className="flex items-center gap-2 font-semibold">
+              {collapse ? (
+                <Image
+                  src={`/svgs/Fero_logo_dark.svg`}
+                  alt="fero's logo"
+                  width={51}
+                  height={45}
+                />
+              ) : (
+                <Image
+                  src={`/svgs/Fero_logo_dark.svg`}
+                  width={110}
+                  height={30}
+                  alt="fero's logo"
+                />
+              )}
+            </Link>
+          )}
           <HiOutlineXMark
             size={30}
             className="text-primary md:hidden block font-bold cursor-pointer"

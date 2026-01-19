@@ -37,7 +37,7 @@ const Page = () => {
         <SocialAuth authType="signin" />
       </div>
 
-      <p className="text-center text-sm text-foreground mt-5">
+      <p className="text-center text-sm text-black mt-5">
         Don’t have an account?{" "}
         <Link
           href="/signup"
