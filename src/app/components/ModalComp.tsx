@@ -15,12 +15,13 @@ import { Button } from "@/components/ui/button";
 interface ModalProps {
   header?: string;
   desc?: string;
-  children: React.ReactNode;
-  open: boolean;
+  children?: React.ReactNode;
+  open?: boolean;
   onClose: () => void;
   onSave?: () => void;
   saveText?: string;
   loading?: boolean;
+  actionType?: "create" | "update" | "delete";
 }
 
 const ModalComp: React.FC<ModalProps> = ({
@@ -32,6 +33,7 @@ const ModalComp: React.FC<ModalProps> = ({
   onSave,
   saveText,
   loading,
+  actionType,
 }) => {
   return (
     <Dialog open={open} onOpenChange={(state) => !state && onClose()}>
@@ -44,18 +46,28 @@ const ModalComp: React.FC<ModalProps> = ({
         <div className="py-2">{children}</div>
 
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-          </DialogClose>
+          {onClose && (
+            <DialogClose asChild>
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                onClick={onClose}>
+                Cancel
+              </Button>
+            </DialogClose>
+          )}
 
-          <Button
-            className="text-white cursor-pointer"
-            disabled={loading}
-            onClick={onSave}>
-            {loading ? "Loading..." : saveText}
-          </Button>
+          {onSave && (
+            <Button
+              className={`text-white cursor-pointer ${
+                actionType === "delete" ? "bg-red-600 hover:bg-red-700" : ""
+              }`}
+              disabled={loading}
+              // variant={""}
+              onClick={onSave}>
+              {loading ? "Loading..." : saveText}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

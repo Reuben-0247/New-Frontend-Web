@@ -1,38 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Moon, SunMedium } from "lucide-react";
-import { THEME } from "@/utils/constant";
-import { Button } from "@/components/ui/button";
+import { useThemeStore } from "../store/theme.store";
+import { useMounted } from "../hooks/useOnmount";
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(THEME) as "light" | "dark" | null;
-      if (stored) return stored;
-      return "light";
-    }
-    return "light";
-  });
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem(THEME, theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
+  const { theme, toggleTheme } = useThemeStore();
+  const mounted = useMounted();
+  if (!mounted) return null;
 
   return (
-    <Button
+    <div
       onClick={toggleTheme}
-      className="p-1 rounded-full cursor-pointer border border-border bg-card  transition">
+      className={`p-1 rounded-full cursor-pointer border  border-border bg-card transition ${theme === "dark" ? "hover:bg-background" : "hover:bg-[#1b2440]  "}`}>
       {theme === "light" ? (
         <Moon className="text-background" />
       ) : (
-        <SunMedium className=" text-amber-500" />
+        <SunMedium className="text-amber-500" />
       )}
-    </Button>
+    </div>
   );
 }

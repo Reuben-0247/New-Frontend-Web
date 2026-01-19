@@ -10,3 +10,9 @@ export interface ChangePasswordInput {
   oldPassword: string;
   password: string;
 }
+
+export interface UpdateUserInput {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+}

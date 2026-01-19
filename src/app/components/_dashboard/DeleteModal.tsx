@@ -1,30 +1,49 @@
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { BsEyeFill, BsEyeSlashFill } from "react-icons/bs";
+import ModalComp from "../ModalComp";
+import { toast } from "react-toastify";
+import { useAuthStore } from "@/app/store/auth.store";
 
 const DeleteAccountFormModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
-}> = ({ isOpen, onClose, onSubmit }) => {
+  loading: boolean;
+}> = ({ isOpen, onClose, onSubmit, loading }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const { auth } = useAuthStore();
   const handleContinue = () => {
-    setError("");
     if (!email || !password) {
-      setError("Email and password are required.");
+      toast.warn("Email and password are required.");
       return;
     }
     onSubmit();
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-800 opacity-90 flex items-center justify-center p-4 z-40 font-sans">
+    <div className="fixed inset-0 bg-gray-800 opacity-97   flex items-center justify-center p-4 z-40 font-sans">
+      <ModalComp
+        open={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+        onSave={() => handleContinue}
+        loading={loading}
+        saveText="Delete"
+        actionType="delete"
+        header="Delete Account">
+        <div>
+          <p className="">
+            Are you sure you want to delete this account{" "}
+            <span className="font-bold text-primary">{auth?.firstName}</span>?
+          </p>
+        </div>
+      </ModalComp>
       <div className="bg-white z-50 rounded-lg shadow-xl w-full max-w-xl mx-auto p-6 sm:p-8">
         <h2 className="text-[30px] sm:text-2xl font-meduim text-gray-900 mb-6 ">
           You are deleting your account
@@ -69,10 +88,6 @@ const DeleteAccountFormModal: React.FC<{
           </div>
         </div>
 
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
-        )}
-
         <div className="flex flex-col sm:flex-row gap-4">
           <Button
             onClick={onClose}
@@ -80,7 +95,7 @@ const DeleteAccountFormModal: React.FC<{
             Cancel
           </Button>
           <Button
-            onClick={handleContinue}
+            onClick={() => setOpenDeleteModal(true)}
             className="flex-1 px-6 py-3 cursor-pointer bg-blue-600 text-white font-medium text-lg rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
             Continue
           </Button>

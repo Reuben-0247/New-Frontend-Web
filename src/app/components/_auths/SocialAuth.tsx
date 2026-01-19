@@ -37,7 +37,7 @@ const SocialAuth: React.FC<{ authType: string }> = ({ authType }) => {
           ) : (
             <div
               onClick={handleAuth}
-              className="cursor-pointer w-full h-full  transition-colors duration-300  flex justify-center items-center    text-foreground"
+              className="cursor-pointer w-full h-full  transition-colors duration-300  flex justify-center items-center    text-black"
               style={{ display: "flex", alignItems: "center", gap: "13px" }}>
               <div>
                 <img src="/svgs/google.svg" className="w-7" alt="google logo" />

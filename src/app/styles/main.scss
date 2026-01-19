@@ -1,0 +1,93 @@
+// @import "./dashboard.scss";
+
+@media (max-width: 768px) {
+  .aside {
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    transition: all 600ms ease-in-out;
+    background-color: rgba(0, 0, 0, 0.322);
+    z-index: 13;
+    &-inner {
+      z-index: 15;
+      width: 80vw;
+      .collapse-btn {
+        display: none;
+      }
+    }
+    &.hide {
+      left: -1000px;
+    }
+
+    &.show {
+      left: 0;
+    }
+  }
+}
+
+.date {
+  height: inherit !important;
+  &:focus {
+    border: 1px solid #fff;
+    outline: none;
+  }
+  &:active {
+    border: 1px solid #fff;
+    outline: none;
+  }
+}
+
+button {
+  cursor: pointer;
+}
+.table-holder {
+  width: 100%;
+}
+[data-slot="table-container"] {
+  width: auto;
+  background: #fff;
+  border-radius: 5px;
+  width: 100%;
+  overflow-x: scroll;
+  &::-webkit-scrollbar {
+    margin-top: 1rem;
+    // width: 2px;
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #d22779;
+    border-radius: 20px;
+  }
+
+  [data-slot="table-header"] {
+    background: #eeeeee;
+    th {
+      font-weight: bolder;
+      color: #333333;
+      background: #eeeeee;
+    }
+  }
+  @media screen {
+    width: 100%;
+  }
+}
+// [data-slot="popover-content"] {
+//   [data-slot="command"] {
+
+//     [data-slot="command-list"] {
+//       overflow-y: scroll !important;
+//       [data-slot="command-group"] {
+//         overflow-y: auto !important;
+//       }
+//     }
+//   }
+// }
+
+// .location-list {
+//   height: 300px !important;
+//   overflow-y: scroll !important;
+// }

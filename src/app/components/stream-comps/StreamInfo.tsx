@@ -1,7 +1,10 @@
+import { IStreamStats } from "@/app/interfaces/castr.interface";
 import { EyeIcon, Signal, Ratio, Volume2 } from "lucide-react";
 import React from "react";
 
-const StreamInfo = () => {
+const StreamInfo: React.FC<{ stats: IStreamStats | undefined }> = ({
+  stats,
+}) => {
   return (
     <div>
       <div className="bg-[#151E37] px-2 w-full flex items-center justify-between h-[50px] ">
@@ -13,7 +16,7 @@ const StreamInfo = () => {
             </span>
           </div>
           <span className="text-white text-[10px] ">
-            {/* {viewers === 0 ? ".." : viewers} */}0
+            {/* {viewers === 0 ? ".." : viewers}0 */ 0}
           </span>
         </div>
         <div className="flex flex-col items-center">
@@ -24,8 +27,7 @@ const StreamInfo = () => {
             </span>
           </div>
           <span className="text-white text-[10px] ">
-            {/* {stats && stats?.bitrate ? stats?.bitrate + "KBPS" : ".."} */}
-            KBPS
+            {`${stats?.bitrate || ""} KBPS`}
           </span>
         </div>
         <div className="flex flex-col items-center">
@@ -36,15 +38,10 @@ const StreamInfo = () => {
             </span>
           </div>
           <span className="text-white text-[10px] ">
-            {/* {stats &&
-                stats?.media_info?.tracks[0]?.width &&
-                stats?.media_info?.tracks[0]?.width
-                  ? stats?.media_info?.tracks[0]?.width +
-                    " X " +
-                    stats?.media_info?.tracks[0]?.height +
-                    "HD"
-                  : ".."} */}
-            HD
+            {`${stats?.media_info?.tracks[0]?.width || ""}` +
+              " X " +
+              `${stats?.media_info?.tracks[0]?.height || ""}` +
+              "HD"}
           </span>
         </div>
 
@@ -56,10 +53,7 @@ const StreamInfo = () => {
             </span>
           </div>
           <span className="text-white text-[10px] ">
-            {/* {stats && stats?.media_info?.tracks[1]?.bitrate
-                  ? stats?.media_info?.tracks[1]?.bitrate + "KBPS"
-                  : ".."} */}
-            KBPS
+            {`${stats?.media_info?.tracks[1]?.bitrate || ""} KBPS`}
           </span>
         </div>
       </div>

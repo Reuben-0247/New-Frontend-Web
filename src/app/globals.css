@@ -1,5 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "swiper/css";
+@import "swiper/css/pagination";
+@import "swiper/css/navigation";
+
 /* body {
   font-family: var(--font-switzer);
 } */
@@ -14,7 +18,7 @@
   --border: #a8a8ac;
   --line: #d5d5d8;
   --dash-gray: #f9fafb;
-
+  font-family: var(--font-nunito-sans), system-ui, sans-serif;
   --ring: #89898f;
   --bg-container: #191919;
   --input: #2e3c65;
@@ -72,8 +76,8 @@
   --color-shadow-sm: var(--shadow-sm);
   --color-muted-foreground: var(--muted-foreground);
   --color-icon: var(--icon);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-nunito-sans);
+  /* --font-mono: var(--font-geist-mono); */
 }
 
 @media (prefers-color-scheme: light) {
@@ -94,7 +98,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* font-family: Arial, , sans-serif; */
+  max-width: 100%;
+  overflow-x: hidden;
+  @apply font-sans;
 }
 
 /* .image-show {

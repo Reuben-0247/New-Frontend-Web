@@ -6,10 +6,13 @@ import React, { useState } from "react";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 import ThemeToggle from "./ToggleTeam";
+import { useThemeStore } from "../store/theme.store";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { theme } = useThemeStore();
+
   const renderComp =
     typeof window !== "undefined" ? window.location.pathname : "";
   const isActive = (link: string) => {
@@ -39,13 +42,23 @@ const Header = () => {
     <header className="w-full md:flex justify-center  md:bg-transparent">
       <div className=" container mx-auto px-2 md:px-6 flex justify-center w-full">
         <nav className=" w-full  py-3 flex justify-between   items-center">
-          <Link href="/" className="">
-            <img
-              src="/images/logo-f.png"
-              alt="Fero Events Logo"
-              className="h-[70px] object-cover"
-            />
-          </Link>
+          {theme === "dark" ? (
+            <Link href="/" className="">
+              <img
+                src="/svgs/FERO_LOGO_light.svg"
+                alt="Fero Events Logo"
+                className="h-[70px] object-cover"
+              />
+            </Link>
+          ) : (
+            <Link href="/" className="">
+              <img
+                src="/svgs/Fero_logo_dark.svg"
+                alt="Fero Events Logo"
+                className="h-[70px] object-cover"
+              />
+            </Link>
+          )}
 
           <ul className="hidden md:flex items-center justify-center m-0 p-0 gap-5 font-Nunito text-sm">
             {navItems.map((nav) => (

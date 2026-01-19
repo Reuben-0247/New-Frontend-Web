@@ -19,9 +19,10 @@ import { LuLogOut } from "react-icons/lu";
 // import { useAuthStore } from "@/app/store/auth.store";
 import { TOKEN_NAME, USER_ID } from "@/utils/constant";
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import ThemeToggle from "../../ToggleTeam";
 import { useAuthStore } from "@/app/store/auth.store";
+import { useThemeStore } from "@/app/store/theme.store";
 // import NotificationModal from "./modal/NotificationModal";
 
 const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
@@ -29,6 +30,7 @@ const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
 }) => {
   const router = useRouter();
   const { auth } = useAuthStore();
+  const { theme } = useThemeStore();
 
   const logout = () => {
     Cookies.remove(TOKEN_NAME);
@@ -44,17 +46,27 @@ const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
     <header className="flex  h-[8vh] justify-between w-full items-center gap-4  border-b-line border-b bg-background  px-4  lg:px-6 dash-header">
       <div className="flex items-center gap-4 ">
         <button onClick={toggleAside}>
-          <span className="mr-12  md:hidden text-white rounded-full  shadow-lg flex items-center justify-center text-2xl  transition">
-            ☰
+          <span className="mr-12  md:hidden  rounded-full  shadow-lg flex items-center justify-center text-2xl  transition">
+            <Menu />
           </span>
         </button>
-        <Image
-          src={`/images/logo-f.png`}
-          className="md:hidden"
-          width={100}
-          height={100}
-          alt="checkCITE logo"
-        />
+        {theme === "dark" ? (
+          <Image
+            src={`/svgs/FERO_LOGO_light.svg`}
+            className="md:hidden"
+            width={100}
+            height={100}
+            alt="checkCITE logo"
+          />
+        ) : (
+          <Image
+            src={`/svgs/Fero_logo_dark.svg`}
+            className="md:hidden"
+            width={100}
+            height={100}
+            alt="checkCITE logo"
+          />
+        )}
       </div>
       <div className="text-foreground md:block hidden font-bold ">
         <p className="flex gap-2">
@@ -71,7 +83,7 @@ const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
             <div className="flex min-w-0 md:gap-x-4 cursor-pointer">
               <div className="flex items-center  text-foreground justify-center h-10 w-10 rounded-full">
                 <img
-                  src={"/images/g2.jpg"}
+                  src={auth?.profilePhotoUrl || "/images/g2.jpg"}
                   alt="image"
                   className="h-full w-full rounded-full object-cover"
                 />

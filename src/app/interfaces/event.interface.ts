@@ -1,4 +1,4 @@
-import { IUser } from "./user.interface";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface IEvent {
   _id?: string;
@@ -67,12 +67,34 @@ export interface CreateEventFormInput {
   displayImage?: string;
   requirePassword: boolean;
   password?: string;
-  appearInFeatureEvent: boolean;
+  type?: "publish" | "draft";
+  featuredEvent: boolean;
   location: {
     address: string;
     type: "Online" | "Hybrid";
   };
-  isPublished: boolean;
+  // isPublished?: boolean;
+}
+
+export interface UpdateEventFormInput {
+  _id: string;
+  title: string;
+  description: string;
+  categoryId: string;
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
+  displayImage?: string;
+  requirePassword: boolean;
+  password?: string;
+  type?: "publish" | "draft";
+  featuredEvent: boolean;
+  location: {
+    address: string;
+    type: "Online" | "Hybrid";
+  };
+  // isPublished?: boolean;
 }
 
 export interface IReview {
@@ -88,11 +110,38 @@ export interface IReview {
   updatedAt?: string;
 }
 export interface IComment {
-  id: string;
+  _id: string;
+  // name: string;
+  content: string;
+  createdAt: string;
+  // image?: string;
+  // check?: boolean;
+  creator?: {
+    _id: string;
+    name: string;
+    profilePhotoUrl?: string;
+  };
+}
+
+export interface Iboard {
+  _id: string;
   name: string;
-  message: string;
-  time: string;
-  image?: string;
-  check?: boolean;
-  creator?: IUser;
+  type: "note" | "document";
+  content: string;
+  createdAt: string;
+  eventId: string;
+  updatedAt: string;
+}
+
+export interface CreateBoardFormInput {
+  name: string;
+  type: "note" | "document";
+  content: string;
+}
+
+export interface UpdateBoardFormInput {
+  boardId: string;
+  name?: string;
+  type?: string;
+  content?: any;
 }
