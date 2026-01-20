@@ -7,6 +7,7 @@ import {
   EllipsisVertical,
   Plus,
   Trash2,
+  Volleyball,
   X,
   Youtube,
 } from "lucide-react";
@@ -84,6 +85,7 @@ const DestinationsPage: React.FC = () => {
     { icon: <FaDiscord size={24} />, name: "Discord" },
     { icon: <FaLinkedin size={24} />, name: "LinkedIn" },
     { icon: <FaTiktok size={24} />, name: "TikTok" },
+    { icon: <Volleyball size={24} />, name: "Kick" },
   ];
 
   const selectPlatform = (name: string) => {
@@ -109,6 +111,8 @@ const DestinationsPage: React.FC = () => {
         return <FaLinkedin size={24} />;
       case "Facebook":
         return <FaFacebook size={24} />;
+      case "Kick":
+        return <Volleyball size={24} />;
       default:
         return <FaFacebook size={24} />;
     }
@@ -127,7 +131,7 @@ const DestinationsPage: React.FC = () => {
   const onSubmit = async () => {
     if (!streamData?.castrStreamId || !event?.castrStreamId) {
       toast.error(
-        "Stream is not live. Please Please ensure you have started streaming."
+        "Stream is not live. Please Please ensure you have started streaming.",
       );
       return;
     }
@@ -220,7 +224,6 @@ const DestinationsPage: React.FC = () => {
             </label>
             <Input
               id="channelName"
-              disabled
               type="text"
               value={input.name}
               onChange={(e) => setInput({ ...input, name: e.target.value })}
@@ -280,7 +283,6 @@ const DestinationsPage: React.FC = () => {
             </label>
             <Input
               id="channelName"
-              disabled
               type="text"
               value={input.name}
               onChange={(e) => setInput({ ...input, name: e.target.value })}
@@ -323,7 +325,20 @@ const DestinationsPage: React.FC = () => {
       </ModalComp>
       {showAdd && (
         <div className="absolute bg-background rounded-md shadow-lg top-0 left-0 w-full h-auto z-50 p-6">
-          <div className="flex justify-end">
+          <div className="flex gap-6 justify-end">
+            <Button
+              onClick={() => {
+                setInput({
+                  name: "",
+                  serverKey: "",
+                  serverUrl: "",
+                });
+                setAdding(true);
+              }}
+              variant={"default"}
+              className=" font-semibold  text-white cursor-pointer">
+              <Plus /> <span> Add custom Platform</span>
+            </Button>
             <Button
               variant={"outline"}
               onClick={() => setShowAdd(false)}
@@ -375,7 +390,7 @@ const DestinationsPage: React.FC = () => {
         <div className="w-full  ">
           <div className="flex mb-12 justify-between">
             <p className="font-bold text-2xl text-foreground">Destinations</p>
-            <div>
+            <div className="">
               <Button
                 onClick={() => setShowAdd(true)}
                 variant={"default"}
@@ -440,7 +455,7 @@ const DestinationsPage: React.FC = () => {
                                 onPointerDown={(e) => e.stopPropagation()}
                                 onClick={handleEditDestination.bind(
                                   null,
-                                  destination
+                                  destination,
                                 )}>
                                 <Edit size={15} /> Update
                               </Button>

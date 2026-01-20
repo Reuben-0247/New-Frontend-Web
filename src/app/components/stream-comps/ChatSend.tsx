@@ -19,21 +19,22 @@ const ChatSend: React.FC<{ chat: IComment }> = ({ chat }) => {
   return (
     <Wrapper>
       <div className="chats p-2">
-        <div className="flex items-center justify-end gap-1">
-          <span className="delete">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  type="button"
-                  // onClick={(e) => e.stopPropagation()}
-                  // onPointerDown={(e) => e.stopPropagation()}
-                  className="cursor-pointer">
-                  <EllipsisVertical size={15} className="text-secondary " />
-                </Button>
-              </DropdownMenuTrigger>
-              {/* <DropdownMenuContent
+        <div className="flex gap-3 justify-end">
+          <div className="flex items-center justify-end gap-1">
+            <span className="delete">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    // onClick={(e) => e.stopPropagation()}
+                    // onPointerDown={(e) => e.stopPropagation()}
+                    className="cursor-pointer">
+                    <EllipsisVertical size={15} className="text-secondary " />
+                  </Button>
+                </DropdownMenuTrigger>
+                {/* <DropdownMenuContent
                 align="end"
                 className="flex bg-background flex-col outline-none border-0 absolute -top-11 right-3">
                 <DropdownMenuItem className="cursor-pointer flex justify-center  w-max ">
@@ -49,20 +50,20 @@ const ChatSend: React.FC<{ chat: IComment }> = ({ chat }) => {
                   </Button>
                 </DropdownMenuItem>
               </DropdownMenuContent> */}
-            </DropdownMenu>
-          </span>
-          <div className="flex flex-col bg-[#011d4e] text-white p-2 message">
-            <small className=" ">
-              {chat?.content || "hhfhhf hfhfhfhf hfhfjjsi  "}
-            </small>
-            <p className="flex items-center ml-12 justify-end  text-gray-400 gap-2 text-xs ">
-              {formatTime(chat?.createdAt)}
-              <span>
-                <Check size={15} />
-              </span>
-            </p>
-          </div>
-          {/* <div className="flex  items-center flex-col">
+              </DropdownMenu>
+            </span>
+            <div className="flex flex-col bg-[#011d4e] text-white p-2 message">
+              <small className=" ">
+                {chat?.content || "hhfhhf hfhfhfhf hfhfjjsi  "}
+              </small>
+              <p className="flex items-center ml-12 justify-end  text-gray-400 gap-2 text-xs ">
+                {formatTime(chat?.createdAt)}
+                <span>
+                  <Check size={15} />
+                </span>
+              </p>
+            </div>
+            {/* <div className="flex  items-center flex-col">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-[12px]">
                 {new Date(chat.createdAt).getTime()}
@@ -79,6 +80,14 @@ const ChatSend: React.FC<{ chat: IComment }> = ({ chat }) => {
             />
             <p className="">{chat.creator?.name || "Tom Tim"}</p>
           </div> */}
+          </div>
+          <div>
+            <img
+              className="rounded-[50%] w-8 h-8 object-cover"
+              src={chat?.creator?.profilePhotoUrl || "/images/avater-1.png"}
+              alt="avatar"
+            />
+          </div>
         </div>
       </div>
     </Wrapper>

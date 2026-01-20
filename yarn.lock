@@ -4288,6 +4288,11 @@ react-loader-spinner@^8.0.0:
     styled-components "^6.1.19"
     tinycolor2 "^1.6.0"
 
+react-photo-view@^1.2.7:
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/react-photo-view/-/react-photo-view-1.2.7.tgz#7cebfd88f20665ac85de053e9980b492d0f66095"
+  integrity sha512-MfOWVPxuibncRLaycZUNxqYU8D9IA+rbGDDaq6GM8RIoGJal592hEJoRAyRSI7ZxyyJNJTLMUWWL3UIXHJJOpw==
+
 react-quill-new@^3.7.0:
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/react-quill-new/-/react-quill-new-3.7.0.tgz#1fc403dc516d71e44f1a72f7c4d34d95f5179834"
@@ -4332,6 +4337,11 @@ react-style-singleton@^2.2.2, react-style-singleton@^2.2.3:
   dependencies:
     get-nonce "^1.0.0"
     tslib "^2.0.0"
+
+react-to-print@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/react-to-print/-/react-to-print-3.2.0.tgz#935d8c8929d63ce483f15553235c4eec67206c18"
+  integrity sha512-IX2D0mebKMgYTBD6s5tf9B7YRL3RFWjRoevYK8JKgRwn94Rep7PFZyeOTGjCmXofKB1SKzvPSzDrAMG4I2PIwg==
 
 react-toastify@*:
   version "11.0.5"

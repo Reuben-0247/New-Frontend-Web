@@ -8,16 +8,14 @@ const ChatReceived: React.FC<{ chat: IComment }> = ({ chat }) => {
   return (
     <Wrapper>
       <div className="message-reply p-2">
-        <div className="flex items-center gap-4">
-          {/* <div className="flex  flex-col">
-            <span className="text-[12px] mb-3">{chat?.time || "3:12"}</span>
+        <div className="flex gap-3">
+          <div className="">
             <img
               className="rounded-[50%] w-8 h-8 object-cover"
-              src="/images/avater-1.png"
+              src={chat?.creator?.profilePhotoUrl || "/images/avater-1.png"}
               alt="avatar"
             />
-            <span className="text-[12px]">{"John Doe"}</span>
-          </div> */}
+          </div>
           <div className="flex flex-col  bg-[#011d4e] text-white p-2 reply">
             <small className=" ">
               {chat?.content || "hhfhhf hfhfhfhf hfhfjjsi  "}

@@ -55,7 +55,7 @@ const SoftwareProp: React.FC<{
 
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center w-full bg-[#2e3c65] p-2 rounded-md mb-4">
+      <div className="flex text-white justify-between items-center w-full bg-[#2e3c65] p-2 rounded-md mb-4">
         <p
           className={`p-2 cursor-pointer ${
             vOut === "Source Setup" ? "border-b-2" : ""
@@ -83,31 +83,31 @@ const SoftwareProp: React.FC<{
           {streamType === "Webcam" ? (
             <div className="space-y-4">
               <Select value="Nigeria">
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full text-white">
                   <SelectValue placeholder="Choose your country" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup className="bg-[#2e3c65]">
+                  <SelectGroup className="bg-[#2e3c65] text-white">
                     <SelectItem value="Nigeria">Nigeria</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
               <Select value="Sound Input">
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full text-white">
                   <SelectValue placeholder="Choose your Sound" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup className="bg-[#2e3c65]">
+                  <SelectGroup className="bg-[#2e3c65] text-white">
                     <SelectItem value="Sound Input">Sound Input</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
               <Select value="Video Input">
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full text-white">
                   <SelectValue placeholder="Select video" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup className="bg-[#2e3c65]">
+                  <SelectGroup className="bg-[#2e3c65] text-white">
                     <SelectItem value="Video Input">Video Input</SelectItem>
                   </SelectGroup>
                 </SelectContent>
@@ -115,11 +115,11 @@ const SoftwareProp: React.FC<{
             </div>
           ) : (
             <div>
-              <div className="flex gap-6">
+              <div className="flex gap-6 text-white">
                 <p className="border-b">RMTP</p>
                 <p>SRT</p>
               </div>
-              <div className="my-6">
+              <div className="my-6 text-white">
                 <label>Stream Url</label>
                 <div className="relative mt-2 w-full  border p-2 rounded-lg bg-[#2e3c65]">
                   <div className="truncate w-70">
@@ -155,7 +155,7 @@ const SoftwareProp: React.FC<{
                   </div>
                 </div>
               </div>
-              <div className="my-6">
+              <div className="my-6 text-white">
                 <label>Stream Key</label>
                 <div className="relative mt-2 w-full  border p-2 rounded-lg bg-[#2e3c65]">
                   <div className="truncate w-70">
@@ -189,11 +189,14 @@ const SoftwareProp: React.FC<{
                 </div>
               </div>
               <Select>
-                <SelectTrigger className="w-full cursor-pointer">
-                  <SelectValue placeholder="Choose your region" />
+                <SelectTrigger className="w-full placeholder:text-white text-white cursor-pointer">
+                  <SelectValue
+                    placeholder="Choose your region"
+                    className="text-white placeholder:text-white"
+                  />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup className="bg-[#2e3c65]">
+                <SelectContent className="text-white placeholder:text-white">
+                  <SelectGroup className="bg-[#2e3c65] text-white placeholder:text-white">
                     <SelectLabel>regions</SelectLabel>
                     {africa.map((a) => (
                       <SelectItem key={a.flag} value={a.name}>
