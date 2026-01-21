@@ -67,6 +67,7 @@ const EventPage = () => {
 
   useEffect(() => {
     const fetchEvents = async (url: string) => {
+      if (!auth?._id) return;
       try {
         setLoading(true);
 
@@ -265,9 +266,11 @@ const EventPage = () => {
                 </Button>
                 <Button
                   onClick={() => setIsLive((prev) => !prev)}
-                  className="cursor-pointer bg-red-600 text-white text-xs hover:bg-red-500 font-semibold px-2 py-0.5  shadow-md animate-pulse"
+                  className="cursor-pointer"
                   variant={isLive ? "default" : "outline"}>
-                  <Radio className={`${isLive ? "" : "text-red-500"}`} />
+                  <Radio
+                    className={`${isLive ? "text-red-500 " : "text-red-500 "}`}
+                  />
                 </Button>
               </div>
             )}

@@ -22,6 +22,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { FiDownload } from "react-icons/fi";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import { Card, CardContent } from "@/components/ui/card";
 
 const LiveBoard: React.FC<{ event: IEvent | null }> = ({ event }) => {
   const [boards, setBoards] = useState<Iboard[]>([]);
@@ -142,15 +144,11 @@ const LiveBoard: React.FC<{ event: IEvent | null }> = ({ event }) => {
               {board.type === "document" && (
                 <div className="flex flex-col gap-3 justify-between items-center">
                   <div className="flex items-center gap-6">
-                    <a
-                      href={board.content}
-                      download={board.name}
-                      title="view document"
-                      target="_blank"
-                      rel="noopener"
-                      className="text-blue-400 hover:underline">
-                      View Document
-                    </a>
+                    <PhotoProvider>
+                      <PhotoView src={board.content}>
+                        <div className="cursor-pointer">View Document</div>
+                      </PhotoView>
+                    </PhotoProvider>
                     <Button
                       variant={"ghost"}
                       onClick={() => handleDownload(board.content, board.name)}
@@ -161,8 +159,8 @@ const LiveBoard: React.FC<{ event: IEvent | null }> = ({ event }) => {
                   </div>
                   <img
                     src={board.content}
-                    alt={board.name}
-                    className="h-30 w-full object-cover"
+                    alt=""
+                    className="cursor-pointer rounded-md object-cover h-40 md:w-80 w-full"
                   />
                 </div>
               )}

@@ -4,9 +4,10 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
+  ArrowLeft,
   LogOut,
   MapPinHouse,
   ScissorsLineDashed,
@@ -17,6 +18,7 @@ import {
 import { BiChevronRight, BiChevronLeft } from "react-icons/bi";
 import { HiOutlineXMark } from "react-icons/hi2";
 import { useThemeStore } from "@/app/store/theme.store";
+import { useEventStore } from "@/app/store/event.store";
 
 interface INav {
   label: string;
@@ -35,6 +37,8 @@ const StreamAside: React.FC<{
 }> = ({ showAside, toggleAside, collapsAside, collapse, param }) => {
   const pathname = usePathname();
   const { theme } = useThemeStore();
+  const router = useRouter();
+  const { event } = useEventStore();
 
   const navLinks: INav[] = [
     {
@@ -64,19 +68,7 @@ const StreamAside: React.FC<{
       id: "tour2-step2",
       show: true,
     },
-    {
-      label: "Live to VOD",
-      icon: (
-        <Tv
-          className={`text-[#171717] dark:text-primary ${
-            pathname.startsWith(`/stream/${param}/live-vod`) && "text-primary"
-          }`}
-        />
-      ),
-      href: `/stream/${param}/live-vod`,
-      id: "tour1-step7",
-      show: true,
-    },
+
     {
       label: "Destinations",
       icon: (
@@ -226,10 +218,13 @@ const StreamAside: React.FC<{
               </div>
               <div
                 className={`${collapse ? "px-1" : "px-6"} mt-4 pt-4 border-t `}>
-                <Button variant="outline" className="w-full cursor-pointer">
-                  <LogOut className="text-red-500" />
+                <Button
+                  variant="outline"
+                  className="w-full cursor-pointer"
+                  onClick={() => router.push(`/events/${event?._id}`)}>
+                  <ArrowLeft className="" />
                   <span className={`${collapse ? "hidden" : "inline"} `}>
-                    Log out
+                    Go Back
                   </span>
                 </Button>
               </div>

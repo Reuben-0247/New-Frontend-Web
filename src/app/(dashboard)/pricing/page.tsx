@@ -5,9 +5,12 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { MenuIcon } from "lucide-react";
 import axiosApi from "@/lib/axios";
-import { toast } from "react-toastify";
+import { toast, ToastContent } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import ModalComp from "@/app/components/ModalComp";
+import { AxiosError } from "axios";
+import { formatError } from "@/utils/helper";
+import { useAuthStore } from "@/app/store/auth.store";
 // import Swal from "sweetalert2";
 // import { AxiosForm } from "../../Utils/AxiosConfig";
 // import Config from "../../Config.json";
@@ -116,6 +119,7 @@ function PricingPage() {
   const [selectedPlan, setSelectedPlan] = useState<IPlans>();
   const [input, setInput] = useState("Monthly");
   const [amount, setAmount] = useState(selectedPlan?.amount);
+  const { auth } = useAuthStore();
   const selectPlan = (plan: IPlans) => {
     setSelectedPlan(plan);
     setShow(true);
@@ -138,25 +142,15 @@ function PricingPage() {
 
     try {
       const payload = {
-        // email: userData?.user?.email,
-        // userId: userData?.user?._id,
+        email: auth?.email,
+        userId: auth?._id,
         paymentPlan: selectedPlan?.name.toLowerCase(),
         billingCycle: input.toLowerCase(),
         amount: amount,
       };
       setLoading(true);
 
-      const { data } = await axiosApi.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/payments/initialize`,
-        payload,
-        {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-          },
-        }
-      );
+      const { data } = await axiosApi.post(`/payments/initialize`, payload);
 
       if (data) {
         toast.success("Payment initialized successfully!", {
@@ -170,23 +164,10 @@ function PricingPage() {
         window.location.href = data.data.authorization_url;
       }
     } catch (error) {
-      // toast.success(error.message, {
-      //   delay: 3000,
-      //   position: "top-right",
-      // });
-      // Swal.fire({
-      //   timer: 3000,
-      //   text: error.message,
-      //   toast: true,
-      //   position: "top-right",
-      //   icon: "error",
-      //   showConfirmButton: false,
-      //   timerProgressBar: true,
-      // });
-      // if (error.message) {
-      //   handleClose();
-      //   setLoading(false);
-      // }
+      const axiosError = error as AxiosError;
+      const formattedError = formatError(axiosError);
+      toast.error(formattedError.response as ToastContent);
+      handleClose();
     } finally {
       setLoading(false);
     }
@@ -249,11 +230,11 @@ function PricingPage() {
             </div>
           </div>
           <ModalComp
+            loading={loading}
             open={pay}
             onClose={() => setPay(false)}
             onSave={() => {
               payNow();
-              setPay(false);
             }}
             saveText="Continue"
             header="Payment">
@@ -266,7 +247,6 @@ function PricingPage() {
             open={show}
             onClose={() => setShow(false)}
             onSave={() => {
-              payNow();
               setShow(false);
               setPay(true);
             }}
@@ -287,7 +267,6 @@ function PricingPage() {
                     type="radio"
                     name="billingCycle"
                     value="Monthly"
-                    defaultChecked
                     checked={input === "Monthly"}
                     onChange={(e) => {
                       setInput(e.target.value);

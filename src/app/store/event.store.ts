@@ -26,17 +26,17 @@ interface IProp {
   setLoading: (loading: boolean) => void;
   createEvent: (
     input: CreateEventFormInput,
-    displayImage: File | null
+    displayImage: File | null,
   ) => Promise<IEvent | boolean>;
   updateEvent: (
     input: UpdateEventFormInput,
-    displayImage?: File | null
+    displayImage?: File | null,
   ) => Promise<IEvent | boolean>;
   goLiveEvent: (eventId: string) => Promise<IEvent | boolean>;
   endStream: (eventId: string) => Promise<IEvent | boolean>;
   createBoard: (
     input: FormData,
-    eventId: string
+    eventId: string,
   ) => Promise<Iboard[] | boolean>;
   updateBoard: (input: FormData, board: Iboard) => Promise<Iboard | boolean>;
   deleteBoard: (board: Iboard) => Promise<boolean>;
@@ -57,7 +57,7 @@ export const useEventStore = create<IProp>((set) => ({
   setEvents: (events: IEvent[]) => set({ events }),
   createEvent: async (
     input: CreateEventFormInput,
-    displayImage: File | null
+    displayImage: File | null,
   ): Promise<IEvent | boolean> => {
     try {
       set({ loading: true });
@@ -86,7 +86,7 @@ export const useEventStore = create<IProp>((set) => ({
       formData.append("type", input.type || "");
       const { data } = await axiosApi.post<{ data: { event: IEvent } }>(
         "/events",
-        formData
+        formData,
       );
       set((state) => ({
         events: [data.data.event, ...state.events],
@@ -105,7 +105,7 @@ export const useEventStore = create<IProp>((set) => ({
   },
   updateEvent: async (
     input: UpdateEventFormInput,
-    displayImage?: File | null
+    displayImage?: File | null,
   ): Promise<IEvent | boolean> => {
     try {
       set({ loading: true });
@@ -124,7 +124,7 @@ export const useEventStore = create<IProp>((set) => ({
         }
         formData.append(
           "featuredEvent",
-          input.featuredEvent ? "true" : "false"
+          input.featuredEvent ? "true" : "false",
         );
         formData.append("location", JSON.stringify(input.location));
         if (input.password) {
@@ -135,7 +135,7 @@ export const useEventStore = create<IProp>((set) => ({
         formData.append("displayImage", displayImage);
         const { data } = await axiosApi.patch<{ data: { event: IEvent } }>(
           `/events/publish/${input._id}`,
-          formData
+          formData,
         );
         set((state) => ({
           events: [data.data.event, ...state.events],
@@ -146,7 +146,7 @@ export const useEventStore = create<IProp>((set) => ({
       } else {
         const { data } = await axiosApi.patch<{ data: { event: IEvent } }>(
           `/events/publish/${input._id}`,
-          input
+          input,
         );
         set((state) => ({
           events: [data.data.event, ...state.events],
@@ -200,7 +200,9 @@ export const useEventStore = create<IProp>((set) => ({
     } catch (error) {
       const axiosError = error as AxiosError;
       const formattedError = formatError(axiosError);
-      toast.error(formattedError.message as ToastContent);
+      toast.error(
+        "To end this stream, please stop the stream on your broadcasting software",
+      );
       throw error;
     } finally {
       set({ loading: false });
@@ -209,13 +211,13 @@ export const useEventStore = create<IProp>((set) => ({
 
   createBoard: async (
     input: FormData,
-    eventId: string
+    eventId: string,
   ): Promise<Iboard[] | boolean> => {
     try {
       set({ loading: true });
       const { data } = await axiosApi.post<{ board: Iboard[] }>(
         `/events/${eventId}/boards`,
-        input
+        input,
       );
       set((state) => ({
         boards: [...state.boards, ...data.board],
@@ -232,17 +234,17 @@ export const useEventStore = create<IProp>((set) => ({
   },
   updateBoard: async (
     input: FormData,
-    board: Iboard
+    board: Iboard,
   ): Promise<Iboard | boolean> => {
     try {
       set({ loading: true });
       const { data } = await axiosApi.put<{ data: Iboard }>(
         `/events/boards/update/${board?._id}`,
-        input
+        input,
       );
       set((state) => ({
         boards: state.boards.map((b) =>
-          b._id === board._id ? { ...b, ...data.data } : b
+          b._id === board._id ? { ...b, ...data.data } : b,
         ),
       }));
       toast.success("Board updated successfully");

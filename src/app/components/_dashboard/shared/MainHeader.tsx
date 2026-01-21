@@ -80,7 +80,7 @@ const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex min-w-0 md:gap-x-4 cursor-pointer">
+            <button className="flex min-w-0 md:gap-x-4 outline-none cursor-pointer">
               <div className="flex items-center  text-foreground justify-center h-10 w-10 rounded-full">
                 <img
                   src={auth?.profilePhotoUrl || "/images/g2.jpg"}
@@ -97,7 +97,7 @@ const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
                 </p>
               </div>
               <span className="sr-only">Toggle user menu</span>
-            </div>
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"

@@ -85,7 +85,7 @@ const AuthenticationForm = () => {
         <div className="flex justify-center mb-6">
           <Link href="/" className="text-primary link font-semibold ">
             <img
-              src="/images/logo-f.png"
+              src="/svgs/Fero_logo_dark.svg"
               alt="Fero Events Logo"
               className="h-[70px] object-cover"
             />

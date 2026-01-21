@@ -40,6 +40,8 @@ import {
 import ModalComp from "../ModalComp";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
+import { Card, CardContent } from "@/components/ui/card";
+import { PhotoProvider, PhotoView } from "react-photo-view";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -84,7 +86,7 @@ const EventBoardComp = () => {
   });
   const [openItem, setOpenItem] = useState<string | undefined>(fields[0]?.id);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-
+  const [view, setView] = useState(false);
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -139,10 +141,12 @@ const EventBoardComp = () => {
       formData.append(`boards[${i}][content]`, board.content);
     });
 
-    createBoard(formData, event?._id || "");
-    form.reset();
-    fields.forEach((_, i) => remove(i));
-    toast.success("Boards created successfully");
+    const res = await createBoard(formData, event?._id || "");
+    if (res) {
+      form.reset();
+      fields.forEach((_, i) => remove(i));
+      toast.success("Boards created successfully");
+    }
   };
 
   const updateBoardData = async () => {
@@ -202,13 +206,14 @@ const EventBoardComp = () => {
     <div>
       {fields.length === 0 && boards.length === 0 && (
         <div className="w-full flex flex-col items-center mt-10">
-          <button
+          <Button
+            variant={"outline"}
             onClick={addBoard}
-            className="flex items-center rounded-lg bg-transparent border-white border px-3 h-10 gap-2">
+            className="cursor-pointer">
             <Plus />
-            <span className="text-white">Add Board</span>
-          </button>
-          <p className="text-gray-400 text-center w-[70%] mt-3 text-sm">
+            <span className="">Add Board</span>
+          </Button>
+          <p className="text-foreground text-center w-[70%] mt-3 text-sm">
             Got materials for your event? Upload them here—slides, guides,
             links—and keep your audience engaged and informed.
           </p>
@@ -218,12 +223,13 @@ const EventBoardComp = () => {
       {boards.length > 0 && fields.length === 0 && (
         <div className="mt-6 space-y-4">
           <div className="flex justify-end">
-            <button
+            <Button
+              variant={"outline"}
               onClick={addBoard}
-              className="flex items-center rounded-lg bg-transparent border-white border px-3 h-10 gap-2">
+              className="cursor-pointer">
               <Plus />
-              <span className="text-white">Add Board</span>
-            </button>
+              <span className="">Add Board</span>
+            </Button>
           </div>
           <ModalComp
             open={openDeleteModal}
@@ -310,7 +316,7 @@ const EventBoardComp = () => {
                 key={board._id}
                 className="border-none hover:border-none">
                 <AccordionTrigger className="cursor-pointer hover:no-underline [&>svg]:hidden pb-4 pt-2 px-2">
-                  <div className="flex justify-between w-full">
+                  <Button className="flex py-8   bg-transparent hover:bg-transparent outline-none justify-between w-full">
                     <div className="flex items-center gap-3">
                       <img
                         className="w-12 h-12 rounded-full object-center"
@@ -363,7 +369,7 @@ const EventBoardComp = () => {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
+                  </Button>
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-4 text-balance">
                   {board.type === "note" && (
@@ -375,15 +381,11 @@ const EventBoardComp = () => {
                   {board.type === "document" && (
                     <div className="flex flex-col gap-3 justify-between items-center">
                       <div className="flex items-center gap-6">
-                        <a
-                          href={board.content}
-                          download={board.name}
-                          title="view document"
-                          target="_blank"
-                          rel="noopener"
-                          className="text-blue-400 hover:underline">
-                          View Document
-                        </a>
+                        <PhotoProvider>
+                          <PhotoView src={board.content}>
+                            <div className="cursor-pointer">View Document</div>
+                          </PhotoView>
+                        </PhotoProvider>
                         <Button
                           variant={"ghost"}
                           onClick={() =>
@@ -394,10 +396,11 @@ const EventBoardComp = () => {
                           Download
                         </Button>
                       </div>
+
                       <img
                         src={board.content}
-                        alt={board.name}
-                        className="h-30 w-full object-cover"
+                        alt=""
+                        className="cursor-pointer rounded-md object-cover h-40 md:w-80 w-full"
                       />
                     </div>
                   )}
@@ -423,8 +426,9 @@ const EventBoardComp = () => {
                 value={field.id}
                 key={field.id}
                 className="border-none hover:border-none">
-                <AccordionTrigger className="cursor-pointer hover:no-underline  pb-4 pt-2 px-2">
-                  {field.id.slice(0, 3)}
+                <AccordionTrigger
+                  className={`${type ? "flex justify-between items-center" : "flex justify-end"} cursor-pointer hover:no-underline  pb-4 pt-2 px-2`}>
+                  {type}
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-4 text-balance">
                   {!type && (
@@ -436,10 +440,10 @@ const EventBoardComp = () => {
                           onClick={() => {
                             handleTypeSelect(index, "note");
                           }}
-                          className="w-full px-3 py-1 rounded bg-gray-700">
+                          className="w-full px-3 text-white py-1 rounded bg-gray-700">
                           <Plus /> Add Text
                         </Button>
-                        <small className="text-center text-gray-400 w-40">
+                        <small className="text-center text-foreground w-40">
                           Type in text such as announcement, notice, and more.
                         </small>
                       </div>
@@ -449,10 +453,10 @@ const EventBoardComp = () => {
                           type="button"
                           variant="outline"
                           onClick={() => handleTypeSelect(index, "document")}
-                          className="w-full px-3 py-1 rounded bg-gray-700">
+                          className="w-full px-3 py-1 rounded text-white bg-gray-700">
                           <Paperclip /> Attach File
                         </Button>
-                        <small className="text-center text-gray-400 w-40">
+                        <small className="text-center text-foreground w-40">
                           Upload slides, documents, event programs, and more.
                         </small>
                       </div>
@@ -480,10 +484,10 @@ const EventBoardComp = () => {
                         </button>
                       </div>
                       <div>
-                        <label className="text-sm text-gray-300">Title</label>
+                        <label className="text-sm text-foreground">Title</label>
                         <input
                           {...register(`boards.${index}.name`)}
-                          className="w-full mt-1 bg-gray-900 border border-gray-700 rounded p-2"
+                          className="w-full mt-1 bg-background border border-gray-700 rounded p-2"
                           placeholder="Board title"
                         />
                       </div>
@@ -493,7 +497,7 @@ const EventBoardComp = () => {
                         control={control}
                         render={({ field }) => (
                           <div className="">
-                            <label className="text-sm text-gray-300">
+                            <label className="text-sm text-foreground">
                               Text
                             </label>
                             <ReactQuill
@@ -531,15 +535,15 @@ const EventBoardComp = () => {
                         </button>
                       </div>
                       <div>
-                        <label className="text-sm text-gray-300">Title</label>
+                        <label className="text-sm text-foreground">Title</label>
                         <input
                           {...register(`boards.${index}.name`)}
-                          className="w-full mt-1 bg-gray-900 border border-gray-700 rounded p-2"
+                          className="w-full mt-1 bg-background border border-gray-700 rounded p-2"
                           placeholder="Board title"
                         />
                       </div>
                       <div>
-                        <label className="text-sm text-gray-300">
+                        <label className="text-sm text-foreground">
                           Upload file
                         </label>
                         <Input
@@ -547,7 +551,7 @@ const EventBoardComp = () => {
                           onChange={(e) =>
                             setValue(
                               `boards.${index}.content`,
-                              e.target.files?.[0] || null
+                              e.target.files?.[0] || null,
                             )
                           }
                           className="mt-2"

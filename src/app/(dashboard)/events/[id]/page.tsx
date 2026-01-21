@@ -102,7 +102,7 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
         <Button
           size={"sm"}
           variant={"outline"}
-          onClick={() => router.back()}
+          onClick={() => router.push("/events")}
           className="text-foreground font-semibold cursor-pointer">
           <ArrowLeft /> <span>Back</span>
         </Button>

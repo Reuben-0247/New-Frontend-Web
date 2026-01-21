@@ -119,26 +119,38 @@ const StreamPage = () => {
     setOpenModal(false);
   };
   useEffect(() => {
-    if (!streamData?.castrStreamId) return;
+    const castrId = streamData?.castrStreamId;
+    if (castrId) {
+      return;
+    }
+    let cancelled = false;
     const getStreamStats = async () => {
-      const castrId = streamData?.castrStreamId || event?.castrStreamId;
       try {
         const { data } = await axiosApi.get<{ response: IStreamStats }>(
           `/stream/castr/${castrId}/stats`,
         );
         // console.log(data.response);
-        setStreamStats(data.response);
+        if (!cancelled) {
+          setStreamStats(data.response);
+        }
         //  setStats(response?.data?.response);
       } catch (error) {
-        console.error("Error fetching stream stats:", error);
+        const axiosError = error as AxiosError;
+        if (!cancelled) {
+          console.debug("Stats fetch failed, retrying...");
+        }
+        if (axiosError.response?.status !== 404) {
+          console.warn("Stream stats unavailable");
+        }
       }
     };
+    getStreamStats();
+    const interval = setInterval(getStreamStats, 5000);
 
-    const interval = setInterval(() => {
-      getStreamStats();
-    }, 5000);
-
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [streamData?.castrStreamId, event?.castrStreamId]);
 
   useEffect(() => {
@@ -223,7 +235,7 @@ const StreamPage = () => {
       <div className="flex  justify-between">
         <div>
           <Button
-            onClick={() => router.back()}
+            onClick={() => router.push(`/events/${event?._id}`)}
             size={"sm"}
             variant={"outline"}
             className="text-foreground font-semibold cursor-pointer">
@@ -325,12 +337,12 @@ const StreamPage = () => {
             <div className="flex">
               {videoSrcData.map((src) => (
                 <p
-                  className={`py-2 md:px-4 px-2 flex items-center md:gap-2 gap-1 font-bold cursor-pointer ${
+                  className={`py-2 md:px-4 px-2 text-white flex items-center md:gap-2 gap-1 font-bold cursor-pointer ${
                     videoSrc === src.label ? "bg-[#232e4e] rounded-md" : ""
                   }`}
                   key={src.label}
                   onClick={() => setVideoSrc(src.label)}>
-                  <span>{src.icon}</span> {src.label}
+                  <span className="text-white">{src.icon}</span> {src.label}
                 </p>
               ))}
             </div>
@@ -343,7 +355,7 @@ const StreamPage = () => {
                   disabled={loadingT}
                   onChange={enableCloudRecord}
                 />
-                <div className="w-8 h-[19px] border-[#ccc] border-2 peer-focus:outline-none peer-focus:ring-2 peer-focus:bg-[#0f1525] rounded-full peer peer-checked:bg-[#151e37] p-1 transition-all duration-300"></div>
+                <div className="w-8 h-[19px] border-[#0062FF] peer-checked:border-[#cc0000] border-2 peer-focus:outline-none peer-focus:ring-2 peer-focus:bg-[#0f1525] rounded-full peer peer-checked:bg-[#cc0000] p-1 transition-all duration-300"></div>
                 <div className="absolute left-[3px] top-0.4 bg-[#FFFFFF] w-[13px] h-[13px] rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
               </label>
               <small className="text-white">Recording</small>

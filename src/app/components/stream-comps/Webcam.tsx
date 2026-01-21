@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import AgoraRTC, {
+import type {
   IAgoraRTCClient,
   ICameraVideoTrack,
   IMicrophoneAudioTrack,
@@ -22,16 +23,18 @@ import axiosApi from "@/lib/axios";
 //   };
 // }
 
-const client: IAgoraRTCClient = AgoraRTC.createClient({
-  mode: "live",
-  codec: "vp8",
-});
+// const client: IAgoraRTCClient = AgoraRTC.createClient({
+//   mode: "live",
+//   codec: "vp8",
+// });
 
 const APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID as string;
 const UID: number | null = null;
 
 const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
   const localVideoRef = useRef<HTMLDivElement | null>(null);
+  const [AgoraRTC, setAgoraRTC] = useState<any>(null);
+  const [client, setClient] = useState<IAgoraRTCClient | null>(null);
   //   const token = Cookies.get(TOKEN_NAME);
   const [joined, setJoined] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,7 +43,20 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
 
   const [micTrack, setMicTrack] = useState<IMicrophoneAudioTrack | null>(null);
   const [camTrack, setCamTrack] = useState<ICameraVideoTrack | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
+    import("agora-rtc-sdk-ng").then((mod) => {
+      setAgoraRTC(mod.default);
+
+      const rtcClient = mod.default.createClient({
+        mode: "live",
+        codec: "vp8",
+      });
+
+      setClient(rtcClient);
+    });
+  }, []);
   const getStreamStats = async () => {
     try {
       const { data: response } = await axiosApi.patch(
@@ -60,6 +76,7 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
   };
 
   const joinAsHost = async () => {
+    if (!AgoraRTC || !client) return;
     if (!APP_ID) {
       toast.warn("Agora App ID missing");
       return;
@@ -78,8 +95,8 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
       }
       toast.success(resp.data?.message);
 
-      await client.setClientRole("host");
-      await client.join(
+      await client?.setClientRole("host");
+      await client?.join(
         APP_ID,
         data?.channelName || "Fero Event",
         data?.token || null,
@@ -92,7 +109,7 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
       setCamTrack(cam);
 
       cam.play(localVideoRef.current!);
-      await client.publish([mic, cam]);
+      await client?.publish([mic, cam]);
 
       setJoined(true);
     } catch (error) {
@@ -110,7 +127,7 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
       camTrack?.stop();
       camTrack?.close();
 
-      await client.leave();
+      await client?.leave();
       setJoined(false);
     } catch (error) {
       console.error("Leave error:", error);

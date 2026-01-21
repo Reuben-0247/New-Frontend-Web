@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   CalendarCheck,
@@ -13,12 +13,13 @@ import {
   Medal,
   MonitorPlay,
   Settings,
+  Tv,
   User,
 } from "lucide-react";
 import { BiChevronRight, BiChevronLeft } from "react-icons/bi";
 import { HiOutlineXMark } from "react-icons/hi2";
 import Cookies from "js-cookie";
-import { TOKEN_NAME } from "@/utils/constant";
+import { TOKEN_NAME, USER_ID } from "@/utils/constant";
 import { useMounted } from "@/app/hooks/useOnmount";
 import { useThemeStore } from "@/app/store/theme.store";
 
@@ -36,8 +37,17 @@ const SideBar: React.FC<{
   collapsAside: () => void;
 }> = ({ showAside, toggleAside, collapsAside, collapse }) => {
   const mounted = useMounted();
+  const router = useRouter();
   const { theme } = useThemeStore();
+  const logout = () => {
+    Cookies.remove(TOKEN_NAME);
+    Cookies.remove(USER_ID);
+    // Cookies.remove(ORG_ID);
+    // Cookies.remove(ROLE);
+    // window.location.href = "/login";
 
+    router.push("/login");
+  };
   const pathname = usePathname();
   const token = Cookies.get(TOKEN_NAME);
 
@@ -100,6 +110,19 @@ const SideBar: React.FC<{
         />
       ),
       href: "/pricing",
+      show: !!token,
+    },
+    {
+      label: "Live to VOD",
+      icon: (
+        <Tv
+          className={`text-[#171717] dark:text-primary ${
+            pathname.startsWith(`/live-vod`) && "text-primary"
+          }`}
+        />
+      ),
+      href: `/live-vod`,
+
       show: !!token,
     },
     {
@@ -243,7 +266,10 @@ const SideBar: React.FC<{
               </div>
               <div
                 className={`${collapse ? "px-1" : "px-6"} mt-4 pt-4 border-t `}>
-                <Button variant="outline" className="w-full cursor-pointer">
+                <Button
+                  onClick={logout}
+                  variant="outline"
+                  className="w-full cursor-pointer">
                   <LogOut className="text-red-500" />
                   <span className={`${collapse ? "hidden" : "inline"} `}>
                     Log out

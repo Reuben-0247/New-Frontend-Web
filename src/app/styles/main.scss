@@ -1,4 +1,6 @@
-// @import "./dashboard.scss";
+@use "react-photo-view/dist/react-photo-view.css";
+
+@use "./reciept-style.scss";
 
 @media (max-width: 768px) {
   .aside {
