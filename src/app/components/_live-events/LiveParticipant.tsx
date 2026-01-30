@@ -39,7 +39,9 @@ const LiveParticipant: React.FC<{ eventId: string }> = ({ eventId }) => {
 
   if (!participants?.length) {
     return (
-      <p className="text-gray-400 text-center">No participants available.</p>
+      <p className="text-gray-400 text-center h-[40vh]">
+        No participants available.
+      </p>
     );
   }
 

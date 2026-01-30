@@ -119,10 +119,10 @@ const LivePage: React.FC<{ params: Promise<{ id: string }> }> = ({
           <p className="font-bold text-2xl text-foreground">{event?.title}</p>
         </div>
         <div className="md:flex w-full gap-4 mt-6">
-          <div className="md:w-[70%] w-full h-auto md:h-[50vh] bg-black overflow-hidden">
+          <div className="md:w-[60%] w-full h-auto md:h-[50vh] bg-black overflow-hidden">
             <LiveVideo streamData={streamData} event={event} />
           </div>
-          <div className=" md:w-[30%] w-full mt-8 md:mt-0 bg-[#151E37] rounded-lg border-gray-700  md:p-2 h-full shrink-0 ">
+          <div className=" md:w-[40%] w-full mt-8 md:mt-0 bg-[#151E37] rounded-lg border-gray-700  md:p-2 h-full shrink-0 ">
             <div className="tabs flex justify-between bg-[#000826] md:gap-2  md:p-2  w-full  overflow-x-auto ">
               {tabs.map((tab) => (
                 <button

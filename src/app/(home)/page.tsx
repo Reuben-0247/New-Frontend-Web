@@ -6,17 +6,29 @@ import ImageView from "../components/_web/ImageView";
 import Header from "@/app/components/Header";
 import { HomeHero } from "../components/_web/Hero";
 import { PlayImg } from "../components/_web/PlayTumb";
+import axiosApi from "@/lib/axios";
+import { IEvent } from "../interfaces/event.interface";
+import { ICategory } from "../interfaces/category.interface";
 
-export default function Home() {
+export default async function Home() {
+  const { data } = await axiosApi.get<{ data: { events: IEvent[] } }>(
+    "/events",
+  );
+  const events = data?.data?.events;
+
+  const { data: cats } = await axiosApi.get<{
+    data: { categories: ICategory[] };
+  }>("/categories");
+
   return (
     <div className="">
       <div className="hero relative">
-        <div className=" -z-5 img-box absolute -top-40 w-full right-0 h-140 bg-[url('/images/Pattern.png')] bg-cover bg-center"></div>
+        <div className="-z-5 img-box absolute -top-40 w-full right-0 h-140 bg-[url('/images/Pattern.png')] bg-cover bg-center"></div>
         <Header />
         <HomeHero />
       </div>
       <PlayImg />
-      <HomePageEvents />
+      <HomePageEvents events={events} cats={cats?.data?.categories} />
       <Features />
       <ImageView />
       <section id="trustPilot">

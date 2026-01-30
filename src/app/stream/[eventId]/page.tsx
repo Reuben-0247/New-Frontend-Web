@@ -120,7 +120,7 @@ const StreamPage = () => {
   };
   useEffect(() => {
     const castrId = streamData?.castrStreamId;
-    if (castrId) {
+    if (!castrId) {
       return;
     }
     let cancelled = false;
@@ -243,7 +243,7 @@ const StreamPage = () => {
           </Button>
           {/* <p className="mt-4 text-2xl font-bold text-foreground">Title</p> */}
         </div>
-        <p className="font-bold text-2xl text-foreground">Stream Setup</p>
+        <p className="font-bold text-2xl text-foreground">{event?.title}</p>
       </div>
 
       <div className="md:flex  gap-4 mt-8">

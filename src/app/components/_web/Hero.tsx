@@ -48,7 +48,7 @@ export const HomeHero = () => {
             transition={{ duration: 0.3, ease: "easeOut" }}
             viewport={{ once: false, amount: 0.4 }}>
             <Link
-              href={"/create-event"}
+              href={"/login"}
               className="bg-primary  text-background link font-semibold flex justify-center items-center h-full w-[154px]  rounded-lg">
               Create Event
             </Link>

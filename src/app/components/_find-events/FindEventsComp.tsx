@@ -1,13 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import {
-  Calendar,
-  Forward,
-  Radio,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react";
+import { Forward, Radio, Search, SlidersHorizontal } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { IEvent } from "@/app/interfaces/event.interface";
 import Link from "next/link";
@@ -102,7 +96,7 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                 return (
                   <div
                     key={eventId}
-                    className="rounded-xl cursor-pointer shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.02] h-fit w-full border  border-gray-200 dark:border-gray-700">
+                    className="rounded-xl cursor-pointer shadow-lg bg-background overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.02] h-fit w-full border  border-gray-200 dark:border-gray-700">
                     <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
                       <img
                         src={
@@ -184,10 +178,10 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                               {" "}
                               Share <Forward />
                               {/* <img
-                                      src="/share.png"
-                                      className="dark:brightness-200"
-                                      alt=""
-                                    /> */}
+                                        src="/share.png"
+                                        className="dark:brightness-200"
+                                        alt=""
+                                      /> */}
                             </p>
                           </button>
                         </div>

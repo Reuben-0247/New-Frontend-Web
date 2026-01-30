@@ -10,7 +10,7 @@ import Cookies from "js-cookie";
 // import { formatTime } from "@/utils/helper";
 import { useChat } from "@/app/hooks/useChat";
 import styled from "styled-components";
-import { Send } from "lucide-react";
+import { SendHorizonal } from "lucide-react";
 import ChatReceived from "../stream-comps/ChatReceived";
 import ChatSend from "../stream-comps/ChatSend";
 import ModalComp from "../ModalComp";
@@ -110,7 +110,7 @@ const LiveComment: React.FC<{ eventId: string }> = ({ eventId }) => {
           ) : (
             <div
               ref={scrollRef}
-              className="min-h-[40vh] h-[420px] overflow-auto px-4 py-2 space-y-4 chat-box">
+              className="min-h-[40vh] h-[420px] overflow-auto px-2 py-2 space-y-1 chat-box">
               {comments.map((c) => (
                 <div key={c._id}>
                   {c?.creator?._id !== auth?._id ? (
@@ -137,7 +137,7 @@ const LiveComment: React.FC<{ eventId: string }> = ({ eventId }) => {
                     ref={buttonRef}
                     type="button"
                     variant="ghost"
-                    className="cursor-pointer"
+                    className="cursor-pointer text-2xl"
                     onClick={() => setShowPicker((p) => !p)}>
                     😊
                   </Button>
@@ -169,12 +169,12 @@ const LiveComment: React.FC<{ eventId: string }> = ({ eventId }) => {
                   placeholder="Type a message..."
                 />
 
-                <Button
-                  variant={"ghost"}
-                  className="cursor-pointer"
+                <div
+                  // variant={"ghost"}
+                  className="cursor-pointer p-1"
                   onClick={handleSend}>
-                  <Send />
-                </Button>
+                  <SendHorizonal size={28} />
+                </div>
               </div>
             </form>
           </div>

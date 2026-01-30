@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ToastContent, toast } from "react-toastify";
 // import Cookies from "js-cookie";
-import axiosApi from "@/lib/axios";
+// import axiosApi from "@/lib/axios";
 import { AxiosError } from "axios";
 
 import { Button } from "@/components/ui/button";
@@ -20,13 +20,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { formatError } from "@/utils/helper";
-import Cookies from "js-cookie";
-import { TOKEN_NAME } from "@/utils/constant";
+// import Cookies from "js-cookie";
+// import { TOKEN_NAME } from "@/utils/constant";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import SocialAuth from "./SocialAuth";
 import { cn } from "@/lib/utils";
+import axiosApi from "@/lib/axios";
 const formSchema = z
   .object({
     firstName: z.string().min(1, "First name is required"),
@@ -74,14 +75,16 @@ const SignupComp = () => {
       password: values.password,
     };
 
-    console.log("Final Payload:", payload);
+    // console.log("Final Payload:", payload);
 
     try {
       // send payload, not values
-      //   const { data } = await axiosApi.post("/auth/signup", payload);
-      router.push("/signup/authentication");
+      const { data } = await axiosApi.post("/auth/signup", payload);
+      if (data) {
+        router.push("/signup/authentication");
 
-      toast.success("Account created successfully!");
+        toast.success("Account created successfully!");
+      }
     } catch (error) {
       const axiosError = error as AxiosError;
       const formattedError = formatError(axiosError);
@@ -109,11 +112,11 @@ const SignupComp = () => {
                   <FormControl>
                     <Input
                       type="text"
-                      placeholder="John"
+                      placeholder="Your first name"
                       {...field}
                       className={cn(
                         "text-foreground border-border! active:border-primary! focus:border-primary!",
-                        form.formState.errors.firstName && "border-red-500!"
+                        form.formState.errors.firstName && "border-red-500!",
                       )}
                     />
                   </FormControl>
@@ -134,11 +137,11 @@ const SignupComp = () => {
                   <FormControl>
                     <Input
                       type="text"
-                      placeholder="you@example.com"
+                      placeholder="Your last name"
                       {...field}
                       className={cn(
                         "text-foreground border-border! active:border-primary! focus:border-primary!",
-                        form.formState.errors.lastName && "border-red-500!"
+                        form.formState.errors.lastName && "border-red-500!",
                       )}
                     />
                   </FormControl>
@@ -164,7 +167,7 @@ const SignupComp = () => {
                     {...field}
                     className={cn(
                       "text-foreground border-border! active:border-primary! focus:border-primary!",
-                      form.formState.errors.email && "border-red-500!"
+                      form.formState.errors.email && "border-red-500!",
                     )}
                   />
                 </FormControl>
@@ -187,7 +190,7 @@ const SignupComp = () => {
                         {...field}
                         className={cn(
                           "text-foreground border-border! active:border-primary! focus:border-primary!",
-                          form.formState.errors.password && "border-red-500!"
+                          form.formState.errors.password && "border-red-500!",
                         )}
                       />
                       <button
@@ -231,7 +234,7 @@ const SignupComp = () => {
                         className={cn(
                           "text-foreground border-border! active:border-primary! focus:border-primary!",
                           form.formState.errors.confirmPassword &&
-                            "border-red-500!"
+                            "border-red-500!",
                         )}
                       />
                       <button

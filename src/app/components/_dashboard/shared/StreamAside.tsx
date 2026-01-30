@@ -1,18 +1,19 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
-  LogOut,
+  // LogOut,
   MapPinHouse,
   ScissorsLineDashed,
-  Settings,
-  Tv,
+  // Settings,
+  // Tv,
   TvMinimalPlay,
 } from "lucide-react";
 import { BiChevronRight, BiChevronLeft } from "react-icons/bi";
@@ -83,19 +84,19 @@ const StreamAside: React.FC<{
       id: "",
       show: true,
     },
-    {
-      label: "Settings",
-      icon: (
-        <Settings
-          className={`text-[#171717] dark:text-primary ${
-            pathname.startsWith(`/stream/${param}/settings`) && "text-primary"
-          }`}
-        />
-      ),
-      href: `/stream/${param}/settings`,
-      id: "tour1-step5",
-      show: true,
-    },
+    // {
+    //   label: "Settings",
+    //   icon: (
+    //     <Settings
+    //       className={`text-[#171717] dark:text-primary ${
+    //         pathname.startsWith(`/stream/${param}/settings`) && "text-primary"
+    //       }`}
+    //     />
+    //   ),
+    //   href: `/stream/${param}/settings`,
+    //   id: "tour1-step5",
+    //   show: true,
+    // },
   ];
 
   const isActive = (href: string) => {
@@ -118,37 +119,45 @@ const StreamAside: React.FC<{
           {theme === "dark" ? (
             <Link href="/" className="flex items-center gap-2 font-semibold">
               {collapse ? (
-                <Image
-                  src={`/svgs/FERO_LOGO_light.svg`}
-                  alt="fero's logo"
-                  width={51}
-                  height={45}
-                />
+                <div className="w-max">
+                  <img
+                    src={`/svgs/FERO_LOGO_light.svg`}
+                    alt="fero's logo"
+                    width={51}
+                    height={45}
+                  />
+                </div>
               ) : (
-                <Image
-                  src={`/svgs/FERO_LOGO_light.svg`}
-                  width={110}
-                  height={30}
-                  alt="fero's logo"
-                />
+                <div className="w-max">
+                  <img
+                    src={`/svgs/FERO_LOGO_light.svg`}
+                    width={110}
+                    height={30}
+                    alt="fero's logo"
+                  />
+                </div>
               )}
             </Link>
           ) : (
             <Link href="/" className="flex items-center gap-2 font-semibold">
               {collapse ? (
-                <Image
-                  src={`/svgs/Fero_logo_dark.svg`}
-                  alt="fero's logo"
-                  width={51}
-                  height={45}
-                />
+                <div className="w-max">
+                  <img
+                    src={`/svgs/Fero_logo_dark.svg`}
+                    alt="fero's logo"
+                    width={51}
+                    height={45}
+                  />
+                </div>
               ) : (
-                <Image
-                  src={`/svgs/Fero_logo_dark.svg`}
-                  width={110}
-                  height={30}
-                  alt="fero's logo"
-                />
+                <div className="w-max">
+                  <img
+                    src={`/svgs/Fero_logo_dark.svg`}
+                    width={110}
+                    height={30}
+                    alt="fero's logo"
+                  />
+                </div>
               )}
             </Link>
           )}

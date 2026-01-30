@@ -408,7 +408,7 @@ const CreateEventForm = () => {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
-                      type="text"
+                      // type="text"
                       placeholder="Enter password"
                       {...field}
                       disabled={watchRequirePassword === false}
