@@ -64,7 +64,7 @@ export const useChat = (eventId: string, userId?: string) => {
 
       try {
         const { data } = await axiosApi.get<{ data: { comments: IComment[] } }>(
-          `/events/${eventId}/comment?page=${p}&limit=${LIMIT}`
+          `/events/${eventId}/comment?page=${p}&limit=${LIMIT}`,
         );
 
         const fetched: IComment[] = data?.data?.comments || [];
@@ -85,7 +85,7 @@ export const useChat = (eventId: string, userId?: string) => {
         console.error(err);
       }
     },
-    [eventId, auth, setChats]
+    [eventId, auth, setChats],
   );
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export const useChat = (eventId: string, userId?: string) => {
       try {
         const { data } = await axiosApi.get<{
           data: { comments: IComment[] };
-        }>(`/events/${eventId}/comment?page=1&limit=${LIMIT}`);
+        }>(`/events/${eventId}/comment`);
 
         const fetched = data?.data?.comments ?? [];
         const normalized = fetched.map((c) => normalizeComment(c, auth));

@@ -12,6 +12,7 @@ import { useAuthStore } from "@/app/store/auth.store";
 import { useCategoryStore } from "@/app/store/category.store";
 import { useDestinationStore } from "@/app/store/destination.store";
 import { useEventStore } from "@/app/store/event.store";
+import { useThemeStore } from "@/app/store/theme.store";
 import axiosApi from "@/lib/axios";
 import { use, useEffect, useState } from "react";
 
@@ -27,6 +28,7 @@ const StreamLayout: React.FC<{
   const { setAuth } = useAuthStore();
   const { setEvents, setEvent, event, setStreamData } = useEventStore();
   const { setCategories } = useCategoryStore();
+  const theme = useThemeStore((state) => state.theme);
   const { setDestinations } = useDestinationStore();
   const toggleCollapse = () => {
     setCollapse(!collapse);
@@ -39,6 +41,14 @@ const StreamLayout: React.FC<{
     }
   };
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }, [theme]);
   useEffect(() => {
     setLoading(true);
     const getMe = async () => {
@@ -105,7 +115,7 @@ const StreamLayout: React.FC<{
   }, [setAuth, setEvents, setCategories, setEvent, eventId, setDestinations]);
 
   useEffect(() => {
-    if (!event?._id) return;
+    if (!event?.isLive) return;
     const getStream = async () => {
       try {
         const { data } = await axiosApi.get<IStreamData>(
@@ -119,7 +129,7 @@ const StreamLayout: React.FC<{
     if (event?._id) {
       getStream();
     }
-  }, [event?._id, setStreamData]);
+  }, [event?.isLive, event?._id, setStreamData]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">

@@ -1,8 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,8 @@ import {
   CalendarCheck,
   CircleDollarSign,
   LogOut,
-  Medal,
-  MonitorPlay,
+  // Medal,
+  // MonitorPlay,
   Settings,
   Tv,
   User,
@@ -76,30 +77,30 @@ const SideBar: React.FC<{
       href: "/events",
       show: !!token,
     },
-    {
-      label: "Go Live",
-      icon: (
-        <MonitorPlay
-          className={`text-[#171717] dark:text-primary ${
-            pathname.startsWith("/go-live") && "text-primary"
-          }`}
-        />
-      ),
-      href: "/go-live",
-      show: !!token,
-    },
-    {
-      label: "Fero points",
-      icon: (
-        <Medal
-          className={`text-[#171717] dark:text-primary ${
-            pathname.startsWith("/fero-points") && "text-primary"
-          }`}
-        />
-      ),
-      href: "/fero-points",
-      show: !!token,
-    },
+    // {
+    //   label: "Go Live",
+    //   icon: (
+    //     <MonitorPlay
+    //       className={`text-[#171717] dark:text-primary ${
+    //         pathname.startsWith("/go-live") && "text-primary"
+    //       }`}
+    //     />
+    //   ),
+    //   href: "/go-live",
+    //   show: !!token,
+    // },
+    // {
+    //   label: "Fero points",
+    //   icon: (
+    //     <Medal
+    //       className={`text-[#171717] dark:text-primary ${
+    //         pathname.startsWith("/fero-points") && "text-primary"
+    //       }`}
+    //     />
+    //   ),
+    //   href: "/fero-points",
+    //   show: !!token,
+    // },
     {
       label: "Pricing",
       icon: (
@@ -166,37 +167,45 @@ const SideBar: React.FC<{
           {theme === "dark" ? (
             <Link href="/" className="flex items-center gap-2 font-semibold">
               {collapse ? (
-                <Image
-                  src={`/svgs/FERO_LOGO_light.svg`}
-                  alt="fero's logo"
-                  width={51}
-                  height={45}
-                />
+                <div className="w-max">
+                  <img
+                    src={`/svgs/FERO_LOGO_light.svg`}
+                    alt="fero's logo"
+                    width={51}
+                    height={45}
+                  />
+                </div>
               ) : (
-                <Image
-                  src={`/svgs/FERO_LOGO_light.svg`}
-                  width={110}
-                  height={30}
-                  alt="fero's logo"
-                />
+                <div className="w-max">
+                  <img
+                    src={`/svgs/FERO_LOGO_light.svg`}
+                    width={110}
+                    height={30}
+                    alt="fero's logo"
+                  />
+                </div>
               )}
             </Link>
           ) : (
             <Link href="/" className="flex items-center gap-2 font-semibold">
               {collapse ? (
-                <Image
-                  src={`/svgs/Fero_logo_dark.svg`}
-                  alt="fero's logo"
-                  width={51}
-                  height={45}
-                />
+                <div className="w-max">
+                  <img
+                    src={`/svgs/Fero_logo_dark.svg`}
+                    alt="fero's logo"
+                    width={51}
+                    height={45}
+                  />
+                </div>
               ) : (
-                <Image
-                  src={`/svgs/Fero_logo_dark.svg`}
-                  width={110}
-                  height={30}
-                  alt="fero's logo"
-                />
+                <div className="w-max">
+                  <img
+                    src={`/svgs/Fero_logo_dark.svg`}
+                    width={110}
+                    height={30}
+                    alt="fero's logo"
+                  />
+                </div>
               )}
             </Link>
           )}
@@ -228,7 +237,7 @@ const SideBar: React.FC<{
             }  text-sm font-medium  flex-1 overflow-auto`}>
             <div
               className={`${
-                collapse ? "w-max" : ""
+                collapse ? "w-full" : ""
               } flex flex-col  justify-between h-full pb-4`}>
               <div className="grid gap-1 w-max ">
                 {navLinks
@@ -244,13 +253,13 @@ const SideBar: React.FC<{
                           : "hover:bg-hover hover:rounded"
                       } ${
                         collapse ? "py-1 px-2" : "py-2 px-6"
-                      }  flex items-center gap-4 capitalize  font-normal transition-all hoverable-link text-foreground`}>
+                      }  flex items-center gap-1 capitalize  font-normal transition-all hoverable-link text-foreground`}>
                       <span
                         className={`${
                           pathname.startsWith(item.href)
                             ? " bg-white text-primary"
                             : "bg-background"
-                        } p-2 rounded-xl`}>
+                        } p-1 rounded-sm`}>
                         {item?.icon}
                       </span>
                       <span

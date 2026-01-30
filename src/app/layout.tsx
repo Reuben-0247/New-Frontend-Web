@@ -33,6 +33,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+      const theme = localStorage.getItem("THEME");
+      if (theme === "dark") document.documentElement.classList.add("dark");
+    `,
+          }}
+        />
+      </head>
       <body className={`${nunitoSans.variable} antialiased`}>
         <NextTopLoader
           color="#0062ff"

@@ -9,7 +9,7 @@ const protectedRoutes = [
   /^\/pricing(\/.*)?$/,
   /^\/profile(\/.*)?$/,
   /^\/settings(\/.*)?$/,
-  /^\/find-events\/[^/]+$/,
+  // /^\/find-events\/[^/]+$/,
   // /^\/dvi(\/.*)?$/,
   // /^\/issues(\/.*)?$/,
   // /^\/organizations(\/.*)?$/,

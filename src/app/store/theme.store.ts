@@ -16,19 +16,17 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
       : "light",
 
   setTheme: (theme) => {
+    set({ theme });
     if (typeof window !== "undefined") {
-      document.documentElement.classList.toggle("dark", theme === "dark");
       localStorage.setItem(THEME, theme);
     }
-    set({ theme });
   },
 
   toggleTheme: () => {
     const nextTheme = get().theme === "light" ? "dark" : "light";
+    set({ theme: nextTheme });
     if (typeof window !== "undefined") {
-      document.documentElement.classList.toggle("dark", nextTheme === "dark");
       localStorage.setItem(THEME, nextTheme);
     }
-    set({ theme: nextTheme });
   },
 }));

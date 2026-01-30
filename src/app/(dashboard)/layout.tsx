@@ -14,6 +14,7 @@ import { useCategoryStore } from "../store/category.store";
 import { ICategory } from "../interfaces/category.interface";
 import Cookies from "js-cookie";
 import { TOKEN_NAME } from "@/utils/constant";
+import { useThemeStore } from "../store/theme.store";
 
 export default function DashboardLayout({
   children,
@@ -26,6 +27,7 @@ export default function DashboardLayout({
   const { setAuth } = useAuthStore();
   const { setEvents } = useEventStore();
   const { setCategories } = useCategoryStore();
+  const theme = useThemeStore((state) => state.theme);
   const token = Cookies.get(TOKEN_NAME);
   const toggleCollapse = () => {
     setCollapse(!collapse);
@@ -38,6 +40,14 @@ export default function DashboardLayout({
     }
   };
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }, [theme]);
   useEffect(() => {
     setLoading(true);
     const getMe = async () => {
@@ -98,7 +108,7 @@ export default function DashboardLayout({
         />
       )}
       <div className="flex-1 flex flex-col bg-dash-gray h-screen">
-        <MainHeader toggleAside={toggleAside} />
+        {token && <MainHeader toggleAside={toggleAside} />}
         <main className="overflow-y-scroll h-[92vh]">
           <div className=" py-6  container mx-auto md:px-6 px-2">
             {children}

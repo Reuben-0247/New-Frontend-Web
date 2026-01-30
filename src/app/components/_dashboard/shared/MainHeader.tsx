@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 // import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 import { useRouter } from "next/navigation";
 // import { Bell } from "lucide-react";
 import { FaRegUser } from "react-icons/fa6";
@@ -51,21 +51,25 @@ const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
           </span>
         </button>
         {theme === "dark" ? (
-          <Image
-            src={`/svgs/FERO_LOGO_light.svg`}
-            className="md:hidden"
-            width={100}
-            height={100}
-            alt="checkCITE logo"
-          />
+          <div className="w-max">
+            <img
+              src={`/svgs/FERO_LOGO_light.svg`}
+              className="md:hidden"
+              width={100}
+              height={100}
+              alt="checkCITE logo"
+            />
+          </div>
         ) : (
-          <Image
-            src={`/svgs/Fero_logo_dark.svg`}
-            className="md:hidden"
-            width={100}
-            height={100}
-            alt="checkCITE logo"
-          />
+          <div className="w-max">
+            <img
+              src={`/svgs/Fero_logo_dark.svg`}
+              className="md:hidden"
+              width={100}
+              height={100}
+              alt="checkCITE logo"
+            />
+          </div>
         )}
       </div>
       <div className="text-foreground md:block hidden font-bold ">

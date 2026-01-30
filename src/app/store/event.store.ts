@@ -32,7 +32,10 @@ interface IProp {
     input: UpdateEventFormInput,
     displayImage?: File | null,
   ) => Promise<IEvent | boolean>;
+
+  publishEvent: (id: string) => Promise<IEvent | boolean>;
   goLiveEvent: (eventId: string) => Promise<IEvent | boolean>;
+
   endStream: (eventId: string) => Promise<IEvent | boolean>;
   createBoard: (
     input: FormData,
@@ -164,6 +167,28 @@ export const useEventStore = create<IProp>((set) => ({
       set({ loading: false });
     }
   },
+
+  publishEvent: async (eventId: string): Promise<IEvent | boolean> => {
+    try {
+      set({ loading: true });
+      await axiosApi.patch(`/events/publish/${eventId}`, {
+        isPublished: true,
+      });
+      set((state) => ({
+        event: state.event
+          ? { ...state.event, isPublished: true }
+          : state.event,
+      }));
+      return true;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const formattedError = formatError(axiosError);
+      toast.error(formattedError.message as ToastContent);
+      throw error;
+    } finally {
+      set({ loading: false });
+    }
+  },
   goLiveEvent: async (eventId: string): Promise<IEvent | boolean> => {
     try {
       set({ loading: true });
@@ -184,10 +209,10 @@ export const useEventStore = create<IProp>((set) => ({
       set({ loading: false });
     }
   },
+
   endStream: async (eventId: string): Promise<IEvent | boolean> => {
     try {
       set({ loading: true });
-
       const { data } = await axiosApi.patch(`/stream/end-streaming`, {
         eventId: eventId,
         streamType: "castr",
@@ -198,11 +223,13 @@ export const useEventStore = create<IProp>((set) => ({
       }));
       return data;
     } catch (error) {
-      const axiosError = error as AxiosError;
-      const formattedError = formatError(axiosError);
-      toast.error(
-        "To end this stream, please stop the stream on your broadcasting software",
-      );
+      // const axiosError = error as AxiosError;
+      // const formattedError = formatError(axiosError);
+      if (error) {
+        toast.error(
+          "To end this stream, please stop the stream on your broadcasting software",
+        );
+      }
       throw error;
     } finally {
       set({ loading: false });

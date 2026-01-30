@@ -17,6 +17,7 @@ import {
   Lock,
   LockOpen,
   MapPin,
+  Play,
   Podcast,
   Users,
 } from "lucide-react";
@@ -32,13 +33,13 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const label = searchParams.get("label");
-  const { setEvent, event, events } = useEventStore();
+  const { setEvent, event, events, loading, publishEvent } = useEventStore();
   const { auth } = useAuthStore();
-  const [loading, setLoading] = useState(false);
-
+  const [loadingE, setLoadingE] = useState(false);
+  const [loadingS, setLoadingS] = useState<boolean>(false);
   useEffect(() => {
     async function fetchEvent() {
-      setLoading(true);
+      setLoadingE(true);
       try {
         const { data } = await axiosApi.get<{ data: { event: IEvent } }>(
           `/events/${id}`,
@@ -48,7 +49,7 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
       } catch (error) {
         console.log(error);
       } finally {
-        setLoading(false);
+        setLoadingE(false);
       }
     }
     if (!event || event._id !== id) {
@@ -58,7 +59,7 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
 
   const SaveEvent = async () => {
     try {
-      setLoading(true);
+      setLoadingS(true);
       const res = await axiosApi.patch("/events/saved/update", { id });
 
       if (res.status === 200 || res.status === 201) {
@@ -70,6 +71,8 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
       const axiosError = error as AxiosError;
       const formattedError = formatError(axiosError);
       toast.error(formattedError.message as ToastContent);
+    } finally {
+      setLoadingS(false);
     }
   };
   const shareEvent = () => {
@@ -88,7 +91,7 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
     }
   };
 
-  if (loading) {
+  if (loadingE) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Spinner />{" "}
@@ -121,6 +124,7 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
             <p className="font-bold text-2xl">{event?.title}</p>
             <div className="flex items-center gap-4">
               <Button
+                disabled={loadingS}
                 className="cursor-pointer"
                 variant={"ghost"}
                 onClick={SaveEvent}>
@@ -177,11 +181,10 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
             {event?.isPublished === false ? (
               <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">
                 <Button
-                  // onClick={() =>
-                  //   publishEvent(event, () => window.location.reload())
-                  // }
+                  disabled={loading}
+                  onClick={() => publishEvent(event?._id as string)}
                   className="cursor-pointer">
-                  Publish Event
+                  {loading ? "Publishing..." : "Publish Event"}
                 </Button>
                 <Button
                   variant={"outline"}
@@ -193,13 +196,26 @@ const SingleEvent: React.FC<{ params: Promise<{ id: string }> }> = ({
                 </Button>
               </div>
             ) : event?.isPublished === true ? (
-              <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">
-                <Link
-                  href={`/stream/${id}`}
-                  className="bg-primary px-4 py-2 flex items-center  gap-2 w-max text-center cursor-pointer rounded-md">
-                  <Podcast className="text-white" />{" "}
-                  <span className="text-white">Set Up Stream</span>
-                </Link>
+              <div>
+                {event.isLive ? (
+                  <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">
+                    <Link
+                      href={`/stream/${id}`}
+                      className="bg-primary px-4 py-2 flex items-center  gap-2 w-max text-center cursor-pointer rounded-md">
+                      <Play className="text-white" />{" "}
+                      <span className="text-white">Continue Stream</span>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">
+                    <Link
+                      href={`/stream/${id}`}
+                      className="bg-primary px-4 py-2 flex items-center  gap-2 w-max text-center cursor-pointer rounded-md">
+                      <Podcast className="text-white" />{" "}
+                      <span className="text-white">Set Up Stream</span>
+                    </Link>
+                  </div>
+                )}
               </div>
             ) : event?.requirePassword === false ? (
               <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">

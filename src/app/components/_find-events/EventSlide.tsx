@@ -3,6 +3,7 @@ import { IEvent } from "@/app/interfaces/event.interface";
 import React, { useRef } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import styled from "styled-components";
+import Link from "next/link";
 
 const EventSlide: React.FC<{ events: IEvent[] }> = ({ events }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -36,12 +37,15 @@ const EventSlide: React.FC<{ events: IEvent[] }> = ({ events }) => {
           role="list"
           aria-label="Scrollable list of events">
           {[...events, ...events].map((ev, idx) => (
-            <div key={`${ev.eventId}-${idx}`} className="card">
+            <Link
+              key={`${ev?._id}-${idx}`}
+              href={`/find-events/${ev?._id}`}
+              className="card">
+              {/* <div > */}
               <img
                 src={ev.displayImage || "https://via.placeholder.com/256x144"}
                 alt={ev.title}
               />
-
               <div className="content">
                 <h3>{ev.title}</h3>
                 <div className="meta">
@@ -52,7 +56,8 @@ const EventSlide: React.FC<{ events: IEvent[] }> = ({ events }) => {
                   <span>{ev.totalParticipants?.length} registered</span>
                 </div>
               </div>
-            </div>
+              {/* </div> */}
+            </Link>
           ))}
         </div>
 

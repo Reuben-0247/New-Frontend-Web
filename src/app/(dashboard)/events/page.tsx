@@ -293,7 +293,7 @@ const EventPage = () => {
                     return (
                       <div
                         key={eventId}
-                        className="rounded-xl  shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.01] h-fit  border  border-gray-200 dark:border-gray-700">
+                        className="rounded-xl  shadow-lg overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.01] h-fit  border bg-background  border-gray-200 dark:border-gray-700">
                         <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
                           <img
                             src={event.displayImage}

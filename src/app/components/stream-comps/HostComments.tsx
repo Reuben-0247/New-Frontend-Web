@@ -10,7 +10,7 @@ import ChatSend from "./ChatSend";
 // import { formatTime } from "@/utils/helper";
 import { useChat } from "@/app/hooks/useChat";
 import styled from "styled-components";
-import { Send } from "lucide-react";
+import { SendHorizonal } from "lucide-react";
 
 interface Props {
   eventId: string;
@@ -87,7 +87,7 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
         <CardContent className="p-0">
           <div
             ref={scrollRef}
-            className="min-h-[40vh] h-[420px] overflow-auto px-4 py-2 space-y-4 chat-box">
+            className="min-h-[40vh] h-[420px] overflow-auto px-1 py-2 chat-box">
             {comments.map((c) => (
               <div key={c._id}>
                 {c?.creator?._id !== auth?._id ? (
@@ -113,7 +113,7 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
                     ref={buttonRef}
                     type="button"
                     variant="ghost"
-                    className="cursor-pointer"
+                    className="cursor-pointer text-2xl"
                     onClick={() => setShowPicker((p) => !p)}>
                     😊
                   </Button>
@@ -144,12 +144,12 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
                   placeholder="Type a message..."
                 />
 
-                <Button
-                  variant={"ghost"}
-                  className="cursor-pointer"
+                <div
+                  // variant={"ghost"}
+                  className="cursor-pointer p-1"
                   onClick={handleSend}>
-                  <Send />
-                </Button>
+                  <SendHorizonal size={28} />
+                </div>
               </div>
             </form>
           </div>

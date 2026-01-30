@@ -7,7 +7,7 @@ import styled from "styled-components";
 const ChatReceived: React.FC<{ chat: IComment }> = ({ chat }) => {
   return (
     <Wrapper>
-      <div className="message-reply p-2">
+      <div className="message-reply p-1">
         <div className="flex gap-3">
           <div className="">
             <img
@@ -17,7 +17,10 @@ const ChatReceived: React.FC<{ chat: IComment }> = ({ chat }) => {
             />
           </div>
           <div className="flex flex-col  bg-[#011d4e] text-white p-2 reply">
-            <small className=" ">
+            <p className="text-[12px] font-bold text-primary">
+              {chat?.creator?.name?.split(" ").reverse()[0]}
+            </p>
+            <small className=" wrap-break-word max-w-[250px]  ">
               {chat?.content || "hhfhhf hfhfhfhf hfhfjjsi  "}
             </small>
             <p className="flex items-center ml-12 justify-end  text-gray-400 gap-2 text-xs ">

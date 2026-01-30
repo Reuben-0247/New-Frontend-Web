@@ -63,7 +63,7 @@ const SoftwareProp: React.FC<{
           onClick={() => setVOut("Source Setup")}>
           Source Setup
         </p>
-        <p
+        {/* <p
           className={`p-2 cursor-pointer ${
             vOut === "Playback" ? "border-b-2" : ""
           }`}
@@ -76,7 +76,7 @@ const SoftwareProp: React.FC<{
           }`}
           onClick={() => setVOut("Mornituring")}>
           Mornituring
-        </p>
+        </p> */}
       </div>
       {vOut === "Source Setup" ? (
         <div>
@@ -115,10 +115,10 @@ const SoftwareProp: React.FC<{
             </div>
           ) : (
             <div>
-              <div className="flex gap-6 text-white">
+              {/* <div className="flex gap-6 text-white">
                 <p className="border-b">RMTP</p>
                 <p>SRT</p>
-              </div>
+              </div> */}
               <div className="my-6 text-white">
                 <label>Stream Url</label>
                 <div className="relative mt-2 w-full  border p-2 rounded-lg bg-[#2e3c65]">

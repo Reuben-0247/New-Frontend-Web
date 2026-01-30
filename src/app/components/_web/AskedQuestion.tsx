@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React, { useState } from "react";
@@ -136,17 +137,37 @@ const FAQSection = () => {
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium text-foreground leading-tight mb-12 text-center">
           Frequently asked questions
         </h2>
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-6 mt-10">
+          <div className="">
+            {faqs.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                question={faq.question}
+                answer={faq.answer}
+                isOpen={openIndex === index}
+                toggleAccordion={() => handleToggle(index)}
+              />
+            ))}
+          </div>
 
-        <div className="">
-          {faqs.map((faq, index) => (
-            <AccordionItem
-              key={index}
-              question={faq.question}
-              answer={faq.answer}
-              isOpen={openIndex === index}
-              toggleAccordion={() => handleToggle(index)}
-            />
-          ))}
+          <div className="faq">
+            <h1 className="md:text-[140px] text-[100px] font-bold tracking-[5.68px] dark:text-primary dark:opacity-30  text-transparent [text-shadow:0_0_10px_rgba(0,0,0,0.25)] ">
+              FAQ's
+            </h1>
+            <div className="helar bg-[#8b8a8826] p-6">
+              <p className="mb-6">Want to Know More ?</p>
+              <p>
+                Follow <strong>FERO EVENT</strong> on all socials, subscribe to
+                our Channels, send a mail or give our client service centre a
+                call.
+              </p>
+              <button
+                type="button"
+                className="px-4 py-2 w-full md:w-fit mt-8 border rounded-sm border-foreground! hover:border-primary! text-text-primary hover:text-black hover:bg-primary cursor-pointer">
+                Contact Us
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>

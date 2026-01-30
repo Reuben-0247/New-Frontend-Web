@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { IComment } from "@/app/interfaces/event.interface";
 import { formatTime } from "@/utils/helper";
 import { Check } from "lucide-react";
@@ -6,15 +5,15 @@ import React from "react";
 import styled from "styled-components";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
+  // DropdownMenuContent,
+  // DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, EllipsisVertical, Send, Trash2 } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ChatSend: React.FC<{ chat: IComment }> = ({ chat }) => {
-  const [open, setOpen] = React.useState(false);
+  // const [open, setOpen] = React.useState(false);
 
   return (
     <Wrapper>
@@ -52,9 +51,9 @@ const ChatSend: React.FC<{ chat: IComment }> = ({ chat }) => {
               </DropdownMenuContent> */}
               </DropdownMenu>
             </span>
-            <div className="flex flex-col bg-[#011d4e] text-white p-2 message">
-              <small className=" ">
-                {chat?.content || "hhfhhf hfhfhfhf hfhfjjsi  "}
+            <div className="flex flex-col bg-primary text-white p-1 message">
+              <small className=" wrap-break-word max-w-[250px]">
+                {chat?.content}
               </small>
               <p className="flex items-center ml-12 justify-end  text-gray-400 gap-2 text-xs ">
                 {formatTime(chat?.createdAt)}
@@ -81,13 +80,13 @@ const ChatSend: React.FC<{ chat: IComment }> = ({ chat }) => {
             <p className="">{chat.creator?.name || "Tom Tim"}</p>
           </div> */}
           </div>
-          <div>
+          {/* <div>
             <img
               className="rounded-[50%] w-8 h-8 object-cover"
               src={chat?.creator?.profilePhotoUrl || "/images/avater-1.png"}
               alt="avatar"
             />
-          </div>
+          </div> */}
         </div>
       </div>
     </Wrapper>
@@ -113,7 +112,7 @@ const Wrapper = styled.div`
         height: 0;
         border-top: 0px solid transparent;
         border-bottom: 12px solid transparent;
-        border-left: 8px solid #011d4e;
+        border-left: 8px solid #0062ff;
         border-right: 0px solid transparent;
       }
     }

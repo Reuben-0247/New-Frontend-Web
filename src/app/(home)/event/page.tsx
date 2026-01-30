@@ -2,8 +2,19 @@
 import React from "react";
 import Header from "@/app/components/Header";
 import HomePageEvents from "@/app/components/_web/HomePageEvents";
+import axiosApi from "@/lib/axios";
+import { IEvent } from "@/app/interfaces/event.interface";
+import { ICategory } from "@/app/interfaces/category.interface";
 
-const page = () => {
+const page = async () => {
+  const { data } = await axiosApi.get<{ data: { events: IEvent[] } }>(
+    "/events",
+  );
+  const events = data?.data?.events;
+
+  const { data: cats } = await axiosApi.get<{
+    data: { categories: ICategory[] };
+  }>("/categories");
   return (
     <div>
       <div className="hero relative">
@@ -30,7 +41,7 @@ const page = () => {
             </p>
           </div>
         </div>
-        <HomePageEvents />
+        <HomePageEvents events={events} cats={cats?.data?.categories} />
         <section className="bg-[#191919] font-Nunito text-white py-16 px-4 sm:px-6 lg:px-8 rounded-lg mx-auto max-w-7xl my-20 text-center">
           <h2 className="text-2xl md:text-3xl font-Nunito font-bold mb-6">
             Ready to host your next big event?

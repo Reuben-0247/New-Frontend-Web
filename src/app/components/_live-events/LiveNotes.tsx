@@ -65,7 +65,7 @@ const LiveNotes: React.FC<{ title: string }> = ({ title }) => {
           <textarea
             className="w-full p-3 rounded-lg bg-white text-gray-800 border border-gray-700 resize-none"
             style={{ height: "200px" }}
-            placeholder="Write your note here..."
+            placeholder="send a secret review about this even..."
             value={input.content}
             onFocus={checkIsLoggedIn}
             onChange={(e) => setInput({ ...input, content: e.target.value })}
