@@ -176,7 +176,6 @@ const DestinationsPage: React.FC = () => {
     } catch (error) {
       console.log(error);
       setEnabled((prev) => ({ ...prev, [id]: !checked }));
-      toast.error("Failed to update destination");
     } finally {
       setLoadingMap((prev) => ({ ...prev, [id]: false }));
     }
@@ -411,7 +410,7 @@ const DestinationsPage: React.FC = () => {
                   value={key}
                   key={key}
                   className="border-none hover:border-none">
-                  <AccordionTrigger className="cursor-pointer  rounded-bl-none rounded-br-none hover:no-underline shadow-lg bg-background  [&>svg]:hidden pb-4 pt-2 px-2">
+                  <AccordionTrigger className="cursor-pointer  rounded-bl-none rounded-br-none hover:no-underline bg-background  [&>svg]:hidden pb-4 pt-2 px-2">
                     <div className="flex justify-between w-full">
                       <div className="flex items-center gap-3">
                         <div className="flex  gap-4 items-center">

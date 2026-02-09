@@ -1,6 +1,22 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
 import Header from "@/app/components/Header";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Solutions",
+  description:
+    "Discover Fero Events solutions for live streaming, virtual events, video recording, and audience engagement.",
+  keywords: [
+    "event solutions",
+    "virtual events",
+    "live streaming tools",
+    "video platform",
+    "Fero Events solutions",
+  ],
+};
+
 const features = [
   {
     icon: "/icons/vector-01.png",

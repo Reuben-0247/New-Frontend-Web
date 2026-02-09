@@ -14,7 +14,6 @@ import {
   // Medal,
   // MonitorPlay,
   Settings,
-  Tv,
   User,
 } from "lucide-react";
 import { BiChevronRight, BiChevronLeft } from "react-icons/bi";
@@ -113,19 +112,7 @@ const SideBar: React.FC<{
       href: "/pricing",
       show: !!token,
     },
-    {
-      label: "Live to VOD",
-      icon: (
-        <Tv
-          className={`text-[#171717] dark:text-primary ${
-            pathname.startsWith(`/live-vod`) && "text-primary"
-          }`}
-        />
-      ),
-      href: `/live-vod`,
 
-      show: !!token,
-    },
     {
       label: "Profile",
       icon: (

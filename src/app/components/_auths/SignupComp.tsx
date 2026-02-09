@@ -28,6 +28,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import SocialAuth from "./SocialAuth";
 import { cn } from "@/lib/utils";
 import axiosApi from "@/lib/axios";
+import { IUser } from "@/app/interfaces/user.interface";
 const formSchema = z
   .object({
     firstName: z.string().min(1, "First name is required"),
@@ -79,11 +80,14 @@ const SignupComp = () => {
 
     try {
       // send payload, not values
-      const { data } = await axiosApi.post("/auth/signup", payload);
-      if (data) {
-        router.push("/signup/authentication");
-
+      const { data } = await axiosApi.post<{ data: { user: IUser } }>(
+        "/auth/signup",
+        payload,
+      );
+      const user = data?.data?.user as IUser;
+      if (user) {
         toast.success("Account created successfully!");
+        router.push(`/signup/authentication?email=${user?.email}`);
       }
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -104,7 +108,7 @@ const SignupComp = () => {
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground">
+                  <FormLabel className="text-black!">
                     <p>
                       First Name<span className="text-red-600">*</span>
                     </p>
@@ -115,7 +119,7 @@ const SignupComp = () => {
                       placeholder="Your first name"
                       {...field}
                       className={cn(
-                        "text-foreground border-border! active:border-primary! focus:border-primary!",
+                        " border-border! active:border-primary! focus:border-primary! bg-transparent! text-black!",
                         form.formState.errors.firstName && "border-red-500!",
                       )}
                     />
@@ -129,7 +133,7 @@ const SignupComp = () => {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground">
+                  <FormLabel className="text-black!">
                     <p>
                       Last Name<span className="text-red-600">*</span>
                     </p>
@@ -140,7 +144,7 @@ const SignupComp = () => {
                       placeholder="Your last name"
                       {...field}
                       className={cn(
-                        "text-foreground border-border! active:border-primary! focus:border-primary!",
+                        "text-black! border-border! active:border-primary! focus:border-primary! bg-transparent!",
                         form.formState.errors.lastName && "border-red-500!",
                       )}
                     />
@@ -155,7 +159,7 @@ const SignupComp = () => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-foreground">
+                <FormLabel className="text-black!">
                   <p>
                     Email Address<span className="text-red-600">*</span>
                   </p>
@@ -166,7 +170,7 @@ const SignupComp = () => {
                     placeholder="you@example.com"
                     {...field}
                     className={cn(
-                      "text-foreground border-border! active:border-primary! focus:border-primary!",
+                      "text-black! border-border! active:border-primary! focus:border-primary! bg-transparent!",
                       form.formState.errors.email && "border-red-500!",
                     )}
                   />
@@ -181,7 +185,7 @@ const SignupComp = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground">Password</FormLabel>
+                  <FormLabel className="text-black!">Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
@@ -189,7 +193,7 @@ const SignupComp = () => {
                         placeholder="••••••••"
                         {...field}
                         className={cn(
-                          "text-foreground border-border! active:border-primary! focus:border-primary!",
+                          "text-black! border-border! active:border-primary! focus:border-primary! bg-transparent!",
                           form.formState.errors.password && "border-red-500!",
                         )}
                       />
@@ -222,7 +226,7 @@ const SignupComp = () => {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground">
+                  <FormLabel className="text-black!">
                     Confirm Password
                   </FormLabel>
                   <FormControl>
@@ -232,7 +236,7 @@ const SignupComp = () => {
                         placeholder="••••••••"
                         {...field}
                         className={cn(
-                          "text-foreground border-border! active:border-primary! focus:border-primary!",
+                          "text-black! border-border! active:border-primary! focus:border-primary! bg-transparent!",
                           form.formState.errors.confirmPassword &&
                             "border-red-500!",
                         )}
@@ -284,7 +288,7 @@ const SignupComp = () => {
                 <span className="relative inline-flex rounded-full h-4 w-4 bg-slate-200"></span>
               </span>
             ) : (
-              "Log In"
+              "Register"
             )}
           </Button>
         </form>

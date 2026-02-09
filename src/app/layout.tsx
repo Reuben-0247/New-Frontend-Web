@@ -22,10 +22,27 @@ const nunitoSans = Nunito_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Fero Events",
-  description: "Fero events your best choice of streaming",
+  title: {
+    default: "Fero Events",
+    template: "%s | Fero Events",
+  },
+  description:
+    "Fero Events is a modern live streaming and event management platform for hosting, broadcasting, and clipping live events.",
+  keywords: [
+    "live streaming",
+    "event platform",
+    "video clipping",
+    "online events",
+    "Fero Events",
+  ],
+  openGraph: {
+    title: "Fero Events",
+    description: "Host, stream, and clip live events easily with Fero Events.",
+    url: "https://feroevent.com",
+    siteName: "Fero Events",
+    type: "website",
+  },
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{

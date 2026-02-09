@@ -94,7 +94,7 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
         return;
       }
       toast.success(resp.data?.message);
-
+      // toast.info(`Joining stream... ${APP_ID} ${UID}`);
       await client?.setClientRole("host");
       await client?.join(
         APP_ID,
@@ -146,7 +146,6 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
     setMicOn((p) => !p);
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       leave();

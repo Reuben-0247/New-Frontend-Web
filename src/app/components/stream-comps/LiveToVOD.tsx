@@ -3,129 +3,127 @@ import React, { useState, useEffect, useRef } from "react";
 // import StreamLinks from "../components/StreamLinks";
 // import { Share } from "lucide-react";
 import styled from "styled-components";
-import { MenuIcon } from "lucide-react";
+// import { MenuIcon } from "lucide-react";
 import axiosApi from "@/lib/axios";
+import { useEventStore } from "@/app/store/event.store";
+import { IRecording } from "@/app/interfaces/event.interface";
+import { toast, ToastContent } from "react-toastify";
+import { Spinner } from "../Spinner";
+import { formatError } from "@/utils/helper";
+import { AxiosError } from "axios";
 
 const LiveToVOD = () => {
-  const streamData = { castrStreamId: "" };
   const [enabled, setEnabled] = useState(false);
-  // const [data, setData] = useState([]);
-  const [show, setShow] = useState(false);
-  // const [loading, setLoading] = useState(false);
+  const [vodData, setVodData] = useState<IRecording[]>([]);
+  // const [show, setShow] = useState(false);
+  const [loadingT, setLoadingT] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+  const { event } = useEventStore();
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   const [showThumbs, setShowThumbs] = useState<Record<string, boolean>>({});
   useEffect(() => {
-    if (!streamData?.castrStreamId) return;
+    if (!event?.castrStreamId) return;
     (async () => {
-      // setLoading(true);
+      setLoading(true);
       try {
-        const { data: res } = await axiosApi.get(
-          `/stream/castr/${streamData.castrStreamId}/retrieve_temp_recordings`,
-
-          {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            },
-          }
+        const { data } = await axiosApi.get<{ response: IRecording[] }>(
+          `/stream/castr/${event.castrStreamId}/retrieve_temp_recordings`,
         );
-        if (res) {
-          // setData(res?.response);
-          // setLoading(false);
+        if (data?.response) {
+          setVodData(data.response);
         }
       } catch (err) {
-        // setLoading(false);
+        setLoading(false);
         console.error("Error fetching users:", err);
       } finally {
-        // setLoading(false);
+        setLoading(false);
       }
     })();
-  }, [streamData?.castrStreamId]);
+  }, [event?.castrStreamId]);
 
-  const enableVod = async () => {
-    setEnabled(!enabled);
-  };
+  // const enableVod = async () => {
+  //   setEnabled(!enabled);
+  // };
 
-  const videoData = [
-    {
-      id: "tete",
-      video: "/videos/Introduction.mp4",
-      minutes: "2hrs 80mins 5secs",
-      playIcon: "/images/play-icon.png",
-      bg: "/images/play-tumb.jpg",
-      videoName: "CONFIG Watch Party, PH Chapter",
-      btn: (
-        <p className="flex items-center gap-2 m-0">
-          <span>Download stream</span>
-          <img src="/images/Vector.png" alt="" />
-        </p>
-      ),
-      share: (
-        <p className="flex items-center gap-2 m-0">
-          <span>Share</span> <img src="/images/share.png" alt="" />
-        </p>
-      ),
-    },
-    {
-      id: "tetew",
-      video: "/videos/Introduction.mp4",
-      minutes: "2hrs 80mins 5secs",
-      playIcon: "/images/play-icon.png",
-      bg: "/images/play-tumb.jpg",
-      videoName: "CONFIG Watch Party, PH Chapter",
-      btn: (
-        <p className="flex items-center gap-2 m-0">
-          <span>Download stream</span>
-          <img src="/images/Vector.png" alt="" />
-        </p>
-      ),
-      share: (
-        <p className="flex items-center gap-2 m-0">
-          <span>Share</span> <img src="/images/share.png" alt="" />
-        </p>
-      ),
-    },
-    {
-      id: "teteee",
-      video: "/videos/Introduction.mp4",
-      minutes: "2hrs 80mins 5secs",
-      playIcon: "/images/play-icon.png",
-      bg: "/images/play-tumb.jpg",
-      videoName: "CONFIG Watch Party, PH Chapter",
-      btn: (
-        <p className="flex items-center gap-2 m-0">
-          <span>Download stream</span>
-          <img src="/images/Vector.png" alt="" />
-        </p>
-      ),
-      share: (
-        <p className="flex items-center gap-2 m-0">
-          <span>Share</span> <img src="/images/share.png" alt="" />
-        </p>
-      ),
-    },
-    {
-      id: "teterr",
-      video: "/videos/Introduction.mp4",
-      minutes: "2hrs 80mins 5secs",
-      playIcon: "/images/play-icon.png",
-      bg: "/images/play-tumb.jpg",
-      videoName: "CONFIG Watch Party, PH Chapter",
-      btn: (
-        <p className="flex items-center gap-2 m-0">
-          <span>Download stream</span>
-          <img src="/images/Vector.png" alt="" />
-        </p>
-      ),
-      share: (
-        <p className="flex items-center gap-2 m-0">
-          <span>Share</span> <img src="/images/share.png" alt="" />
-        </p>
-      ),
-    },
-  ];
+  // const videoData = [
+  //   {
+  //     id: "tete",
+  //     video: "/videos/Introduction.mp4",
+  //     minutes: "2hrs 80mins 5secs",
+  //     playIcon: "/images/play-icon.png",
+  //     bg: "/images/play-tumb.jpg",
+  //     videoName: "CONFIG Watch Party, PH Chapter",
+  //     btn: (
+  //       <p className="flex items-center gap-2 m-0">
+  //         <span>Download stream</span>
+  //         <img src="/images/Vector.png" alt="" />
+  //       </p>
+  //     ),
+  //     share: (
+  //       <p className="flex items-center gap-2 m-0">
+  //         <span>Share</span> <img src="/images/share.png" alt="" />
+  //       </p>
+  //     ),
+  //   },
+  //   {
+  //     id: "tetew",
+  //     video: "/videos/Introduction.mp4",
+  //     minutes: "2hrs 80mins 5secs",
+  //     playIcon: "/images/play-icon.png",
+  //     bg: "/images/play-tumb.jpg",
+  //     videoName: "CONFIG Watch Party, PH Chapter",
+  //     btn: (
+  //       <p className="flex items-center gap-2 m-0">
+  //         <span>Download stream</span>
+  //         <img src="/images/Vector.png" alt="" />
+  //       </p>
+  //     ),
+  //     share: (
+  //       <p className="flex items-center gap-2 m-0">
+  //         <span>Share</span> <img src="/images/share.png" alt="" />
+  //       </p>
+  //     ),
+  //   },
+  //   {
+  //     id: "teteee",
+  //     video: "/videos/Introduction.mp4",
+  //     minutes: "2hrs 80mins 5secs",
+  //     playIcon: "/images/play-icon.png",
+  //     bg: "/images/play-tumb.jpg",
+  //     videoName: "CONFIG Watch Party, PH Chapter",
+  //     btn: (
+  //       <p className="flex items-center gap-2 m-0">
+  //         <span>Download stream</span>
+  //         <img src="/images/Vector.png" alt="" />
+  //       </p>
+  //     ),
+  //     share: (
+  //       <p className="flex items-center gap-2 m-0">
+  //         <span>Share</span> <img src="/images/share.png" alt="" />
+  //       </p>
+  //     ),
+  //   },
+  //   {
+  //     id: "teterr",
+  //     video: "/videos/Introduction.mp4",
+  //     minutes: "2hrs 80mins 5secs",
+  //     playIcon: "/images/play-icon.png",
+  //     bg: "/images/play-tumb.jpg",
+  //     videoName: "CONFIG Watch Party, PH Chapter",
+  //     btn: (
+  //       <p className="flex items-center gap-2 m-0">
+  //         <span>Download stream</span>
+  //         <img src="/images/Vector.png" alt="" />
+  //       </p>
+  //     ),
+  //     share: (
+  //       <p className="flex items-center gap-2 m-0">
+  //         <span>Share</span> <img src="/images/share.png" alt="" />
+  //       </p>
+  //     ),
+  //   },
+  // ];
 
   const handleShare = (eventtitle: string, eventId: string) => {
     const URL = `${window.location.origin}/Live-Event/${eventtitle}/${eventId}`;
@@ -157,6 +155,52 @@ const LiveToVOD = () => {
     }
   };
 
+  const enableCloudRecord = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+
+    if (!event?.castrStreamId) {
+      toast.warn("Please create a stream...");
+      return;
+    }
+
+    if (loadingT) return;
+    setLoadingT(true);
+    setEnabled(checked);
+    sessionStorage.setItem("cloud_recording", JSON.stringify(checked));
+
+    const body = {
+      settings: {
+        abr: false,
+        cloud_recording: checked,
+      },
+    };
+
+    try {
+      const { data: res } = await axiosApi.patch(
+        `/stream/castr/${event?.castrStreamId}`,
+        body,
+      );
+
+      if (res) {
+        toast.success(
+          checked
+            ? "Cloud Recording enabled..."
+            : "Cloud Recording disabled...",
+        );
+
+        setLoadingT(false);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const formattedError = formatError(axiosError);
+      toast.error(formattedError.message as ToastContent);
+      setEnabled(!checked);
+      console.error(error);
+    } finally {
+      setLoadingT(false);
+    }
+  };
+
   // const handlePlayPause = (id:string) => {
   //   const video = videoRefs.current[id];
   //   if (video) {
@@ -169,6 +213,13 @@ const LiveToVOD = () => {
   //     }
   //   }
   // };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner />{" "}
+      </div>
+    );
+  }
 
   return (
     <Warpper>
@@ -193,82 +244,105 @@ const LiveToVOD = () => {
                     type="checkbox"
                     className="sr-only peer"
                     checked={enabled}
-                    onChange={enableVod}
+                    disabled={loadingT}
+                    onChange={enableCloudRecord}
                   />
-                  <div className="w-11 h-6 border-[#0062FF] border peer-focus:outline-none peer-checked:bg-[#0062FF] rounded-full peer  transition-all duration-300"></div>
+                  <div className="w-11 h-6 border-[#0062FF] border peer-focus:outline-none peer-checked:bg-[#cc0000] rounded-full peer  transition-all duration-300"></div>
                   <div className="absolute left-0.5 top-0.5 border-[#0062FF] border bg-[#000826] w-5 h-5 rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
                 </label>
               </div>
             </div>
           </div>
-          <div className="videos ">
-            {videoData.map((v) => (
-              <div key={v.id} className=" inner relative">
-                <div className="src">
-                  {showThumbs[v.id] !== false && (
-                    <div
-                      className="tumb"
-                      style={{
-                        backgroundImage: `url(${v.bg})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                      }}>
-                      <div className="opacity">
-                        <div className="time-label">{v.minutes}</div>
-                        <button
-                          className="cursor-pointer"
-                          onClick={() => handlePauseVideo(v.id)}>
-                          <img src={v.playIcon} alt="" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
+          <div>
+            {vodData.length === 0 ? (
+              <p className="text-foreground mt-6 mb-4 font-nuni mx-auto w-full text-[14px] text-center">
+                No recordings available yet.
+              </p>
+            ) : (
+              <div className="videos ">
+                {vodData.map((v, i) => (
+                  <div key={i} className=" inner relative">
+                    <div className="src">
+                      {showThumbs[v?.recording_id] !== false && (
+                        <div
+                          className="tumb"
+                          style={{
+                            backgroundImage: `url(${"/images/play-tumb.jpg"})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                          }}>
+                          <div className="opacity">
+                            <div className="time-label">{v.duration}</div>
+                            <button
+                              className="cursor-pointer"
+                              onClick={() => handlePauseVideo(v?.recording_id)}>
+                              <img src={"/images/play-icon.png"} alt="" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
-                  <video
-                    ref={(el) => {
-                      videoRefs.current[v.id] = el;
-                    }}
-                    src={v.video}
-                    className="w-full vid "
-                    controls={true}
-                    onPause={() =>
-                      setShowThumbs((prev) => ({ ...prev, [v.id]: true }))
-                    }
-                    onPlay={() =>
-                      setShowThumbs((prev) => ({ ...prev, [v.id]: false }))
-                    }
-                    // onTimeUpdate={handlePauseVideo(v.id)}
-                  />
+                      <video
+                        ref={(el) => {
+                          videoRefs.current[v.recording_id] = el;
+                        }}
+                        src={v?.download_url}
+                        className="w-full vid "
+                        controls={true}
+                        onPause={() =>
+                          setShowThumbs((prev) => ({
+                            ...prev,
+                            [v.recording_id]: true,
+                          }))
+                        }
+                        onPlay={() =>
+                          setShowThumbs((prev) => ({
+                            ...prev,
+                            [v.recording_id]: false,
+                          }))
+                        }
+                        // onTimeUpdate={handlePauseVideo(v.id)}
+                      />
 
-                  {/* {showThumbs[v.id] === false && (
+                      {/* {showThumbs[v.id] === false && (
                       <button
                         className="absolute top-2 right-2 bg-black/60 text-white px-3 py-1 rounded"
                         onClick={() => handlePlayPause(v.id)}>
                         Pause
                       </button>
                     )} */}
-                </div>
-                <div className="action  p-3">
-                  <h4 className="mb-3 text-white">{v.videoName}</h4>
-                  <div className="flex justify-between items-center">
-                    <button className="text-[#A4A4A4] cursor-pointer">
-                      <a
-                        href={v.video}
-                        download={v.video}
-                        className="text-[#A4A4A4] no-underline">
-                        {v.btn}
-                      </a>
-                    </button>
-                    <button
-                      className="text-[#A4A4A4] cursor-pointer"
-                      onClick={() => handleShare(v.videoName, v.id)}>
-                      {v.share}
-                    </button>
+                    </div>
+                    <div className="action  p-3">
+                      <h4 className="mb-3 text-white">{event?.title}</h4>
+                      <div className="flex justify-between items-center">
+                        <button className="text-[#A4A4A4] cursor-pointer">
+                          <a
+                            href={v?.download_url}
+                            download
+                            className="text-[#A4A4A4] no-underline">
+                            Download stream
+                          </a>
+                        </button>
+                        <button
+                          className="text-[#A4A4A4] cursor-pointer"
+                          onClick={() =>
+                            handleShare(
+                              event?.title || "Fero Event",
+                              v.recording_id,
+                            )
+                          }>
+                          <p className="flex items-center gap-2 m-0">
+                            <span>Share</span>{" "}
+                            <img src="/images/share.png" alt="" />
+                          </p>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

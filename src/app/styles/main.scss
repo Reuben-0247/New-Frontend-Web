@@ -93,3 +93,68 @@ button {
 //   height: 300px !important;
 //   overflow-y: scroll !important;
 // }
+
+// SLIDER STYLES
+
+.noUi-target {
+  margin-top: 1rem;
+  border: none !important;
+  background: #ccc !important;
+  height: 5px !important;
+}
+.noUi-base {
+  background: #ccc !important;
+  border: none !important;
+  height: 5px;
+  .noUi-connects {
+    .noUi-connect {
+      background: var(--primary);
+      height: 6px;
+    }
+  }
+  .noUi-origin {
+    .noUi-handle {
+      border: none !important;
+      box-shadow: none !important;
+      &-lower {
+        background: var(--primary) !important;
+        border-radius: 5px !important;
+        height: 1.2rem !important;
+        cursor: pointer;
+        &::after {
+          margin-bottom: 3px !important;
+          height: 8px !important;
+        }
+        &::before {
+          height: 8px !important;
+          margin-bottom: 3px !important;
+        }
+        .noUi-touch-area {
+          background: var(--primary) !important;
+
+          border-radius: 5px !important;
+          height: 1.2rem !important;
+        }
+      }
+      &-upper {
+        background: var(--primary) !important;
+        border-radius: 5px !important;
+        height: 1.2rem !important;
+        cursor: pointer;
+        &::after {
+          margin-bottom: 3px !important;
+          height: 8px !important;
+        }
+        &::before {
+          height: 8px !important;
+          margin-bottom: 3px !important;
+        }
+        .noUi-touch-area {
+          background: var(--primary) !important;
+          border-radius: 5px !important;
+          height: 1.2rem !important;
+        }
+      }
+    }
+  }
+}

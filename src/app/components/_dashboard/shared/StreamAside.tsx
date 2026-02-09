@@ -12,6 +12,7 @@ import {
   // LogOut,
   MapPinHouse,
   ScissorsLineDashed,
+  Tv,
   // Settings,
   // Tv,
   TvMinimalPlay,
@@ -25,7 +26,6 @@ interface INav {
   label: string;
   icon: any;
   href: string;
-  id: string;
   show: boolean;
 }
 
@@ -52,7 +52,19 @@ const StreamAside: React.FC<{
         />
       ),
       href: `/stream/${param}`,
-      id: "",
+      show: true,
+    },
+    {
+      label: "Live to VOD",
+      icon: (
+        <Tv
+          className={`text-[#171717] dark:text-primary ${
+            pathname.startsWith(`/stream/${param}/live-vod`) && "text-primary"
+          }`}
+        />
+      ),
+      href: `/stream/${param}/live-vod`,
+
       show: true,
     },
     {
@@ -66,7 +78,6 @@ const StreamAside: React.FC<{
         />
       ),
       href: `/stream/${param}/live-clipping`,
-      id: "tour2-step2",
       show: true,
     },
 
@@ -81,7 +92,6 @@ const StreamAside: React.FC<{
         />
       ),
       href: `/stream/${param}/destination`,
-      id: "",
       show: true,
     },
     // {
@@ -196,7 +206,7 @@ const StreamAside: React.FC<{
                   .filter((nav) => nav.show === true)
                   .map((item, index) => (
                     <Link
-                      id={item.id}
+                      id={item?.label}
                       key={index}
                       href={item.href}
                       className={`${

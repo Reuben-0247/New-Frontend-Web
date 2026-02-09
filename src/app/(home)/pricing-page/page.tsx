@@ -2,6 +2,21 @@
 import React from "react";
 import Header from "@/app/components/Header";
 import PricingHero from "@/app/components/_web/PricingHero";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pricing Plans",
+  description:
+    "Explore flexible pricing plans on Fero Events for live streaming, event hosting, and video clipping. Choose a plan that fits your needs.",
+  keywords: [
+    "Fero Events pricing",
+    "live streaming pricing",
+    "event platform plans",
+    "video clipping pricing",
+  ],
+};
+
 const plans = [
   {
     id: 1,

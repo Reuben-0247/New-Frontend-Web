@@ -10,7 +10,7 @@ export default function LibraryLayout({
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
       <div className="w-full h-screen bg-white  gap-6">
         <div className="container bg-white mx-auto md:px-6 px-2 flex justify-center items-center w-full">
-          <section className="md:w-[600px] w-full mt-8 p-2 rounded-lg shadow-lg">
+          <section className="md:w-[600px] w-full md:mt-8 mt-2 p-2 rounded-lg ">
             {children}
           </section>
         </div>
