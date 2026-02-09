@@ -56,7 +56,7 @@ const LoginComp: React.FC<{ token: string }> = ({ token }) => {
     if (!token) return;
 
     Cookies.set(TOKEN_NAME, token);
-    router.replace("/events");
+    router.replace("/find-events");
   }, [token, router]);
 
   // const email = form.watch("email");
