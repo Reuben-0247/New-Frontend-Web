@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import HomePageEvents from "../components/_web/HomePageEvents";
 import Features from "../components/_web/Features";
 import TrustPilotSection from "../components/_web/trustPilot";
@@ -7,18 +9,22 @@ import Header from "@/app/components/Header";
 import { HomeHero } from "../components/_web/Hero";
 import { PlayImg } from "../components/_web/PlayTumb";
 import axiosApi from "@/lib/axios";
-import { IEvent } from "../interfaces/event.interface";
-import { ICategory } from "../interfaces/category.interface";
+// import { IEvent } from "../interfaces/event.interface";
+// import { ICategory } from "../interfaces/category.interface";
 
 export default async function Home() {
-  const { data } = await axiosApi.get<{ data: { events: IEvent[] } }>(
-    "/events",
-  );
-  const events = data?.data?.events;
+  let events = [];
+  let categories = [];
 
-  const { data: cats } = await axiosApi.get<{
-    data: { categories: ICategory[] };
-  }>("/categories");
+  try {
+    const { data } = await axiosApi.get("/events");
+    events = data?.data?.events || [];
+
+    const { data: cats } = await axiosApi.get("/categories");
+    categories = cats?.data?.categories || [];
+  } catch (e) {
+    console.error("API failed", e);
+  }
 
   return (
     <div className="">
@@ -28,7 +34,7 @@ export default async function Home() {
         <HomeHero />
       </div>
       <PlayImg />
-      <HomePageEvents events={events} cats={cats?.data?.categories} />
+      <HomePageEvents events={events} cats={categories} />
       <Features />
       <ImageView />
       <section id="trustPilot">

@@ -1,10 +1,12 @@
+export const dynamic = "force-dynamic";
+
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
 import Header from "@/app/components/Header";
 import HomePageEvents from "@/app/components/_web/HomePageEvents";
 import axiosApi from "@/lib/axios";
-import { IEvent } from "@/app/interfaces/event.interface";
-import { ICategory } from "@/app/interfaces/category.interface";
+// import { IEvent } from "@/app/interfaces/event.interface";
+// import { ICategory } from "@/app/interfaces/category.interface";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Live Events",
@@ -12,14 +14,18 @@ export const metadata: Metadata = {
     "Browse upcoming live events and replays on Fero Events. Watch streams and highlights.",
 };
 const page = async () => {
-  const { data } = await axiosApi.get<{ data: { events: IEvent[] } }>(
-    "/events",
-  );
-  const events = data?.data?.events;
+  let events = [];
+  let categories = [];
 
-  const { data: cats } = await axiosApi.get<{
-    data: { categories: ICategory[] };
-  }>("/categories");
+  try {
+    const { data } = await axiosApi.get("/events");
+    events = data?.data?.events || [];
+
+    const { data: cats } = await axiosApi.get("/categories");
+    categories = cats?.data?.categories || [];
+  } catch (e) {
+    console.error("API failed", e);
+  }
   return (
     <div>
       <div className="hero relative">
@@ -46,7 +52,7 @@ const page = async () => {
             </p>
           </div>
         </div>
-        <HomePageEvents events={events} cats={cats?.data?.categories} />
+        <HomePageEvents events={events} cats={categories} />
         <section className="bg-[#191919] font-Nunito text-white py-16 px-4 sm:px-6 lg:px-8 rounded-lg mx-auto max-w-7xl my-20 text-center">
           <h2 className="text-2xl md:text-3xl font-Nunito font-bold mb-6">
             Ready to host your next big event?
