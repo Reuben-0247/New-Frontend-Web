@@ -71,7 +71,7 @@ const LoginComp: React.FC<{ token: string }> = ({ token }) => {
       // console.log("Login response:", values);
       if (data) {
         toast.success("Login successful");
-        // window.location.href = "/events";
+        router.replace("/find-events");
       }
 
       // if (data.message) {
