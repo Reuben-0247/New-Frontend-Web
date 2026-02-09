@@ -39,7 +39,7 @@ const PasswordResetPage = () => {
   };
 
   return (
-    <div className="h-auto p-6 mx-auto flex flex-col gap-4">
+    <div className="h-auto p-6 mx-auto flex flex-col gap-4 shadow-xl p-1 rounded-md">
       <div className="flex justify-center mb-6">
         <Link href="/" className="text-primary link font-semibold ">
           <img
@@ -62,13 +62,13 @@ const PasswordResetPage = () => {
 
           <form className="space-y-6" onSubmit={onSubmit}>
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium">
+              <label htmlFor="email" className="block text-black font-medium">
                 Email Address
               </label>
               <Input
                 type="email"
                 name="email"
-                className="text-black"
+                className="text-black bg-transparent!"
                 value={input.email}
                 placeholder="you@example.com"
                 required

@@ -145,3 +145,12 @@ export interface UpdateBoardFormInput {
   type?: string;
   content?: any;
 }
+
+export interface IRecording {
+  recording_id: string;
+  stream_key: string;
+  start_time: string;
+  end_time: string;
+  download_url: string;
+  duration: number;
+}

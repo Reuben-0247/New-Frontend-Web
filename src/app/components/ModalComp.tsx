@@ -21,6 +21,7 @@ interface ModalProps {
   onSave?: () => void;
   saveText?: string;
   loading?: boolean;
+  saveIcon?: React.ReactNode;
   actionType?: "create" | "update" | "delete";
 }
 
@@ -34,6 +35,7 @@ const ModalComp: React.FC<ModalProps> = ({
   saveText,
   loading,
   actionType,
+  saveIcon,
 }) => {
   return (
     <Dialog open={open} onOpenChange={(state) => !state && onClose()}>
@@ -65,6 +67,7 @@ const ModalComp: React.FC<ModalProps> = ({
               disabled={loading}
               // variant={""}
               onClick={onSave}>
+              {saveIcon}
               {loading ? "Loading..." : saveText}
             </Button>
           )}

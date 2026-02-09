@@ -17,10 +17,10 @@ interface IProp {
   setDestination: (data: IDestination | null) => void;
   setDestinations: (data: IDestination[]) => void;
   createDestination: (
-    input: CreateDestinationInput
+    input: CreateDestinationInput,
   ) => Promise<IDestination | undefined>;
   updateDestination: (
-    input: UpdateDestinationInput
+    input: UpdateDestinationInput,
   ) => Promise<IDestination | undefined>;
   deleteDestination: (id: string) => Promise<boolean>;
   enableDestination: (input: {
@@ -41,7 +41,7 @@ export const useDestinationStore = create<IProp>((set) => ({
       set({ loading: true });
       const { data } = await axiosApi.post<{ data: IDestination }>(
         "/stream/platform",
-        input
+        input,
       );
       const newDestination = data.data;
       set((state) => ({
@@ -63,12 +63,12 @@ export const useDestinationStore = create<IProp>((set) => ({
       set({ loading: true });
       const { data } = await axiosApi.patch<{ data: IDestination }>(
         `/stream/platform/update`,
-        input
+        input,
       );
       const updatedDestination = data.data;
       set((state) => ({
         destinations: state.destinations.map((d) =>
-          d._id === input._id ? updatedDestination : d
+          d._id === input._id ? updatedDestination : d,
         ),
       }));
       toast.success("Destination updated successfully");
@@ -88,7 +88,7 @@ export const useDestinationStore = create<IProp>((set) => ({
       await axiosApi.delete(`/stream/platform/${id}`);
       set((state) => {
         const updatedDestinations = state.destinations.filter(
-          (d) => d._id !== id
+          (d) => d._id !== id,
         );
 
         return {
@@ -115,12 +115,12 @@ export const useDestinationStore = create<IProp>((set) => ({
       set({ loading: true });
       const { data } = await axiosApi.patch<{ response: IDestination }>(
         `/stream/castr/${input.streamId}/destination/${input.id}`,
-        { enabled: input.enabled }
+        { enabled: input.enabled },
       );
       const enabledDestination = data.response;
       set((state) => ({
         destinations: state.destinations.map((d) =>
-          d._id === input.id ? enabledDestination : d
+          d._id === input.id ? enabledDestination : d,
         ),
       }));
       toast.success("Destination enabled successfully");

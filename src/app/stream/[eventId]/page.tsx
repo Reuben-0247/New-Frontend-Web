@@ -8,6 +8,7 @@ import SoftwareProp from "@/app/components/stream-comps/SoftwareProp";
 import StreamInfo from "@/app/components/stream-comps/StreamInfo";
 import WebcamP from "@/app/components/stream-comps/Webcam";
 import { IStreamData, IStreamStats } from "@/app/interfaces/castr.interface";
+import { IEvent } from "@/app/interfaces/event.interface";
 import { useEventStore } from "@/app/store/event.store";
 import { Button } from "@/components/ui/button";
 import axiosApi from "@/lib/axios";
@@ -62,8 +63,15 @@ const StreamPage = () => {
   const [enabled, setEnabled] = useState(false);
 
   const [videoSrc, setVideoSrc] = useState("Streaming Sofware");
-  const { event, setStreamData, streamData, loading, goLiveEvent, endStream } =
-    useEventStore();
+  const {
+    event,
+    setStreamData,
+    setEvent,
+    streamData,
+    loading,
+    goLiveEvent,
+    endStream,
+  } = useEventStore();
   const router = useRouter();
   const [isLive, setIslive] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -93,7 +101,10 @@ const StreamPage = () => {
         body,
       );
       setStreamData(data?.stream);
-
+      setEvent({
+        ...event,
+        castrStreamId: data?.stream?.castrStreamId,
+      } as IEvent);
       toast.success("Stream Created Successfully", { delay: 3000 });
     } catch (error) {
       const axiosError = error as AxiosError;

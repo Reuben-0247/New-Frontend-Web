@@ -87,8 +87,19 @@ export const formatError = (error: AxiosError): FormattedAxiosError => {
     let message: unknown = undefined;
 
     if (data) {
-      if (typeof data === "object" && "message" in data) {
-        message = data.message;
+      if (
+        (typeof data === "object" && "message" in data) ||
+        (typeof data === "object" &&
+          "errResponse" in data &&
+          "message" in data.errResponse)
+      ) {
+        if (data.message.includes("Request failed with status code")) {
+          message =
+            data.errResponse?.message || data.message || "An error occurred";
+        } else {
+          message =
+            data.message || data.errResponse?.message || "An error occurred";
+        }
       } else if (Array.isArray(data?.errors) && data.errors.length > 0) {
         message = data.errors[0];
       } else if (typeof data?.error === "string") {
@@ -143,6 +154,6 @@ export const mergeById = (prev: IComment[], incoming: IComment[]) => {
   incoming.forEach((msg) => map.set(msg._id, msg));
 
   return Array.from(map.values()).sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 };

@@ -5,7 +5,7 @@ import React from "react";
 
 const page = () => {
   return (
-    <div>
+    <div className="shadow-xl p-1 rounded-md">
       <div className="flex justify-center mb-6">
         <Link href="/" className="text-primary link font-semibold ">
           <img

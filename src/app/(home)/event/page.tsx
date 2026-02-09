@@ -5,7 +5,12 @@ import HomePageEvents from "@/app/components/_web/HomePageEvents";
 import axiosApi from "@/lib/axios";
 import { IEvent } from "@/app/interfaces/event.interface";
 import { ICategory } from "@/app/interfaces/category.interface";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Live Events",
+  description:
+    "Browse upcoming live events and replays on Fero Events. Watch streams and highlights.",
+};
 const page = async () => {
   const { data } = await axiosApi.get<{ data: { events: IEvent[] } }>(
     "/events",

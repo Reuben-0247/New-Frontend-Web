@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,17 +13,10 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { FiArrowLeft } from "react-icons/fi";
 import { toast, ToastContent } from "react-toastify";
-import { api } from "@/lib/axios";
-import Cookies from "js-cookie";
-import { TOKEN_NAME, USER_ID } from "@/utils/constant";
+// import { api } from "@/lib/axios";
+// import Cookies from "js-cookie";
+// import { TOKEN_NAME, USER_ID } from "@/utils/constant";
 import { AxiosError } from "axios";
 import { formatError } from "@/utils/helper";
 import Link from "next/link";
@@ -36,10 +29,11 @@ const formSchema = z.object({
 });
 
 const AuthenticationForm = () => {
-  const [otpAttempts, setOtpAttempts] = useState(0);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+  // const [otpAttempts, setOtpAttempts] = useState(0);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  // const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,10 +41,6 @@ const AuthenticationForm = () => {
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (otpAttempts >= 3) {
-      setIsDialogOpen(true);
-      return;
-    }
     console.log(values);
     try {
       setLoading(true);
@@ -73,14 +63,14 @@ const AuthenticationForm = () => {
       const axiosError = error as AxiosError;
       const formattedError = formatError(axiosError);
       toast.error(formattedError?.message as ToastContent);
-      setOtpAttempts((prev) => prev + 1);
+      // setOtpAttempts((prev) => prev + 1);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full h-screen flex items-center justify-center">
+    <div className="w-full  flex items-center justify-center ">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-6">
           <Link href="/" className="text-primary link font-semibold ">
@@ -92,38 +82,47 @@ const AuthenticationForm = () => {
           </Link>
         </div>
 
-        <h2 className="text-2xl text-center font-bold text-gray-900 ">
+        <h2 className="text-2xl mb-2 text-center font-bold text-gray-900 ">
           Verify Your Email
         </h2>
-        <Button
+        {/* <Button
           variant="outline"
           size="icon"
           onClick={() => router.back()}
           className="mb-8 cursor-pointer">
           <FiArrowLeft className="h-4 w-4" />
-        </Button>
+        </Button> */}
 
-        <div className="mb-6">
-          <p className="text-2xl md:text-4xl font-semibold">
+        <div className="mb-8 text-center text-black">
+          {/* <p className="text-2xl md:text-4xl font-semibold text-black">
             Confirm that it&apos;s you
+          </p> */}
+          <p>
+            We&apos;ve sent a 6-digit code to{" "}
+            <span className="text-primary font-bold">{email}</span> enter it
+            below to verify your email address.
           </p>
-          <p>Please enter your 6-digit OneToken code to proceed.</p>
         </div>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-8">
-            <InputOTP
-              maxLength={6}
-              value={form.watch("otp")}
-              onChange={(value) => form.setValue("otp", value)}>
-              {[...Array(6)].map((_, index) => (
-                <InputOTPGroup key={index}>
-                  <InputOTPSlot index={index} />
-                </InputOTPGroup>
-              ))}
-            </InputOTP>
+            <div className="flex justify-center">
+              <InputOTP
+                maxLength={6}
+                value={form.watch("otp")}
+                onChange={(value) => form.setValue("otp", value)}>
+                {[...Array(6)].map((_, index) => (
+                  <InputOTPGroup key={index}>
+                    <InputOTPSlot
+                      index={index}
+                      className="bg-transparent! text-black!"
+                    />
+                  </InputOTPGroup>
+                ))}
+              </InputOTP>
+            </div>
 
             <FormMessage>{form.formState.errors.otp?.message}</FormMessage>
 
@@ -143,20 +142,6 @@ const AuthenticationForm = () => {
             </Button>
           </form>
         </Form>
-
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="text-center">
-                Access restricted
-              </DialogTitle>
-            </DialogHeader>
-            <p className="text-center text-[#4E5D6C]">
-              Your account has been locked due to failed login attempts. Contact
-              admin for assistance.
-            </p>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
