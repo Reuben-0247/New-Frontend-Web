@@ -53,10 +53,10 @@ const LoginComp: React.FC<{ token: string }> = ({ token }) => {
   });
 
   useEffect(() => {
-    if (!token) return;
-
-    Cookies.set(TOKEN_NAME, token);
-    router.replace("/find-events");
+    if (token) {
+      Cookies.set(TOKEN_NAME, token);
+      router.push("/find-events");
+    }
   }, [token, router]);
 
   // const email = form.watch("email");
@@ -71,7 +71,7 @@ const LoginComp: React.FC<{ token: string }> = ({ token }) => {
       // console.log("Login response:", values);
       if (data) {
         toast.success("Login successful");
-        router.replace("/find-events");
+        // router.push("/find-events");
       }
 
       // if (data.message) {
