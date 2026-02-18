@@ -2,19 +2,19 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
-import { HiMenuAlt3 } from "react-icons/hi";
-import { IoClose } from "react-icons/io5";
+// import React, { useState } from "react";
+// import { HiMenuAlt3 } from "react-icons/hi";
+// import { IoClose } from "react-icons/io5";
 import ThemeToggle from "./ToggleTeam";
 import { useThemeStore } from "../store/theme.store";
 
 const Header = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
+  // const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const { theme } = useThemeStore();
 
-  const renderComp =
-    typeof window !== "undefined" ? window.location.pathname : "";
+  // const renderComp =
+  //   typeof window !== "undefined" ? window.location.pathname : "";
   const isActive = (link: string) => {
     if (link === "/") return pathname === "/";
     return pathname.startsWith(link);

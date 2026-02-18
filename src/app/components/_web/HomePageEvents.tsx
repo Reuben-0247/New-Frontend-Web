@@ -102,7 +102,7 @@ const HomePageEvents: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                         <img src={"/icons/cal.png"} alt="date" />
                         <small>
                           {new Date(event?.startDate || "").toLocaleDateString(
-                            undefined,
+                            "en-GB",
                             {
                               day: "numeric",
                               month: "short",

@@ -285,7 +285,7 @@ const EventsPage = () => {
                   {`No ${components.toLowerCase()} events found.`}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-4">
                   {filteredEvents?.map((event: IEvent) => {
                     const eventId = event._id || event._id || event.eventId;
                     const shareUrl = `${window.origin}/find-events/${event._id}?label=${components}`;
@@ -296,8 +296,8 @@ const EventsPage = () => {
                         className="rounded-xl  shadow-lg overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.01] h-fit  border bg-background  border-gray-200 dark:border-gray-700">
                         <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
                           <img
-                            src={event.displayImage}
-                            alt={event.title}
+                            src={event?.displayImage}
+                            alt={event?.title}
                             className="w-full h-full object-cover"
                           />
                           {event.isLive && (
