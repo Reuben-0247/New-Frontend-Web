@@ -87,7 +87,7 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
 
       <div className="">
         {showTrending ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-4">
             {filteredEvents
               .filter((ev) => ev.featuredEvent == true)
               .map((event) => {
@@ -96,14 +96,14 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                 return (
                   <div
                     key={eventId}
-                    className="rounded-xl cursor-pointer shadow-lg bg-background overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.02] h-fit w-full border  border-gray-200 dark:border-gray-700">
+                    className="rounded-xl  shadow-lg overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.01] h-fit  border bg-background  border-gray-200 dark:border-gray-700">
                     <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
                       <img
                         src={
-                          event.displayImage ||
+                          event?.displayImage ||
                           "https://via.placeholder.com/400x300"
                         }
-                        alt={event.title}
+                        alt={event?.title}
                         className="w-full h-full object-cover"
                       />
 
@@ -114,7 +114,7 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
 
                     <div className="p-2 flex flex-col gap-2  h-1/2">
                       <h3
-                        className={`text-lg font-semibold link dark:text-white text-foreground mt-2 word-break truncate `}>
+                        className={`text-[18px] font-semibold  truncate m-0  text-gray-900 dark:text-white leading-tight`}>
                         {event.title}
                       </h3>
 
@@ -190,7 +190,7 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                     <div className="p-2 w-full">
                       <Link
                         href={`/find-events/${eventId}`}
-                        className=" w-full p-2 border border-primary flex rounded-lg justify-center">
+                        className="block link cursor-pointer text-center w-full border border-primary py-2 px-4 rounded-lg mb-3">
                         view
                       </Link>
                     </div>
