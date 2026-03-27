@@ -23,7 +23,7 @@ const Reciept: React.FC<{ resData: any }> = ({ resData }) => {
           <p className="transcript">
             Your{" "}
             <strong className="strong">
-              {resData?.data?.subscription?.cycle}{" "}
+              {resData?.data?.subscription?.billingCycle}{" "}
               {resData?.data?.payment.metadata?.paymentPlan}
             </strong>{" "}
             Subscription Payment Slip
@@ -56,7 +56,7 @@ const Reciept: React.FC<{ resData: any }> = ({ resData }) => {
                 </li>
                 <li>
                   <span>Payment cycle: </span>
-                  {resData?.data?.subscription?.cycle.toUpperCase()}
+                  {resData?.data?.subscription?.billingCycle.toUpperCase()}
                 </li>
                 <li>
                   <span>Subscribed At:</span>

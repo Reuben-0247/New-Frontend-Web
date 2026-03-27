@@ -2,6 +2,7 @@ import { AxiosError } from "axios";
 import {
   CreateDestinationInput,
   IDestination,
+  IEnableDestination,
   UpdateDestinationInput,
 } from "../interfaces/destination.interface";
 import { formatError } from "@/utils/helper";
@@ -18,16 +19,15 @@ interface IProp {
   setDestinations: (data: IDestination[]) => void;
   createDestination: (
     input: CreateDestinationInput,
+    userId?: string,
   ) => Promise<IDestination | undefined>;
   updateDestination: (
     input: UpdateDestinationInput,
   ) => Promise<IDestination | undefined>;
   deleteDestination: (id: string) => Promise<boolean>;
-  enableDestination: (input: {
-    id: string;
-    enabled: boolean;
-    streamId: string;
-  }) => Promise<IDestination | undefined>;
+  enableDestination: (
+    input: IEnableDestination,
+  ) => Promise<IDestination | undefined>;
 }
 export const useDestinationStore = create<IProp>((set) => ({
   destination: null,
@@ -36,11 +36,11 @@ export const useDestinationStore = create<IProp>((set) => ({
   setLoading: (loading: boolean) => set({ loading }),
   setDestination: (destination: IDestination | null) => set({ destination }),
   setDestinations: (destinations: IDestination[]) => set({ destinations }),
-  createDestination: async (input: CreateDestinationInput) => {
+  createDestination: async (input: CreateDestinationInput, userId?: string) => {
     try {
       set({ loading: true });
       const { data } = await axiosApi.post<{ data: IDestination }>(
-        "/stream/platform",
+        `/stream/platform/${userId}`,
         input,
       );
       const newDestination = data.data;
@@ -106,16 +106,13 @@ export const useDestinationStore = create<IProp>((set) => ({
       set({ loading: false });
     }
   },
-  enableDestination: async (input: {
-    id: string;
-    enabled: boolean;
-    streamId: string;
-  }) => {
+  enableDestination: async (input: IEnableDestination) => {
     try {
       set({ loading: true });
+      const { id, streamId, ...res } = input;
       const { data } = await axiosApi.patch<{ response: IDestination }>(
-        `/stream/castr/${input.streamId}/destination/${input.id}`,
-        { enabled: input.enabled },
+        `/stream/castr/${streamId}/destination/${id}`,
+        res,
       );
       const enabledDestination = data.response;
       set((state) => ({

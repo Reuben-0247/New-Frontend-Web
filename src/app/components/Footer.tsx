@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { MailIcon } from "lucide-react";
 import { FiMapPin } from "react-icons/fi";
 import { BsInstagram, BsTwitterX, BsWhatsapp } from "react-icons/bs";
@@ -12,6 +12,17 @@ import Link from "next/link";
 const Footer = () => {
   const { theme } = useThemeStore();
 
+  const [resolvedTheme, setResolvedTheme] = useState<string | null>(null);
+
+  useEffect(() => {
+    setResolvedTheme(theme);
+  }, [theme]);
+
+  const logo =
+    resolvedTheme === "dark"
+      ? "/svgs/FERO_LOGO_light.svg"
+      : "/svgs/Fero_logo_dark.svg";
+
   return (
     <div>
       <div className="h-0.5 w-full bg-linear-to-r from-transparent via-line to-transparent"></div>
@@ -21,19 +32,11 @@ const Footer = () => {
           <div className="max-w-[220px] flex flex-col ">
             {theme === "dark" ? (
               <Link href="/" className="">
-                <img
-                  src="/svgs/FERO_LOGO_light.svg"
-                  alt="Fero Events Logo"
-                  className="h-[50px] "
-                />
+                <img src={logo} alt="Fero Events Logo" className="h-[50px] " />
               </Link>
             ) : (
               <Link href="/" className="">
-                <img
-                  src="/svgs/Fero_logo_dark.svg"
-                  alt="Fero Events Logo"
-                  className="h-[50px] "
-                />
+                <img src={logo} alt="Fero Events Logo" className="h-[50px] " />
               </Link>
             )}
             <p className="text-sm text-foreground max-w-xs leading-relaxed mt-8">

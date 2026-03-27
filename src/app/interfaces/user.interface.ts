@@ -5,7 +5,7 @@ export interface IUser {
   password?: string;
 
   email: string;
-
+  hasPaid: boolean;
   hasSubscribed?: boolean;
   paymentPlan?: string;
 

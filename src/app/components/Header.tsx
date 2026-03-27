@@ -7,18 +7,23 @@ import { usePathname } from "next/navigation";
 // import { IoClose } from "react-icons/io5";
 import ThemeToggle from "./ToggleTeam";
 import { useThemeStore } from "../store/theme.store";
+import { useEffect, useState } from "react";
 
 const Header = () => {
   // const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const { theme } = useThemeStore();
 
-  // const renderComp =
-  //   typeof window !== "undefined" ? window.location.pathname : "";
+  const [resolvedTheme, setResolvedTheme] = useState<string | null>(null);
+
+  useEffect(() => {
+    setResolvedTheme(theme);
+  }, [theme]);
   const isActive = (link: string) => {
     if (link === "/") return pathname === "/";
     return pathname.startsWith(link);
   };
+
   const navItems: { label: string; link: string }[] = [
     {
       label: "Home",
@@ -38,14 +43,19 @@ const Header = () => {
     },
   ];
 
+  const logo =
+    resolvedTheme === "dark"
+      ? "/svgs/FERO_LOGO_light.svg"
+      : "/svgs/Fero_logo_dark.svg";
+
   return (
     <header className="w-full md:flex justify-center  md:bg-transparent">
       <div className=" container mx-auto px-2 md:px-6 flex justify-center w-full">
         <nav className=" w-full  py-3 flex justify-between   items-center">
-          {theme === "dark" ? (
+          {resolvedTheme ? (
             <Link href="/" className="">
               <img
-                src="/svgs/FERO_LOGO_light.svg"
+                src={logo}
                 alt="Fero Events Logo"
                 className="h-[70px] object-cover"
               />
@@ -53,7 +63,7 @@ const Header = () => {
           ) : (
             <Link href="/" className="">
               <img
-                src="/svgs/Fero_logo_dark.svg"
+                src={logo}
                 alt="Fero Events Logo"
                 className="h-[70px] object-cover"
               />

@@ -84,3 +84,7 @@ const page = () => {
 };
 
 export default page;
+
+// https://api.castr.com/metrics/streams/69ab2ce24370f87e37bf8ac0/bandwidth?startTime=1765472045000&endTime=1772827638010
+// Request Method
+// GET

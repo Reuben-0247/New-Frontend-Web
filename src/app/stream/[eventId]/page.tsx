@@ -9,6 +9,7 @@ import StreamInfo from "@/app/components/stream-comps/StreamInfo";
 import WebcamP from "@/app/components/stream-comps/Webcam";
 import { IStreamData, IStreamStats } from "@/app/interfaces/castr.interface";
 import { IEvent } from "@/app/interfaces/event.interface";
+import { useAuthStore } from "@/app/store/auth.store";
 import { useEventStore } from "@/app/store/event.store";
 import { Button } from "@/components/ui/button";
 import axiosApi from "@/lib/axios";
@@ -61,7 +62,7 @@ const StreamPage = () => {
   const [isPublished, setIsPublished] = useState(true);
   const [loadingT, setLoadingT] = useState(false);
   const [enabled, setEnabled] = useState(false);
-
+  const [bandWidth, setBandWidth] = useState("");
   const [videoSrc, setVideoSrc] = useState("Streaming Sofware");
   const {
     event,
@@ -72,6 +73,7 @@ const StreamPage = () => {
     goLiveEvent,
     endStream,
   } = useEventStore();
+  const { auth } = useAuthStore();
   const router = useRouter();
   const [isLive, setIslive] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -97,7 +99,7 @@ const StreamPage = () => {
       setLoadingS(true);
 
       const { data } = await axiosApi.post<{ stream: IStreamData }>(
-        `/stream/castr/create`,
+        `/stream/castr/create/${auth?._id}`,
         body,
       );
       setStreamData(data?.stream);
@@ -115,6 +117,7 @@ const StreamPage = () => {
       setLoadingS(false);
     }
   };
+
   const goLive = async () => {
     // setIsLoading(true);
     await goLiveEvent(event?._id || "");
@@ -126,7 +129,7 @@ const StreamPage = () => {
   };
 
   const endEventStream = async () => {
-    endStream(event?._id || "");
+    endStream(event?._id || "", auth?._id || "");
     setOpenModal(false);
   };
   useEffect(() => {
@@ -137,13 +140,15 @@ const StreamPage = () => {
     let cancelled = false;
     const getStreamStats = async () => {
       try {
-        const { data } = await axiosApi.get<{ response: IStreamStats }>(
-          `/stream/castr/${castrId}/stats`,
-        );
+        const { data } = await axiosApi.get<{
+          response: IStreamStats;
+          usedBandwidth: string;
+        }>(`/stream/castr/${castrId}/stats/${auth?._id}`);
         // console.log(data.response);
         if (!cancelled) {
           setStreamStats(data.response);
         }
+        setBandWidth(data?.usedBandwidth);
         //  setStats(response?.data?.response);
       } catch (error) {
         const axiosError = error as AxiosError;
@@ -162,7 +167,7 @@ const StreamPage = () => {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [streamData?.castrStreamId, event?.castrStreamId]);
+  }, [streamData?.castrStreamId, event?.castrStreamId, auth?._id]);
 
   useEffect(() => {
     if (videoSrc === "Streaming Sofware") {
@@ -190,6 +195,8 @@ const StreamPage = () => {
         abr: false,
         cloud_recording: checked,
       },
+      name: event?.title,
+      enabled: true,
     };
 
     try {
@@ -214,6 +221,26 @@ const StreamPage = () => {
       setLoadingT(false);
     }
   };
+
+  // const saveVod = async () => {
+  //   try {
+  //     const { data } = await axiosApi.post(
+  //       `/stream/save-temp_recs/${event?._id}/${auth?._id}/${event?.castrStreamId}`,
+  //     );
+  //     console.log(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  // const getVod = async () => {
+  //   try {
+  //     const { data } = await axiosApi.get(`/stream/${auth?._id}/recodings`);
+  //     console.log(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const playBackUrl = streamData?.playBack?.embedUrl;
 
@@ -287,7 +314,7 @@ const StreamPage = () => {
           </div>
         </div>
         <div className="stream-tab md:w-[50%] w-full p-4 bg-[#151e37]">
-          <StreamInfo stats={streamStats} />
+          <StreamInfo stats={streamStats} usedBandwidth={bandWidth} />
           <hr />
           {isPublished ? (
             <div className="w-full h-[300px] relative flex mt-2 rounded-md items-center border justify-center bg-[#151E37] ">
@@ -357,20 +384,22 @@ const StreamPage = () => {
                 </p>
               ))}
             </div>
-            <div className="flex items-center ml-2 gap-2">
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  checked={enabled}
-                  disabled={loadingT}
-                  onChange={enableCloudRecord}
-                />
-                <div className="w-8 h-[19px] border-[#0062FF] peer-checked:border-[#cc0000] border-2 peer-focus:outline-none peer-focus:ring-2 peer-focus:bg-[#0f1525] rounded-full peer peer-checked:bg-[#cc0000] p-1 transition-all duration-300"></div>
-                <div className="absolute left-[3px] top-0.4 bg-[#FFFFFF] w-[13px] h-[13px] rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
-              </label>
-              <small className="text-white">Recording</small>
-            </div>
+            {auth?.hasSubscribed && (
+              <div className="flex items-center ml-2 gap-2">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={enabled}
+                    disabled={loadingT}
+                    onChange={enableCloudRecord}
+                  />
+                  <div className="w-8 h-[19px] border-[#0062FF] peer-checked:border-[#cc0000] border-2 peer-focus:outline-none peer-focus:ring-2 peer-focus:bg-[#0f1525] rounded-full peer peer-checked:bg-[#cc0000] p-1 transition-all duration-300"></div>
+                  <div className="absolute left-[3px] top-0.4 bg-[#FFFFFF] w-[13px] h-[13px] rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
+                </label>
+                <small className="text-white">Recording</small>
+              </div>
+            )}
           </div>
           <div className="vsrc flex justify-between items-center   my-4">
             {active && (

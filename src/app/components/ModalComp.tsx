@@ -23,6 +23,7 @@ interface ModalProps {
   loading?: boolean;
   saveIcon?: React.ReactNode;
   actionType?: "create" | "update" | "delete";
+  isLink?: boolean;
 }
 
 const ModalComp: React.FC<ModalProps> = ({

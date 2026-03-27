@@ -41,8 +41,10 @@ import { Input } from "@/components/ui/input";
 import { useEventStore } from "@/app/store/event.store";
 import { toast } from "react-toastify";
 import { Switch } from "@/components/ui/switch";
+import { useAuthStore } from "@/app/store/auth.store";
 
 const DestinationsPage: React.FC = () => {
+  const { auth } = useAuthStore();
   const [showAdd, setShowAdd] = useState(false);
   const [adding, setAdding] = useState(false);
   const [enabled, setEnabled] = useState<Record<string, boolean>>({});
@@ -65,7 +67,7 @@ const DestinationsPage: React.FC = () => {
     deleteDestination,
     updateDestination,
   } = useDestinationStore();
-  const { streamData, event } = useEventStore();
+  const { streamData } = useEventStore();
 
   useEffect(() => {
     const initialState: Record<string, boolean> = {};
@@ -129,13 +131,13 @@ const DestinationsPage: React.FC = () => {
   };
 
   const onSubmit = async () => {
-    if (!streamData?.castrStreamId || !event?.castrStreamId) {
-      toast.error(
-        "Stream is not live. Please Please ensure you have started streaming.",
-      );
-      return;
-    }
-    const success = await createDestination(input);
+    // if (!streamData?.castrStreamId || !event?.castrStreamId) {
+    //   toast.error(
+    //     "Stream is not live. Please Please ensure you have started streaming.",
+    //   );
+    //   return;
+    // }
+    const success = await createDestination(input, auth?._id);
     if (success) {
       setAdding(false);
       setShowAdd(false);
@@ -160,7 +162,13 @@ const DestinationsPage: React.FC = () => {
     }
   };
 
-  const onEnableDestination = async (checked: boolean, id: string) => {
+  const onEnableDestination = async (
+    checked: boolean,
+    id: string,
+    server: string,
+    key: string,
+    name: string,
+  ) => {
     if (!streamData?.castrStreamId) {
       toast.warn("Please create a stream...");
       return;
@@ -172,6 +180,9 @@ const DestinationsPage: React.FC = () => {
         streamId: streamData.castrStreamId,
         id,
         enabled: checked,
+        server,
+        key,
+        name,
       });
     } catch (error) {
       console.log(error);
@@ -426,22 +437,25 @@ const DestinationsPage: React.FC = () => {
                           checked={!!enabled[destination._id]}
                           disabled={loadingMap[destination._id]}
                           onCheckedChange={(checked) =>
-                            onEnableDestination(checked, destination._id)
+                            onEnableDestination(
+                              checked,
+                              destination._id,
+                              destination?.serverUrl,
+                              destination?.serverKey,
+                              destination?.name,
+                            )
                           }
                           onClick={(e) => e.stopPropagation()}
                           onPointerDown={(e) => e.stopPropagation()}
                         />
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              type="button"
+                            <span
                               onClick={(e) => e.stopPropagation()}
                               onPointerDown={(e) => e.stopPropagation()}
                               className="cursor-pointer">
                               <EllipsisVertical size={15} />
-                            </Button>
+                            </span>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
                             align="end"

@@ -40,8 +40,9 @@ import {
 import ModalComp from "../ModalComp";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
-import { Card, CardContent } from "@/components/ui/card";
+// import { Card, CardContent } from "@/components/ui/card";
 import { PhotoProvider, PhotoView } from "react-photo-view";
+import Link from "next/link";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -86,7 +87,7 @@ const EventBoardComp = () => {
   });
   const [openItem, setOpenItem] = useState<string | undefined>(fields[0]?.id);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [view, setView] = useState(false);
+  // const [view, setView] = useState(false);
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -205,18 +206,35 @@ const EventBoardComp = () => {
   return (
     <div>
       {fields.length === 0 && boards.length === 0 && (
-        <div className="w-full flex flex-col items-center mt-10">
-          <Button
-            variant={"outline"}
-            onClick={addBoard}
-            className="cursor-pointer">
-            <Plus />
-            <span className="">Add Board</span>
-          </Button>
-          <p className="text-foreground text-center w-[70%] mt-3 text-sm">
-            Got materials for your event? Upload them here—slides, guides,
-            links—and keep your audience engaged and informed.
-          </p>
+        <div>
+          {auth?.hasSubscribed ? (
+            <div className="w-full flex flex-col items-center mt-10">
+              <Button
+                variant={"outline"}
+                onClick={addBoard}
+                className="cursor-pointer">
+                <Plus />
+                <span className="">Add Board</span>
+              </Button>
+              <p className="text-foreground text-center w-[70%] mt-3 text-sm">
+                Got materials for your event? Upload them here—slides, guides,
+                links—and keep your audience engaged and informed.
+              </p>
+            </div>
+          ) : (
+            <div className="w-full flex flex-col items-center mt-10">
+              <Link
+                href={"/pricing"}
+                className="cursor-pointer flex items-center px-3 py-1 bg-primary text-white rounded-md">
+                <Plus />
+                <span className="">Subscribe!</span>
+              </Link>
+              <p className="text-foreground text-center w-[70%] mt-3 text-sm">
+                Sbuscribe to Upload them here—slides, guides, links—and keep
+                your audience engaged and informed.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

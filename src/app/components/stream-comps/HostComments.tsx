@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect, useRef } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,8 @@ import ChatSend from "./ChatSend";
 import { useChat } from "@/app/hooks/useChat";
 import styled from "styled-components";
 import { SendHorizonal } from "lucide-react";
+import ModalComp from "../ModalComp";
+import Link from "next/link";
 
 interface Props {
   eventId: string;
@@ -30,7 +33,7 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
 
   const [message, setMessage] = useState("");
   const [showPicker, setShowPicker] = useState(false);
-
+  const [showSubModal, setShowSubModal] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const pickerRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -63,6 +66,9 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!auth?.hasSubscribed || !auth?.hasPaid) {
+      return setShowSubModal(true);
+    }
     if (!message.trim()) return;
 
     await sendMessage(message.trim());
@@ -73,6 +79,29 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
 
   return (
     <Wrapper>
+      <ModalComp
+        open={showSubModal}
+        onClose={() => setShowSubModal(false)}
+        header="Subscribe!">
+        <div className="w-full flex flex-col items-center mt-10">
+          <img
+            src={`/svgs/FERO_LOGO_light.svg`}
+            alt="fero's logo"
+            width={110}
+            height={30}
+            className="mb-8"
+          />
+          <Link
+            href={"/pricing"}
+            className="cursor-pointer flex items-center px-3 py-1 bg-primary text-white rounded-md">
+            {/* <Plus /> */}
+            <span className="">Subscribe!</span>
+          </Link>
+          <p className="text-foreground text-center w-[70%] mt-3 text-sm">
+            Sbuscribe to share ur comments.
+          </p>
+        </div>
+      </ModalComp>
       <Card className="w-full bg-background pt-4 pb-0">
         {comments.length < 1 && (
           <CardHeader>
@@ -114,7 +143,12 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
                     type="button"
                     variant="ghost"
                     className="cursor-pointer text-2xl"
-                    onClick={() => setShowPicker((p) => !p)}>
+                    onClick={() => {
+                      if (!auth?.hasSubscribed || !auth?.hasPaid) {
+                        return setShowSubModal(true);
+                      }
+                      setShowPicker((p) => !p);
+                    }}>
                     😊
                   </Button>
 
@@ -137,6 +171,11 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
 
                 <Input
                   value={message}
+                  onFocus={() => {
+                    if (!auth?.hasSubscribed || !auth?.hasPaid) {
+                      return setShowSubModal(true);
+                    }
+                  }}
                   onChange={(e) => {
                     setMessage(e.target.value);
                     sendTyping();
