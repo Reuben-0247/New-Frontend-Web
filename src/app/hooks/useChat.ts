@@ -91,6 +91,8 @@ export const useChat = (eventId: string, userId?: string) => {
   useEffect(() => {
     if (!eventId) return;
 
+    if (!auth?.hasSubscribed || !auth?.hasPaid) return;
+
     const interval = setInterval(async () => {
       try {
         const { data } = await axiosApi.get<{

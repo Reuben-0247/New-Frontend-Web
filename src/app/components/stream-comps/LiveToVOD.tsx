@@ -11,8 +11,10 @@ import { toast, ToastContent } from "react-toastify";
 import { Spinner } from "../Spinner";
 import { formatError } from "@/utils/helper";
 import { AxiosError } from "axios";
+import { useAuthStore } from "@/app/store/auth.store";
 
 const LiveToVOD = () => {
+  const { auth } = useAuthStore();
   const [enabled, setEnabled] = useState(false);
   const [vodData, setVodData] = useState<IRecording[]>([]);
   // const [show, setShow] = useState(false);
@@ -23,107 +25,43 @@ const LiveToVOD = () => {
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   const [showThumbs, setShowThumbs] = useState<Record<string, boolean>>({});
   useEffect(() => {
-    if (!event?.castrStreamId) return;
     (async () => {
-      setLoading(true);
-      try {
-        const { data } = await axiosApi.get<{ response: IRecording[] }>(
-          `/stream/castr/${event.castrStreamId}/retrieve_temp_recordings`,
-        );
-        if (data?.response) {
-          setVodData(data.response);
+      if (event?.castrStreamId !== null && event?.isLive == true) {
+        setLoading(true);
+        try {
+          const { data } = await axiosApi.get<IRecording[]>(
+            `/stream/castr/${event?.castrStreamId}/retrieve_temp_recordings`,
+          );
+          if (data) {
+            setVodData(data || []);
+          }
+        } catch (err) {
+          setLoading(false);
+          console.error("Error fetching users:", err);
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        setLoading(false);
-        console.error("Error fetching users:", err);
-      } finally {
-        setLoading(false);
+      } else {
+        setLoading(true);
+        try {
+          const { data } = await axiosApi.get(`/stream/${auth?._id}/recodings`);
+
+          if (data) {
+            setVodData(data || []);
+          }
+        } catch (err) {
+          setLoading(false);
+          console.error("Error fetching users:", err);
+        } finally {
+          setLoading(false);
+        }
       }
     })();
-  }, [event?.castrStreamId]);
-
+  }, [event?.castrStreamId, auth?._id, event?.isLive]);
+  // console.log(data);
   // const enableVod = async () => {
   //   setEnabled(!enabled);
   // };
-
-  // const videoData = [
-  //   {
-  //     id: "tete",
-  //     video: "/videos/Introduction.mp4",
-  //     minutes: "2hrs 80mins 5secs",
-  //     playIcon: "/images/play-icon.png",
-  //     bg: "/images/play-tumb.jpg",
-  //     videoName: "CONFIG Watch Party, PH Chapter",
-  //     btn: (
-  //       <p className="flex items-center gap-2 m-0">
-  //         <span>Download stream</span>
-  //         <img src="/images/Vector.png" alt="" />
-  //       </p>
-  //     ),
-  //     share: (
-  //       <p className="flex items-center gap-2 m-0">
-  //         <span>Share</span> <img src="/images/share.png" alt="" />
-  //       </p>
-  //     ),
-  //   },
-  //   {
-  //     id: "tetew",
-  //     video: "/videos/Introduction.mp4",
-  //     minutes: "2hrs 80mins 5secs",
-  //     playIcon: "/images/play-icon.png",
-  //     bg: "/images/play-tumb.jpg",
-  //     videoName: "CONFIG Watch Party, PH Chapter",
-  //     btn: (
-  //       <p className="flex items-center gap-2 m-0">
-  //         <span>Download stream</span>
-  //         <img src="/images/Vector.png" alt="" />
-  //       </p>
-  //     ),
-  //     share: (
-  //       <p className="flex items-center gap-2 m-0">
-  //         <span>Share</span> <img src="/images/share.png" alt="" />
-  //       </p>
-  //     ),
-  //   },
-  //   {
-  //     id: "teteee",
-  //     video: "/videos/Introduction.mp4",
-  //     minutes: "2hrs 80mins 5secs",
-  //     playIcon: "/images/play-icon.png",
-  //     bg: "/images/play-tumb.jpg",
-  //     videoName: "CONFIG Watch Party, PH Chapter",
-  //     btn: (
-  //       <p className="flex items-center gap-2 m-0">
-  //         <span>Download stream</span>
-  //         <img src="/images/Vector.png" alt="" />
-  //       </p>
-  //     ),
-  //     share: (
-  //       <p className="flex items-center gap-2 m-0">
-  //         <span>Share</span> <img src="/images/share.png" alt="" />
-  //       </p>
-  //     ),
-  //   },
-  //   {
-  //     id: "teterr",
-  //     video: "/videos/Introduction.mp4",
-  //     minutes: "2hrs 80mins 5secs",
-  //     playIcon: "/images/play-icon.png",
-  //     bg: "/images/play-tumb.jpg",
-  //     videoName: "CONFIG Watch Party, PH Chapter",
-  //     btn: (
-  //       <p className="flex items-center gap-2 m-0">
-  //         <span>Download stream</span>
-  //         <img src="/images/Vector.png" alt="" />
-  //       </p>
-  //     ),
-  //     share: (
-  //       <p className="flex items-center gap-2 m-0">
-  //         <span>Share</span> <img src="/images/share.png" alt="" />
-  //       </p>
-  //     ),
-  //   },
-  // ];
 
   const handleShare = (eventtitle: string, eventId: string) => {
     const URL = `${window.location.origin}/Live-Event/${eventtitle}/${eventId}`;
@@ -213,6 +151,13 @@ const LiveToVOD = () => {
   //     }
   //   }
   // };
+  function formatClock(seconds: number) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+
+    return [h, m, s].map((v) => v.toString().padStart(2, "0")).join(":");
+  }
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -254,26 +199,28 @@ const LiveToVOD = () => {
             </div>
           </div>
           <div>
-            {vodData.length === 0 ? (
+            {!vodData.length ? (
               <p className="text-foreground mt-6 mb-4 font-nuni mx-auto w-full text-[14px] text-center">
                 No recordings available yet.
               </p>
             ) : (
               <div className="videos ">
-                {vodData.map((v, i) => (
+                {vodData?.map((v, i) => (
                   <div key={i} className=" inner relative">
                     <div className="src">
                       {showThumbs[v?.recording_id] !== false && (
                         <div
                           className="tumb"
                           style={{
-                            backgroundImage: `url(${"/images/play-tumb.jpg"})`,
+                            backgroundImage: `url(${v?.download_url || "/images/play-tumb.jpg"})`,
                             backgroundSize: "cover",
                             backgroundPosition: "center",
                             backgroundRepeat: "no-repeat",
                           }}>
                           <div className="opacity">
-                            <div className="time-label">{v.duration}</div>
+                            <div className="time-label">
+                              {formatClock(v.duration)}
+                            </div>
                             <button
                               className="cursor-pointer"
                               onClick={() => handlePauseVideo(v?.recording_id)}>

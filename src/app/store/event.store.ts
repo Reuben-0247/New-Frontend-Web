@@ -14,12 +14,14 @@ import { IStreamData } from "../interfaces/castr.interface";
 interface IProp {
   events: IEvent[];
   event: IEvent | null;
+  liveEvent: IEvent | null;
   boards: Iboard[];
   board: Iboard | null;
   streamData: IStreamData | null;
   setStreamData: (data: IStreamData | null) => void;
   setEvents: (data: IEvent[]) => void;
   setEvent: (data: IEvent | null) => void;
+  setLiveEvent: (data: IEvent | null) => void;
   setBoard: (data: Iboard | null) => void;
   setBoards: (data: Iboard[]) => void;
   loading: boolean;
@@ -36,7 +38,7 @@ interface IProp {
   publishEvent: (id: string) => Promise<IEvent | boolean>;
   goLiveEvent: (eventId: string) => Promise<IEvent | boolean>;
 
-  endStream: (eventId: string) => Promise<IEvent | boolean>;
+  endStream: (eventId: string, userId: string) => Promise<IEvent | boolean>;
   createBoard: (
     input: FormData,
     eventId: string,
@@ -47,6 +49,7 @@ interface IProp {
 
 export const useEventStore = create<IProp>((set) => ({
   event: null,
+  liveEvent: null,
   streamData: null,
   events: [],
   boards: [],
@@ -57,6 +60,7 @@ export const useEventStore = create<IProp>((set) => ({
   setLoading: (loading: boolean) => set({ loading }),
   setStreamData: (streamData: IStreamData | null) => set({ streamData }),
   setEvent: (event: IEvent | null) => set({ event }),
+  setLiveEvent: (liveEvent: IEvent | null) => set({ liveEvent }),
   setEvents: (events: IEvent[]) => set({ events }),
   createEvent: async (
     input: CreateEventFormInput,
@@ -210,10 +214,13 @@ export const useEventStore = create<IProp>((set) => ({
     }
   },
 
-  endStream: async (eventId: string): Promise<IEvent | boolean> => {
+  endStream: async (
+    eventId: string,
+    userId: string,
+  ): Promise<IEvent | boolean> => {
     try {
       set({ loading: true });
-      const { data } = await axiosApi.patch(`/stream/end-streaming`, {
+      const { data } = await axiosApi.patch(`/stream/end-streaming/${userId}`, {
         eventId: eventId,
         streamType: "castr",
       });
@@ -226,9 +233,7 @@ export const useEventStore = create<IProp>((set) => ({
       // const axiosError = error as AxiosError;
       // const formattedError = formatError(axiosError);
       if (error) {
-        toast.error(
-          "To end this stream, please stop the stream on your broadcasting software",
-        );
+        toast.error("Failed to end streaming");
       }
       throw error;
     } finally {

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 // import Link from "next/link";
@@ -23,14 +24,21 @@ import { Bell, Menu } from "lucide-react";
 import ThemeToggle from "../../ToggleTeam";
 import { useAuthStore } from "@/app/store/auth.store";
 import { useThemeStore } from "@/app/store/theme.store";
+import { useEffect, useState } from "react";
 // import NotificationModal from "./modal/NotificationModal";
 
-const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
+const DashboardHeader: React.FC<{ toggleAside?: () => void }> = ({
   toggleAside,
 }) => {
   const router = useRouter();
   const { auth } = useAuthStore();
   const { theme } = useThemeStore();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const logout = () => {
     Cookies.remove(TOKEN_NAME);
@@ -42,62 +50,60 @@ const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
     router.push("/login");
   };
 
+  const logo =
+    mounted && theme === "dark"
+      ? "/svgs/FERO_LOGO_light.svg"
+      : "/svgs/Fero_logo_dark.svg";
   return (
-    <header className="flex  h-[8vh] justify-between w-full items-center gap-4  border-b-line border-b bg-background  px-4  lg:px-6 dash-header">
+    <div className="flex  h-[8vh] justify-between w-full items-center gap-4  border-b-line border-b bg-background  px-4  lg:px-6 dash-header">
       <div className="flex items-center gap-4 ">
         <button onClick={toggleAside}>
           <span className="mr-12  md:hidden  rounded-full  shadow-lg flex items-center justify-center text-2xl  transition">
             <Menu />
           </span>
         </button>
-        {theme === "dark" ? (
-          <div className="w-max">
-            <img
-              src={`/svgs/FERO_LOGO_light.svg`}
-              className="md:hidden"
-              width={100}
-              height={100}
-              alt="checkCITE logo"
-            />
-          </div>
-        ) : (
-          <div className="w-max">
-            <img
-              src={`/svgs/Fero_logo_dark.svg`}
-              className="md:hidden"
-              width={100}
-              height={100}
-              alt="checkCITE logo"
-            />
-          </div>
-        )}
+
+        <div className="w-max">
+          <img
+            src={logo}
+            className="md:hidden"
+            width={100}
+            height={100}
+            alt="logo"
+          />
+        </div>
       </div>
       <div className="text-foreground md:block hidden font-bold ">
         <p className="flex gap-2">
-          <span>{auth?.firstName}</span> <span>{auth?.lastName}</span>
+          <span>{mounted ? auth?.firstName : ""}</span>
+          <span>{mounted ? auth?.lastName : ""}</span>
         </p>
       </div>
 
       <div className="flex items-center gap-6 justify-end w-full">
         <Bell className="text-primary cursor-pointer" />
-        <ThemeToggle />
+        {mounted && <ThemeToggle />}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex min-w-0 md:gap-x-4 outline-none cursor-pointer">
               <div className="flex items-center  text-foreground justify-center h-10 w-10 rounded-full">
                 <img
-                  src={auth?.profilePhotoUrl || "/images/g2.jpg"}
+                  src={
+                    mounted
+                      ? auth?.profilePhotoUrl || "/images/g2.jpg"
+                      : "/images/g2.jpg"
+                  }
                   alt="image"
                   className="h-full w-full rounded-full object-cover"
                 />
               </div>
               <div className="min-w-0 flex-auto">
                 <p className="hidden md:flex text-md font-semibold leading-6 text-foreground mb-0">
-                  {auth?.firstName} {auth?.lastName}
+                  {mounted ? `${auth?.firstName} ${auth?.lastName}` : ""}
                 </p>
                 <p className="hidden md:flex truncate text-xs leading-5 text-foreground">
-                  {auth?.email}
+                  {mounted ? auth?.email : ""}
                 </p>
               </div>
               <span className="sr-only">Toggle user menu</span>
@@ -107,7 +113,10 @@ const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
             align="end"
             className="flex bg-background flex-col">
             <DropdownMenuLabel className="text-foreground">
-              <span className="text-foreground"> {auth?.email}</span>
+              <span className="text-foreground">
+                {" "}
+                {mounted ? auth?.email : ""}
+              </span>
             </DropdownMenuLabel>
 
             <DropdownMenuSeparator />
@@ -135,8 +144,8 @@ const MainHeader: React.FC<{ toggleAside?: () => void }> = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>
+    </div>
   );
 };
 
-export default MainHeader;
+export default DashboardHeader;

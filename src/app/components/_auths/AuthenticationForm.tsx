@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,14 +14,13 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { toast, ToastContent } from "react-toastify";
-// import { api } from "@/lib/axios";
-// import Cookies from "js-cookie";
-// import { TOKEN_NAME, USER_ID } from "@/utils/constant";
+import { api } from "@/lib/axios";
 import { AxiosError } from "axios";
 import { formatError } from "@/utils/helper";
 import Link from "next/link";
 
 const formSchema = z.object({
+  email: z.string(),
   otp: z
     .string()
     .length(6, { message: "OTP must be exactly 6 digits." })
@@ -31,39 +30,30 @@ const formSchema = z.object({
 const AuthenticationForm = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
-  // const [otpAttempts, setOtpAttempts] = useState(0);
   const [loading, setLoading] = useState(false);
-  // const router = useRouter();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { otp: "" },
+    defaultValues: { otp: "", email: email || "" },
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values);
     try {
       setLoading(true);
-      // const { data } = await api.post("/auth/verify-otp", values);
-      // if (data) {
-      //   toast.success("OTP verified successfully!");
-      //   Cookies.set(TOKEN_NAME, data.token);
-      //   Cookies.set(USER_ID, data.id);
-      //   setLoading(false);
-      //   if (data.role === "Inspector") {
-      //     router.push("/inspections");
-      //   } else if (data.role === "Handler") {
-      //     router.push("/issues");
-      //   } else {
-      //     router.push("/dashboard");
-      //   }
-      // }
+      const { data } = await api.post("/auth/verify-email", values);
+      if (data) {
+        toast.success("OTP verified successfully!");
+
+        setLoading(false);
+        router.push("/login");
+      }
     } catch (error) {
       console.error("OTP Verification Error:", error);
       const axiosError = error as AxiosError;
       const formattedError = formatError(axiosError);
       toast.error(formattedError?.message as ToastContent);
-      // setOtpAttempts((prev) => prev + 1);
     } finally {
       setLoading(false);
     }

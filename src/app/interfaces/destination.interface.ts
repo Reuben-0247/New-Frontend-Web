@@ -8,14 +8,20 @@ export interface IDestination {
   updatedAt: Date;
   enabled: boolean;
 }
-
+export interface IEnableDestination {
+  id: string;
+  enabled: boolean;
+  streamId: string;
+  name: string;
+  server: string;
+  key: string;
+}
 export interface CreateDestinationInput {
   name: string;
   serverUrl: string;
   serverKey: string;
 }
 
-export interface UpdateDestinationInput
-  extends Partial<CreateDestinationInput> {
+export interface UpdateDestinationInput extends Partial<CreateDestinationInput> {
   _id: string;
 }

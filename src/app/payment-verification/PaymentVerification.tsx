@@ -86,7 +86,7 @@ const PaymentVerification = () => {
           goHome();
         }}
         saveText="Continue"
-        header="">
+        header="Cancel Printing">
         <div className="modal-body">
           Are you sure you want to go back without printing?
         </div>

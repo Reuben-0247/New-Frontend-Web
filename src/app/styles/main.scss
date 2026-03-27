@@ -1,6 +1,7 @@
 @use "react-photo-view/dist/react-photo-view.css";
 
 @use "./reciept-style.scss";
+@use "./payment.scss";
 
 @media (max-width: 768px) {
   .aside {

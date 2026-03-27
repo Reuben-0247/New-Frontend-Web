@@ -75,7 +75,7 @@ const EventSlide: React.FC<{ events: IEvent[] }> = ({ events }) => {
 export default EventSlide;
 
 const Wrapper = styled.div`
-  width: 100%;
+  width: 90%;
   overflow: hidden;
   position: relative;
 
