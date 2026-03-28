@@ -125,7 +125,7 @@ export default function DashboardLayout({
   ]);
 
   useEffect(() => {
-    if (!auth?._id) return;
+    if (!auth?.hasLiveEvent) return;
     const getLiveEvent = async () => {
       try {
         const { data } = await axiosApi.get<IEvent>(
@@ -136,9 +136,8 @@ export default function DashboardLayout({
         console.error("Error fetching stream stats:", error);
       }
     };
-
     getLiveEvent();
-  }, [setLiveEvent, auth?._id]);
+  }, [setLiveEvent, auth?._id, auth?.hasLiveEvent]);
 
   useEffect(() => {
     if (!auth?._id) return;
