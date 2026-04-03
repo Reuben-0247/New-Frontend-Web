@@ -1,3 +1,5 @@
+import { UsageChart } from "./Chart";
+
 type UsageData = {
   label: string;
   used: number;
@@ -39,7 +41,7 @@ export const ProgressBar = ({ label, used, total, color }: UsageData) => {
         </span>
       </div>
 
-      <div className="w-full h-3 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+      <div className="w-full h-5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
         <div
           className={`h-full ${color} transition-all duration-500 rounded-full`}
           style={{ width: `${percentage}%` }}
@@ -56,10 +58,10 @@ export const ProgressBar = ({ label, used, total, color }: UsageData) => {
 export const UsageProgress = ({ granted, used }: Props) => {
   if (!granted || !used) return null;
 
-  const remaining = {
-    storageGB: Math.max(granted.storageGB - used.storageGB, 0),
-    bandwidthGB: Math.max(granted.bandwidthGB - used.bandwidthGB, 0),
-  };
+  // const remaining = {
+  //   storageGB: Math.max(granted.storageGB - used.storageGB, 0),
+  //   bandwidthGB: Math.max(granted.bandwidthGB - used.bandwidthGB, 0),
+  // };
 
   return (
     <div className="space-y-6">
@@ -83,46 +85,20 @@ export const UsageProgress = ({ granted, used }: Props) => {
         </div>
       </div>
 
-      <div>
-        <h3 className="text-sm font-semibold mb-3 text-foreground">Used</h3>
+      <div className="grid grid-cols-2 gap-6">
+        <UsageChart
+          label="Storage"
+          used={used.storageGB}
+          total={granted.storageGB}
+          type="doughnut"
+        />
 
-        <div className="space-y-4">
-          <ProgressBar
-            label="Storage"
-            used={used.storageGB}
-            total={granted.storageGB}
-            color="bg-blue-600"
-          />
-
-          <ProgressBar
-            label="Bandwidth"
-            used={used.bandwidthGB}
-            total={granted.bandwidthGB}
-            color="bg-purple-600"
-          />
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-sm font-semibold mb-3 text-foreground">
-          Remaining
-        </h3>
-
-        <div className="space-y-4">
-          <ProgressBar
-            label="Storage"
-            used={remaining.storageGB}
-            total={granted.storageGB}
-            color="bg-green-500"
-          />
-
-          <ProgressBar
-            label="Bandwidth"
-            used={remaining.bandwidthGB}
-            total={granted.bandwidthGB}
-            color="bg-emerald-500"
-          />
-        </div>
+        <UsageChart
+          label="Bandwidth"
+          used={used.bandwidthGB}
+          total={granted.bandwidthGB}
+          type="pie"
+        />
       </div>
     </div>
   );
