@@ -47,7 +47,7 @@ function PricingPage() {
             label: (
               <p>
                 Cloud storage{" "}
-                <span className="text-yellow-300 font-bold">(100GB)</span>
+                <span className="text-yellow-500 font-bold">(100GB)</span>
               </p>
             ),
             value: true,
@@ -56,7 +56,7 @@ function PricingPage() {
             label: (
               <p>
                 Allocated bandwidth{" "}
-                <span className="text-yellow-300  font-bold">
+                <span className="text-yellow-500  font-bold">
                   {isMonthly ? "(150GB)" : "(1.8TB)"}
                 </span>
               </p>
@@ -67,7 +67,7 @@ function PricingPage() {
             label: (
               <p>
                 Multiple stream{" "}
-                <span className="text-yellow-300 font-bold">
+                <span className="text-yellow-500 font-bold">
                   {isMonthly ? "(5)" : "(6)"}
                 </span>{" "}
                 destinations

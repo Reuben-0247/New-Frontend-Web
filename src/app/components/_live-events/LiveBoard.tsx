@@ -138,7 +138,7 @@ const LiveBoard: React.FC<{ event: IEvent | null }> = ({ event }) => {
                 {board.type === "note" && (
                   <div
                     dangerouslySetInnerHTML={{ __html: board.content }}
-                    className="prose prose-invert md:w-[400px]! w-full p-2 mt-2 wrap-break-word whitespace-normal overflow-auto"></div>
+                    className="prose prose-invert px-4 w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full p-2 mt-2 wrap-break-word whitespace-normal"></div>
                 )}
 
                 {board.type === "document" && (

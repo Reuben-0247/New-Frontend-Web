@@ -43,7 +43,7 @@ const formSchema = z.object({
   }),
 });
 
-const LoginComp: React.FC<{ token: string }> = ({ token }) => {
+const LoginComp: React.FC<{ token?: string }> = ({ token }) => {
   const searchParams = useSearchParams();
 
   const redirect = searchParams.get("redirect");

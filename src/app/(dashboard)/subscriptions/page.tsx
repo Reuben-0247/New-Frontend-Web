@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { UsageProgress } from "@/app/components/_dashboard/GrantProgress";
 import { IPayment } from "@/app/interfaces/payment.interface";
@@ -61,7 +62,7 @@ const SubscriptionPage = () => {
         console.error("Error fetching subs", error);
       }
     })();
-  }, [auth?._id, setPayments, setSub, subscription, payments]);
+  }, [auth?._id, setPayments, setSub]);
 
   return (
     <div>

@@ -87,11 +87,11 @@ const StreamLayout: React.FC<{
 
     const getEvent = async () => {
       try {
-        const { data } = await axiosApi.get<{ data: { event: IEvent } }>(
+        const { data } = await axiosApi.get<{ event: IEvent }>(
           `/events/${eventId}`,
         );
 
-        setEvent(data.data.event);
+        setEvent(data.event);
       } catch (error) {
         console.log(error);
       }
