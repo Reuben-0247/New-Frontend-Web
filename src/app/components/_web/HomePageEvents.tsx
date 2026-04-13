@@ -45,9 +45,9 @@ const HomePageEvents: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
         <div className="flex justify-between items-center">
           <h2 className="text-2xl md:text-3xl font-bold">Featured Events</h2>
           <Link
-            href={"/find-events"}
-            className="border-2 border-primary cursor-pointer rounded-lg px-4 py-2.5 font-normal text-foreground text-lg hover:bg-gray-100">
-            View all Events
+            href={pathName === "/event" ? "/find-events" : "/event"}
+            className="border-2 border-primary cursor-pointer rounded-lg px-4 py-2.5 font-normal text-foreground text-lg transition-colors duration-300 hover:bg-primary hover:text-white">
+            {pathName === "/event" ? " View all Events" : "Find more Event"}
           </Link>
         </div>
 
@@ -55,7 +55,7 @@ const HomePageEvents: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
           <div className="events grid md:grid-cols-3 grid-cols-1 gap-6 mt-10">
             {filteredEvents
               ?.filter((ev) => ev?.featuredEvent == true)
-              ?.slice(0, 6)
+              ?.slice(0, pathName === "/event" ? 12 : 3)
               ?.map((event) => {
                 const eventId = event?._id;
                 let eventUrl = "";
@@ -73,7 +73,7 @@ const HomePageEvents: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                           "https://via.placeholder.com/400x300"
                         }
                         alt={event.title}
-                        className="object-cover rounded-xl h-full w-full"
+                        className="object-cover rounded-tr-xl rounded-tl-xl h-full w-full"
                       />
                       <p className="absolute bottom-0 m-0 left-0 text-sm p-3 h-[25px] w-[95px] flex justify-center items-center rounded-tl-none rounded-tr-xl rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
                         {getCategoryName(event?.categoryId || "")}

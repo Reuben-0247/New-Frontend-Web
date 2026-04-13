@@ -143,6 +143,9 @@ const SubscriptionPage = () => {
                 subscription?.granted || { storageGB: 0, bandwidthGB: 0 }
               }
               used={subscription?.used || { storageGB: 0, bandwidthGB: 0 }}
+              remaining={
+                subscription?.remaining || { storageGB: 0, bandwidthGB: 0 }
+              }
             />
           </div>
         </div>

@@ -16,6 +16,10 @@ type Props = {
     storageGB: number;
     bandwidthGB: number;
   };
+  remaining: {
+    storageGB: number;
+    bandwidthGB: number;
+  };
 };
 
 export const ProgressBar = ({ label, used, total, color }: UsageData) => {
@@ -55,7 +59,7 @@ export const ProgressBar = ({ label, used, total, color }: UsageData) => {
   );
 };
 
-export const UsageProgress = ({ granted, used }: Props) => {
+export const UsageProgress = ({ granted, used, remaining }: Props) => {
   if (!granted || !used) return null;
 
   // const remaining = {
@@ -96,7 +100,7 @@ export const UsageProgress = ({ granted, used }: Props) => {
         <UsageChart
           label="Bandwidth"
           used={used.bandwidthGB}
-          total={granted.bandwidthGB}
+          total={remaining.bandwidthGB}
           type="pie"
         />
       </div>

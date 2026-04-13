@@ -20,11 +20,13 @@ interface IProp {
   createDestination: (
     input: CreateDestinationInput,
     userId?: string,
+    castrId?: string,
   ) => Promise<IDestination | undefined>;
   updateDestination: (
     input: UpdateDestinationInput,
+    castrId?: string,
   ) => Promise<IDestination | undefined>;
-  deleteDestination: (id: string) => Promise<boolean>;
+  deleteDestination: (id: string, streamId?: string) => Promise<boolean>;
   enableDestination: (
     input: IEnableDestination,
   ) => Promise<IDestination | undefined>;
@@ -36,11 +38,15 @@ export const useDestinationStore = create<IProp>((set) => ({
   setLoading: (loading: boolean) => set({ loading }),
   setDestination: (destination: IDestination | null) => set({ destination }),
   setDestinations: (destinations: IDestination[]) => set({ destinations }),
-  createDestination: async (input: CreateDestinationInput, userId?: string) => {
+  createDestination: async (
+    input: CreateDestinationInput,
+    userId?: string,
+    castrId?: string,
+  ) => {
     try {
       set({ loading: true });
       const { data } = await axiosApi.post<{ data: IDestination }>(
-        `/stream/platform/${userId}`,
+        `/stream/platform/${userId}/${castrId}`,
         input,
       );
       const newDestination = data.data;
@@ -58,11 +64,14 @@ export const useDestinationStore = create<IProp>((set) => ({
       set({ loading: false });
     }
   },
-  updateDestination: async (input: UpdateDestinationInput) => {
+  updateDestination: async (
+    input: UpdateDestinationInput,
+    castrId?: string,
+  ) => {
     try {
       set({ loading: true });
       const { data } = await axiosApi.patch<{ data: IDestination }>(
-        `/stream/platform/update`,
+        `/stream/platform/update/${castrId}`,
         input,
       );
       const updatedDestination = data.data;
@@ -82,13 +91,13 @@ export const useDestinationStore = create<IProp>((set) => ({
       set({ loading: false });
     }
   },
-  deleteDestination: async (id: string) => {
+  deleteDestination: async (id: string, streamId?: string) => {
     try {
       set({ loading: true });
-      await axiosApi.delete(`/stream/platform/${id}`);
+      await axiosApi.delete(`/stream/platform/${id}/${streamId}`);
       set((state) => {
         const updatedDestinations = state.destinations.filter(
-          (d) => d._id !== id,
+          (d) => d.platform_id !== id,
         );
 
         return {
@@ -109,18 +118,20 @@ export const useDestinationStore = create<IProp>((set) => ({
   enableDestination: async (input: IEnableDestination) => {
     try {
       set({ loading: true });
-      const { id, streamId, ...res } = input;
+      const { platform_id, streamId, ...res } = input;
       const { data } = await axiosApi.patch<{ response: IDestination }>(
-        `/stream/castr/${streamId}/destination/${id}`,
+        `/stream/castr/${streamId}/destination/${platform_id}`,
         res,
       );
       const enabledDestination = data.response;
       set((state) => ({
         destinations: state.destinations.map((d) =>
-          d._id === input.id ? enabledDestination : d,
+          d.platform_id === input.platform_id ? enabledDestination : d,
         ),
       }));
-      toast.success("Destination enabled successfully");
+      toast.success(
+        `Destination ${enabledDestination?.isEnabled ? "enabled" : "disabled"} successfully`,
+      );
       return enabledDestination;
     } catch (error) {
       const axiosError = error as AxiosError;
