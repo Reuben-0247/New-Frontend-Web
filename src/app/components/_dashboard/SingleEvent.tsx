@@ -38,11 +38,9 @@ const SingleEvent: React.FC<{ id: string }> = ({ id }) => {
     async function fetchEvent() {
       setLoadingE(true);
       try {
-        const { data } = await axiosApi.get<{ data: { event: IEvent } }>(
-          `/events/${id}`,
-        );
+        const { data } = await axiosApi.get<{ event: IEvent }>(`/events/${id}`);
 
-        setEvent(data.data.event);
+        setEvent(data?.event);
       } catch (error) {
         console.log(error);
       } finally {
@@ -106,7 +104,7 @@ const SingleEvent: React.FC<{ id: string }> = ({ id }) => {
           className="text-foreground font-semibold cursor-pointer">
           <ArrowLeft /> <span>Back</span>
         </Button>
-        <p className="font-bold text-2xl text-foreground">Single Event</p>
+        <p className="font-bold text-2xl text-foreground">{event?.title}</p>
       </div>
       <div className="event mt-16 rounded-lg border bg-background">
         <div className="img w-full h-[50vh]">

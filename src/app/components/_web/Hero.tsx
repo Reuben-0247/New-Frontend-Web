@@ -49,7 +49,7 @@ export const HomeHero = () => {
             viewport={{ once: false, amount: 0.4 }}>
             <Link
               href={"/login"}
-              className="bg-primary  text-background link font-semibold flex justify-center items-center h-full w-[154px]  rounded-lg">
+              className="bg-primary  text-white link font-semibold flex justify-center items-center h-full w-[154px]  rounded-lg">
               Create Event
             </Link>
           </motion.div>
@@ -59,7 +59,7 @@ export const HomeHero = () => {
             transition={{ duration: 0.3, ease: "easeOut" }}
             viewport={{ once: false, amount: 0.4 }}>
             <Link
-              href={"/login"}
+              href={"/event"}
               className=" text-secondary link cursor-pointer border-2 border-gray-400 flex justify-center items-center font-semibold h-full w-[154px] rounded-lg">
               Find An Event
             </Link>

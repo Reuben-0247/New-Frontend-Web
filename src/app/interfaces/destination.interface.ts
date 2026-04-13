@@ -7,9 +7,11 @@ export interface IDestination {
   createdAt: Date;
   updatedAt: Date;
   enabled: boolean;
+  platform_id: string;
+  isEnabled: boolean;
 }
 export interface IEnableDestination {
-  id: string;
+  platform_id: string;
   enabled: boolean;
   streamId: string;
   name: string;

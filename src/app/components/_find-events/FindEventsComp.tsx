@@ -10,22 +10,40 @@ import { FaCalendar } from "react-icons/fa";
 import { ICategory } from "@/app/interfaces/category.interface";
 import { Button } from "@/components/ui/button";
 import EventSlide from "./EventSlide";
+import Cookies from "js-cookie";
+import { TOKEN_NAME } from "@/utils/constant";
 
 const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
   events,
   cats,
 }) => {
+  const token = Cookies.get(TOKEN_NAME);
+
   const [showTrending, setShowTrending] = useState(true);
   const [search, setSearch] = useState("");
 
   const filteredEvents = useMemo(() => {
-    const data = events.filter(
-      (event) =>
-        event?.channelName?.toLowerCase().includes(search.toLowerCase()) ||
-        event.location?.address?.toLowerCase().includes(search.toLowerCase()),
-    );
-    return data;
-  }, [search, events]);
+    if (token) {
+      const data = events.filter(
+        (ev) => ev.isPublished == true && ev.featuredEvent == true,
+      );
+      const searchedData = data.filter(
+        (event) =>
+          event?.channelName?.toLowerCase().includes(search.toLowerCase()) ||
+          event.location?.address?.toLowerCase().includes(search.toLowerCase()),
+      );
+      return searchedData;
+    } else {
+      const data = events.filter((ev) => ev.featuredEvent == true);
+
+      const searchedData = data.filter(
+        (event) =>
+          event?.channelName?.toLowerCase().includes(search.toLowerCase()) ||
+          event.location?.address?.toLowerCase().includes(search.toLowerCase()),
+      );
+      return searchedData;
+    }
+  }, [search, events, token]);
 
   const showLiveEvent = () => {
     setSearch("");
@@ -88,115 +106,113 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
       <div className="">
         {showTrending ? (
           <div className="grid grid-cols-1  md:grid-cols-3  gap-4">
-            {filteredEvents
-              .filter((ev) => ev.featuredEvent == true)
-              .map((event) => {
-                const eventId = event._id;
-                const eventUrl = `${window.origin}/find-events/${eventId}?label=Live`;
-                return (
-                  <div
-                    key={eventId}
-                    className="rounded-xl  shadow-lg overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.01] h-fit  border bg-background  border-gray-200 dark:border-gray-700">
-                    <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
-                      <img
-                        src={
-                          event?.displayImage ||
-                          "https://via.placeholder.com/400x300"
-                        }
-                        alt={event?.title}
-                        className="w-full h-full object-cover"
-                      />
+            {filteredEvents.map((event) => {
+              const eventId = event._id;
+              const eventUrl = `${window.origin}/find-events/${eventId}?label=Live`;
+              return (
+                <div
+                  key={eventId}
+                  className="rounded-xl  shadow-lg overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.01] h-fit  border bg-background  border-gray-200 dark:border-gray-700">
+                  <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
+                    <img
+                      src={
+                        event?.displayImage ||
+                        "https://via.placeholder.com/400x300"
+                      }
+                      alt={event?.title}
+                      className="w-full h-full object-cover"
+                    />
 
-                      <p className="absolute bottom-0 m-0 left-0 text-sm p-3 h-[25px] w-[95px] flex justify-center items-center rounded-tl-none rounded-tr-xl rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
-                        {getCategoryName(event?.categoryId || "")}
+                    <p className="absolute bottom-0 m-0 left-0 text-sm p-3 h-[25px] w-[95px] flex justify-center items-center rounded-tl-none rounded-tr-xl rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
+                      {getCategoryName(event?.categoryId || "")}
+                    </p>
+                  </div>
+
+                  <div className="p-2 flex flex-col gap-2  h-1/2">
+                    <h3
+                      className={`text-[18px] font-semibold  truncate m-0  text-gray-900 dark:text-white leading-tight`}>
+                      {event.title}
+                    </h3>
+
+                    <div className="flex items-center gap-5 text-sm">
+                      <FiCalendar className="w-4 h-4 text-[#434343] dark:text-white" />
+                      <span className="truncate text-[#434343] dark:text-white ">
+                        {new Date(event.startDate || "").toLocaleDateString(
+                          undefined,
+                          {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          },
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-5 text-sm ">
+                      <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white" />
+                      <span className="truncate link text-[#434343] dark:text-white  ">
+                        {event.location?.address}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-5 text-sm ">
+                      <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white" />
+                      <p className="w-3 h-4 text-[#434343] m-0 dark:text-white">
+                        {" "}
+                        {new Date(event.startDate || "").toLocaleDateString()}
                       </p>
                     </div>
 
-                    <div className="p-2 flex flex-col gap-2  h-1/2">
-                      <h3
-                        className={`text-[18px] font-semibold  truncate m-0  text-gray-900 dark:text-white leading-tight`}>
-                        {event.title}
-                      </h3>
-
-                      <div className="flex items-center gap-5 text-sm">
-                        <FiCalendar className="w-4 h-4 text-[#434343] dark:text-white" />
-                        <span className="truncate text-[#434343] dark:text-white ">
-                          {new Date(event.startDate || "").toLocaleDateString(
-                            undefined,
-                            {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          )}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-5 text-sm ">
-                        <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white" />
-                        <span className="truncate link text-[#434343] dark:text-white  ">
-                          {event.location?.address}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-5 text-sm ">
-                        <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white" />
-                        <p className="w-3 h-4 text-[#434343] m-0 dark:text-white">
+                    <div>
+                      <div className="flex items-center justify-between text-sm">
+                        <p className="text-xs m-0 text-gray-400 dark:text-white">
                           {" "}
-                          {new Date(event.startDate || "").toLocaleDateString()}
+                          +{event?.totalParticipants?.length} registerd{" "}
                         </p>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between text-sm">
-                          <p className="text-xs m-0 text-gray-400 dark:text-white">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (navigator.share) {
+                              navigator
+                                .share({
+                                  title: event?.title,
+                                  text: `Check out this live event: ${event?.title}`,
+                                  url: eventUrl,
+                                })
+                                .catch((err) =>
+                                  console.error("Sharing failed:", err),
+                                );
+                            } else {
+                              navigator.clipboard.writeText(eventUrl);
+                              alert("Event link copied to clipboard!");
+                            }
+                          }}
+                          className="m-0"
+                          title="Share Event"
+                          type="button">
+                          <p className="text-xs flex items-center gap-2 m-0 text-gray-400">
                             {" "}
-                            +{event?.totalParticipants?.length} registerd{" "}
-                          </p>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (navigator.share) {
-                                navigator
-                                  .share({
-                                    title: event?.title,
-                                    text: `Check out this live event: ${event?.title}`,
-                                    url: eventUrl,
-                                  })
-                                  .catch((err) =>
-                                    console.error("Sharing failed:", err),
-                                  );
-                              } else {
-                                navigator.clipboard.writeText(eventUrl);
-                                alert("Event link copied to clipboard!");
-                              }
-                            }}
-                            className="m-0"
-                            title="Share Event"
-                            type="button">
-                            <p className="text-xs flex items-center gap-2 m-0 text-gray-400">
-                              {" "}
-                              Share <Forward />
-                              {/* <img
+                            Share <Forward />
+                            {/* <img
                                         src="/share.png"
                                         className="dark:brightness-200"
                                         alt=""
                                       /> */}
-                            </p>
-                          </button>
-                        </div>
+                          </p>
+                        </button>
                       </div>
                     </div>
-                    <div className="p-2 w-full">
-                      <Link
-                        href={`/find-events/${eventId}`}
-                        className="block link cursor-pointer text-center w-full border border-primary py-2 px-4 rounded-lg mb-3">
-                        view
-                      </Link>
-                    </div>
                   </div>
-                );
-              })}
+                  <div className="p-2 w-full">
+                    <Link
+                      href={`/find-events/${eventId}`}
+                      className="block link cursor-pointer text-center w-full border border-primary py-2 px-4 rounded-lg mb-3">
+                      view
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 max-w-7xl">

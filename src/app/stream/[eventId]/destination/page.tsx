@@ -137,7 +137,11 @@ const DestinationsPage: React.FC = () => {
     //   );
     //   return;
     // }
-    const success = await createDestination(input, auth?._id);
+    const success = await createDestination(
+      input,
+      auth?._id,
+      streamData?.castrStreamId,
+    );
     if (success) {
       setAdding(false);
       setShowAdd(false);
@@ -148,12 +152,15 @@ const DestinationsPage: React.FC = () => {
   const onUpdate = async () => {
     if (!desToEdit) return;
     try {
-      await updateDestination({
-        _id: desToEdit._id,
-        name: input.name,
-        serverKey: input.serverKey,
-        serverUrl: input.serverUrl,
-      });
+      await updateDestination(
+        {
+          _id: desToEdit._id,
+          name: input.name,
+          serverKey: input.serverKey,
+          serverUrl: input.serverUrl,
+        },
+        streamData?.castrStreamId,
+      );
       setOpenModal(false);
       setDesToEdit(null);
       setInput({ name: "", serverUrl: "", serverKey: "" });
@@ -164,7 +171,7 @@ const DestinationsPage: React.FC = () => {
 
   const onEnableDestination = async (
     checked: boolean,
-    id: string,
+    platform_id: string,
     server: string,
     key: string,
     name: string,
@@ -173,12 +180,12 @@ const DestinationsPage: React.FC = () => {
       toast.warn("Please create a stream...");
       return;
     }
-    setEnabled((prev) => ({ ...prev, [id]: checked }));
-    setLoadingMap((prev) => ({ ...prev, [id]: true }));
+    setEnabled((prev) => ({ ...prev, [platform_id]: checked }));
+    setLoadingMap((prev) => ({ ...prev, [platform_id]: true }));
     try {
       await enableDestination({
         streamId: streamData.castrStreamId,
-        id,
+        platform_id,
         enabled: checked,
         server,
         key,
@@ -186,15 +193,15 @@ const DestinationsPage: React.FC = () => {
       });
     } catch (error) {
       console.log(error);
-      setEnabled((prev) => ({ ...prev, [id]: !checked }));
+      setEnabled((prev) => ({ ...prev, [platform_id]: !checked }));
     } finally {
-      setLoadingMap((prev) => ({ ...prev, [id]: false }));
+      setLoadingMap((prev) => ({ ...prev, [platform_id]: false }));
     }
   };
 
   const deleteData = async (data: IDestination) => {
     try {
-      await deleteDestination(data._id);
+      await deleteDestination(data?.platform_id, streamData?.castrStreamId);
       setOpenDeleteModal(false);
     } catch (error) {
       console.log(error);
@@ -433,13 +440,13 @@ const DestinationsPage: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-8">
                         <Switch
-                          className="text-primary"
-                          checked={!!enabled[destination._id]}
-                          disabled={loadingMap[destination._id]}
+                          className=" data-[state=checked]:bg-red-500 "
+                          checked={destination?.isEnabled}
+                          disabled={loadingMap[destination?.platform_id]}
                           onCheckedChange={(checked) =>
                             onEnableDestination(
                               checked,
-                              destination._id,
+                              destination?.platform_id,
                               destination?.serverUrl,
                               destination?.serverKey,
                               destination?.name,
