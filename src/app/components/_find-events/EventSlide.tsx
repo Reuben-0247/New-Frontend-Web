@@ -37,7 +37,7 @@ const EventSlide: React.FC<{ events: IEvent[] }> = ({ events }) => {
           role="list"
           aria-label="Scrollable list of events">
           {[...events, ...events]
-            .filter((evn) => evn?.featuredEvent && evn?.isPublished)
+            .filter((evn) => evn?.featuredEvent)
             .map((ev, idx) => (
               <Link
                 key={`${ev?._id}-${idx}`}
@@ -58,7 +58,6 @@ const EventSlide: React.FC<{ events: IEvent[] }> = ({ events }) => {
                     <span>{ev.totalParticipants?.length} registered</span>
                   </div>
                 </div>
-                {/* </div> */}
               </Link>
             ))}
         </div>

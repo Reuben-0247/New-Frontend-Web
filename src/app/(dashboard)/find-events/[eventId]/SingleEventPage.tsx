@@ -156,7 +156,7 @@ const SingleEventPage: React.FC<{
             className="text-foreground font-semibold cursor-pointer">
             <ArrowLeft /> <span>Back</span>
           </Button>
-          <p className="font-bold text-2xl text-foreground">Single Event</p>
+          {/* <p className="font-bold text-2xl text-foreground">Single Event</p> */}
         </div>
         <div className="event mt-16 rounded-lg border bg-background">
           <div className="img w-full h-[50vh]">
@@ -282,7 +282,7 @@ const SingleEventPage: React.FC<{
                     <div
                       key={eventId}
                       className="flex border border-gray-200 rounded-lg shadow-sm h-[91px] hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
-                      onClick={() => router.push(`/findEvents/${eventId}`)}>
+                      onClick={() => router.push(`/find-events/${eventId}`)}>
                       <div className="w-28 h-full shrink-0">
                         <img
                           src={

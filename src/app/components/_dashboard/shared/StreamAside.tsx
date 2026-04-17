@@ -21,7 +21,7 @@ import { BiChevronRight, BiChevronLeft } from "react-icons/bi";
 import { HiOutlineXMark } from "react-icons/hi2";
 import { useThemeStore } from "@/app/store/theme.store";
 import { useEventStore } from "@/app/store/event.store";
-import { useAuthStore } from "@/app/store/auth.store";
+// import { useAuthStore } from "@/app/store/auth.store";
 
 interface INav {
   label: string;
@@ -41,7 +41,7 @@ const StreamAside: React.FC<{
   const { theme } = useThemeStore();
   const router = useRouter();
   const { event } = useEventStore();
-  const { auth } = useAuthStore();
+  // const { auth } = useAuthStore();
 
   const navLinks: INav[] = [
     {
@@ -67,7 +67,7 @@ const StreamAside: React.FC<{
       ),
       href: `/stream/${param}/live-vod`,
 
-      show: auth?.hasSubscribed || (auth?.hasPaid as boolean),
+      show: true,
     },
     {
       label: "Live Clipping",
@@ -80,7 +80,7 @@ const StreamAside: React.FC<{
         />
       ),
       href: `/stream/${param}/live-clipping`,
-      show: auth?.hasSubscribed || (auth?.hasPaid as boolean),
+      show: true,
     },
 
     {
@@ -94,7 +94,7 @@ const StreamAside: React.FC<{
         />
       ),
       href: `/stream/${param}/destination`,
-      show: auth?.hasSubscribed || (auth?.hasPaid as boolean),
+      show: true,
     },
     // {
     //   label: "Settings",

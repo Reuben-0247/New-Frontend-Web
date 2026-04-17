@@ -1,9 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { IPaymentPrint } from "@/app/interfaces/payment.interface";
 import React from "react";
 import styled from "styled-components";
 
-const Reciept: React.FC<{ resData: any }> = ({ resData }) => {
+const Reciept: React.FC<{ resData?: any; data?: IPaymentPrint }> = ({
+  resData,
+  data,
+}) => {
   function formatNaira(amount: number) {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
@@ -23,8 +27,9 @@ const Reciept: React.FC<{ resData: any }> = ({ resData }) => {
           <p className="transcript">
             Your{" "}
             <strong className="strong">
-              {resData?.data?.subscription?.billingCycle}{" "}
-              {resData?.data?.payment.metadata?.paymentPlan}
+              {resData?.data?.subscription?.billingCycle || data?.billingCycle}{" "}
+              {resData?.data?.payment.metadata?.paymentPlan ||
+                data?.paymentPlan}
             </strong>{" "}
             Subscription Payment Slip
           </p>
@@ -32,48 +37,54 @@ const Reciept: React.FC<{ resData: any }> = ({ resData }) => {
             <div className="details">
               <ul className="details_info">
                 <li>
-                  <span>Firs Name:</span>
-                  {resData?.data?.user.firstName}
+                  <span>First Name:</span>
+                  {resData?.data?.user.firstName || data?.firstName}
                 </li>
                 <li>
                   <span>Last Name:</span>
-                  {resData?.data?.user?.lastName}
+                  {resData?.data?.user?.lastName || data?.lastName}
                 </li>
 
                 <li>
                   <span> Email:</span>
-                  {resData?.data?.user.email}
+                  {resData?.data?.user.email || data?.email}
                 </li>
 
                 <li>
                   <span>Amount Paid:</span>
-                  {formatNaira(resData?.data?.payment?.amount | 0)}
+                  {formatNaira(resData?.data?.payment?.amount || data?.amount)}
                 </li>
 
                 <li>
                   <span>Payment plan:</span>
-                  {resData?.data?.payment.metadata?.paymentPlan.toUpperCase()}
+                  {resData?.data?.payment.metadata?.paymentPlan.toUpperCase() ||
+                    data?.paymentPlan.toUpperCase()}
                 </li>
                 <li>
                   <span>Payment cycle: </span>
-                  {resData?.data?.subscription?.billingCycle.toUpperCase()}
+                  {resData?.data?.subscription?.billingCycle.toUpperCase() ||
+                    data?.billingCycle.toUpperCase()}
                 </li>
                 <li>
                   <span>Subscribed At:</span>
                   {new Date(
                     resData?.data?.subscription?.periodStart,
-                  ).toLocaleDateString()}
+                  ).toLocaleDateString() ||
+                    new Date(data?.subscribedAt as string).toLocaleDateString()}
                 </li>
 
                 <li>
                   <span>Subscription end Date:</span>
                   {new Date(
                     resData?.data?.subscription?.periodEnd,
-                  ).toLocaleDateString()}
+                  ).toLocaleDateString() ||
+                    new Date(
+                      data?.subscriptionEndDate as string,
+                    ).toLocaleDateString()}
                 </li>
                 <li>
                   <span>Transaction Id </span>
-                  {resData?.data?.payment?.transactionId}
+                  {resData?.data?.payment?.transactionId || data?.transactionId}
                 </li>
               </ul>
             </div>

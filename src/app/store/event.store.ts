@@ -111,10 +111,11 @@ export const useEventStore = create<IProp>((set) => ({
     }
   },
   updateEvent: async (
-    input: UpdateEventFormInput,
+    data: UpdateEventFormInput,
     displayImage?: File | null,
   ): Promise<IEvent | boolean> => {
     try {
+      const { _id, ...input } = data;
       set({ loading: true });
 
       if (displayImage) {
@@ -141,7 +142,7 @@ export const useEventStore = create<IProp>((set) => ({
         formData.append("type", input.type || "");
         formData.append("displayImage", displayImage);
         const { data } = await axiosApi.patch<{ data: { event: IEvent } }>(
-          `/events/publish/${input._id}`,
+          `/events/publish/${_id}`,
           formData,
         );
         set((state) => ({
@@ -152,7 +153,7 @@ export const useEventStore = create<IProp>((set) => ({
         return data.data.event;
       } else {
         const { data } = await axiosApi.patch<{ data: { event: IEvent } }>(
-          `/events/publish/${input._id}`,
+          `/events/publish/${_id}`,
           input,
         );
         set((state) => ({
