@@ -1,21 +1,34 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { UsageProgress } from "@/app/components/_dashboard/GrantProgress";
-import { IPayment } from "@/app/interfaces/payment.interface";
+import Reciept from "@/app/components/_dashboard/Reciept";
+import { IPayment, IPaymentPrint } from "@/app/interfaces/payment.interface";
 import { ISubscription } from "@/app/interfaces/subscription.interface";
 import { useAuthStore } from "@/app/store/auth.store";
 import { useSubscriptionStore } from "@/app/store/subscription.store";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import axiosApi from "@/lib/axios";
-import { formatDate, formatDateTime, formatNaira } from "@/utils/helper";
+import { formatDateTime, formatNaira } from "@/utils/helper";
+import { Download, View, X } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+
 const SubscriptionPage = () => {
   const { subscription, payments, setSub, setPayments } =
     useSubscriptionStore();
   const { auth } = useAuthStore();
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
+  const [subData, setSubData] = React.useState<IPaymentPrint | null>(null);
+  const [viewSubData, setViewSubData] = React.useState<IPaymentPrint | null>(
+    null,
+  );
+  const printReceipt = useReactToPrint({
+    contentRef,
+  });
   const tableCol = [
     {
       id: 1,
@@ -41,7 +54,27 @@ const SubscriptionPage = () => {
       id: 6,
       name: "Status",
     },
+    // {
+    //   id: 7,
+    //   name: "",
+    // },
   ];
+  const printSubData = (data: IPayment) => {
+    setSubData({
+      ...data,
+      firstName: auth?.firstName || "",
+      lastName: auth?.lastName || "",
+      subscribedAt: subscription?.periodStart || "",
+      subscriptionEndDate: subscription?.periodEnd || "",
+      billingCycle: data?.metadata?.billingCycle || "",
+      paymentPlan: data?.metadata?.paymentPlan || "",
+    });
+    if (subData) {
+      // printReceipt();
+      console.log(subData);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       if (payments.length || subscription?._id) return;
@@ -65,7 +98,7 @@ const SubscriptionPage = () => {
   }, [auth?._id, setPayments, setSub]);
 
   return (
-    <div>
+    <div className="relative">
       <div className="md:col-span-2 mb-8">
         <div className="flex items-center justify-between">
           <p className="text-xl font-semibold leading-6 text-foreground">
@@ -99,7 +132,7 @@ const SubscriptionPage = () => {
                     <span className="font-semibold text-gray-900 dark:text-white">
                       <Badge
                         className={`${subscription?.status === "active" ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300" : "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300"}`}>
-                        {subscription?.status || "Free"}
+                        {subscription?.status || "Exhausted"}
                       </Badge>
                     </span>
                   </p>
@@ -191,13 +224,45 @@ const SubscriptionPage = () => {
                     </td>
 
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                      {formatDate(pay?.createdAt)}
+                      {new Date(pay?.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </td>
 
+                    {/* <td ></td> */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-                        {pay?.status}
-                      </Badge>
+                      <div className="flex justify-between items-center ga-4">
+                        <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
+                          {pay?.status}
+                        </Badge>
+                        <div className="flex items-center gap-4 text-muted-foreground z-30">
+                          <Button
+                            size={"icon"}
+                            variant={"ghost"}
+                            onClick={() =>
+                              setViewSubData({
+                                ...pay,
+                                firstName: auth?.firstName || "",
+                                lastName: auth?.lastName || "",
+                                subscribedAt: subscription?.periodStart || "",
+                                subscriptionEndDate:
+                                  subscription?.periodEnd || "",
+                                billingCycle: pay?.metadata?.billingCycle || "",
+                                paymentPlan: pay?.metadata?.paymentPlan || "",
+                              })
+                            }>
+                            <View size={15} />
+                          </Button>
+                          <Button
+                            size={"icon"}
+                            variant={"ghost"}
+                            onClick={() => printSubData(pay)}>
+                            <Download size={15} />
+                          </Button>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -209,6 +274,27 @@ const SubscriptionPage = () => {
             <p>You have no active subscription</p>
           </div>
         )}
+      </div>
+      {viewSubData && (
+        <div className="absolute top-20  left-0 w-full h-full bg-black opacity-95 flex justify-center items-center">
+          <div className="absolute z-10 -top-12 right-28">
+            <Button
+              size={"icon"}
+              variant={"ghost"}
+              onClick={() => setViewSubData(null)}>
+              <X size={20} className="text-black z-40" />
+            </Button>
+          </div>
+          <div className="">
+            <Reciept resData={viewSubData} />
+          </div>
+        </div>
+      )}
+
+      <div className="hidden">
+        <div ref={contentRef}>
+          <Reciept resData={subData} />
+        </div>
       </div>
     </div>
   );

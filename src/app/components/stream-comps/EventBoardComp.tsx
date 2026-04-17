@@ -43,7 +43,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 // import { Card, CardContent } from "@/components/ui/card";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-import Link from "next/link";
+// import Link from "next/link";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -142,11 +142,9 @@ const EventBoardComp = () => {
     append({ name: "", type: null, content: "" });
   };
 
-  const resetForm = () => {
-    remove();
-    // form.reset();
-    // fields.forEach((_, i) => remove(i));
-  };
+  // const resetForm = (index: number) => {
+  //   fields.forEach((_, i) => remove(i === index ? i : -1));
+  // };
 
   const handleTypeSelect = (index: number, type: "note" | "document") => {
     setValue(`boards.${index}.type`, type);
@@ -277,21 +275,21 @@ const EventBoardComp = () => {
       )}
       {fields.length === 0 && boards.length === 0 && (
         <div>
-          {auth?.hasSubscribed ? (
-            <div className="w-full flex flex-col items-center mt-10">
-              <Button
-                variant={"outline"}
-                onClick={addBoard}
-                className="cursor-pointer">
-                <Plus />
-                <span className="">Add Board</span>
-              </Button>
-              <p className="text-foreground text-center w-[70%] mt-3 text-sm">
-                Got materials for your event? Upload them here—slides, guides,
-                links—and keep your audience engaged and informed.
-              </p>
-            </div>
-          ) : (
+          {/* {auth?.hasSubscribed ? ( */}
+          <div className="w-full flex flex-col items-center mt-10">
+            <Button
+              variant={"outline"}
+              onClick={addBoard}
+              className="cursor-pointer">
+              <Plus />
+              <span className="">Add Board</span>
+            </Button>
+            <p className="text-foreground text-center w-[70%] mt-3 text-sm">
+              Got materials for your event? Upload them here—slides, guides,
+              links—and keep your audience engaged and informed.
+            </p>
+          </div>
+          {/* ) : (
             <div className="w-full flex flex-col items-center mt-10">
               <Link
                 href={"/pricing"}
@@ -304,7 +302,7 @@ const EventBoardComp = () => {
                 your audience engaged and informed.
               </p>
             </div>
-          )}
+          )} */}
         </div>
       )}
 
@@ -581,139 +579,144 @@ const EventBoardComp = () => {
                   className={`${type ? "flex justify-between items-center" : "flex justify-end"} cursor-pointer hover:no-underline  pb-4 pt-2 px-2`}>
                   {field.name || type}
                 </AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-4 text-balance">
-                  {!type && (
-                    <div className="flex flex-col gap-4 md:flex-row md:gap-6">
-                      <div className="flex flex-col items-center gap-2 w-full">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            handleTypeSelect(index, "note");
-                          }}
-                          className="w-full px-3 text-white py-1 rounded bg-gray-700">
-                          <Plus /> Add Text
-                        </Button>
-                        <small className="text-center text-foreground w-40">
-                          Type in text such as announcement, notice, and more.
-                        </small>
-                      </div>
+                <AccordionContent>
+                  <div className="flex flex-col gap-4 text-balance">
+                    {!type && (
+                      <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+                        <div className="flex flex-col items-center gap-2 w-full">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              handleTypeSelect(index, "note");
+                            }}
+                            className="w-full px-3 text-white py-1 rounded bg-gray-700">
+                            <Plus /> Add Text
+                          </Button>
+                          <small className="text-center text-foreground w-40">
+                            Type in text such as announcement, notice, and more.
+                          </small>
+                        </div>
 
-                      <div className="flex flex-col items-center gap-2 w-full">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => handleTypeSelect(index, "document")}
-                          className="w-full px-3 py-1 rounded text-white bg-gray-700">
-                          <Paperclip /> Attach File
-                        </Button>
-                        <small className="text-center text-foreground w-40">
-                          Upload slides, documents, event programs, and more.
-                        </small>
+                        <div className="flex flex-col items-center gap-2 w-full">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleTypeSelect(index, "document")}
+                            className="w-full px-3 py-1 rounded text-white bg-gray-700">
+                            <Paperclip /> Attach File
+                          </Button>
+                          <small className="text-center text-foreground w-40">
+                            Upload slides, documents, event programs, and more.
+                          </small>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {type === "note" && (
-                    <>
-                      <div className="flex justify-between items-center">
-                        {type && (
+                    {type === "note" && (
+                      <>
+                        <div className="flex justify-between items-center">
+                          {type && (
+                            <button
+                              type="button"
+                              title="Reset Type Selection"
+                              onClick={() => resetTypeSelect(index)}
+                              className="text-white text-sm cursor-pointer">
+                              <RefreshCw size={15} />
+                            </button>
+                          )}
                           <button
                             type="button"
-                            title="Reset Type Selection"
-                            onClick={() => resetTypeSelect(index)}
-                            className="text-white text-sm cursor-pointer">
-                            <RefreshCw size={15} />
+                            title="Remove"
+                            onClick={() => remove(index)}
+                            className="text-red-400 text-sm cursor-pointer">
+                            <X size={15} />
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          title="Remove"
-                          onClick={() => remove(index)}
-                          className="text-red-400 text-sm cursor-pointer">
-                          <X size={15} />
-                        </button>
-                      </div>
-                      <div>
-                        <label className="text-sm text-foreground">Title</label>
-                        <input
-                          {...register(`boards.${index}.name`)}
-                          className="w-full mt-1 bg-background border border-gray-700 rounded p-2"
-                          placeholder="Board title"
+                        </div>
+                        <div>
+                          <label className="text-sm text-foreground">
+                            Title
+                          </label>
+                          <input
+                            {...register(`boards.${index}.name`)}
+                            className="w-full mt-1 bg-background border border-gray-700 rounded p-2"
+                            placeholder="Board title"
+                          />
+                          {errors.boards?.[index]?.name && (
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.boards[index]?.name?.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <Controller
+                          name={`boards.${index}.content`}
+                          control={control}
+                          render={({ field }) => (
+                            <div className="">
+                              <label className="text-sm text-foreground">
+                                Text
+                              </label>
+                              <ReactQuill
+                                theme="snow"
+                                value={field.value || ""}
+                                onChange={field.onChange}
+                                modules={modules}
+                                placeholder="Write something..."
+                                // className="bg-white w-full text-black h-full  mt-1 rounded"
+                                className="bg-white text-black mt-1 rounded [&_.ql-container]:max-h-[200px] [&_.ql-container]:overflow-y-auto [&_.ql-container]:scroll-smooth [&_.ql-container::-webkit-scrollbar]:w-1 [&_.ql-container::-webkit-scrollbar-track]:bg-background [&_.ql-container::-webkit-scrollbar-thumb]:bg-primary [&_.ql-container::-webkit-scrollbar-thumb]:rounded-full"
+                              />
+                            </div>
+                          )}
                         />
-                        {errors.boards?.[index]?.name && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {errors.boards[index]?.name?.message}
-                          </p>
-                        )}
-                      </div>
+                      </>
+                    )}
 
-                      <Controller
-                        name={`boards.${index}.content`}
-                        control={control}
-                        render={({ field }) => (
-                          <div className="">
-                            <label className="text-sm text-foreground">
-                              Text
-                            </label>
-                            <ReactQuill
-                              theme="snow"
-                              value={field.value || ""}
-                              onChange={field.onChange}
-                              modules={modules}
-                              placeholder="Write something..."
-                              // className="bg-white w-full text-black h-full  mt-1 rounded"
-                              className="bg-white text-black mt-1 rounded [&_.ql-container]:max-h-[200px] [&_.ql-container]:overflow-y-auto [&_.ql-container]:scroll-smooth [&_.ql-container::-webkit-scrollbar]:w-1 [&_.ql-container::-webkit-scrollbar-track]:bg-background [&_.ql-container::-webkit-scrollbar-thumb]:bg-primary [&_.ql-container::-webkit-scrollbar-thumb]:rounded-full"
-                            />
-                          </div>
-                        )}
-                      />
-                    </>
-                  )}
-
-                  {type === "document" && (
-                    <>
-                      <div className="flex justify-between items-center">
-                        {type && (
+                    {type === "document" && (
+                      <>
+                        <div className="flex justify-between items-center">
+                          {type && (
+                            <button
+                              type="button"
+                              title="Reset Type Selection"
+                              onClick={() => resetTypeSelect(index)}
+                              className="text-white text-sm cursor-pointer">
+                              <RefreshCw size={15} />
+                            </button>
+                          )}
                           <button
                             type="button"
-                            title="Reset Type Selection"
-                            onClick={() => resetTypeSelect(index)}
-                            className="text-white text-sm cursor-pointer">
-                            <RefreshCw size={15} />
+                            title="Remove"
+                            onClick={() => remove(index)}
+                            className="text-red-400 text-sm cursor-pointer">
+                            <X size={15} />
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          title="Remove"
-                          onClick={() => remove(index)}
-                          className="text-red-400 text-sm cursor-pointer">
-                          <X size={15} />
-                        </button>
-                      </div>
-                      <div>
-                        <label className="text-sm text-foreground">Title</label>
-                        <input
-                          {...register(`boards.${index}.name`)}
-                          className="w-full mt-1 bg-background border border-gray-700 rounded p-2"
-                          placeholder="Board title"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm text-foreground">
-                          Upload file
-                        </label>
-                        <Input
-                          type="file"
-                          onChange={(e) =>
-                            setValue(
-                              `boards.${index}.content`,
-                              e.target.files?.[0] || null,
-                            )
-                          }
-                          className="mt-2"
-                        />
-                        {/* {content && (
+                        </div>
+                        <div>
+                          <label className="text-sm text-foreground">
+                            Title
+                          </label>
+                          <input
+                            {...register(`boards.${index}.name`)}
+                            className="w-full mt-1 bg-background border border-gray-700 rounded p-2"
+                            placeholder="Board title"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm text-foreground">
+                            Upload file
+                          </label>
+                          <Input
+                            type="file"
+                            onChange={(e) =>
+                              setValue(
+                                `boards.${index}.content`,
+                                e.target.files?.[0] || null,
+                              )
+                            }
+                            className="mt-2"
+                          />
+                          {/* {content && (
                           <img
                             src={
                               content instanceof File
@@ -724,79 +727,86 @@ const EventBoardComp = () => {
                             className="w-full h-20 object-contain mt-2 rounded-md"
                           />
                         )} */}
-                        {content &&
-                          (() => {
-                            const fileType = getFileType(content);
+                          {content &&
+                            (() => {
+                              const fileType = getFileType(content);
 
-                            const fileUrl =
-                              content instanceof File
-                                ? URL.createObjectURL(content)
-                                : content;
+                              const fileUrl =
+                                content instanceof File
+                                  ? URL.createObjectURL(content)
+                                  : content;
 
-                            if (fileType === "image") {
-                              return (
-                                <img
-                                  src={fileUrl}
-                                  alt="preview"
-                                  className="w-full h-20 object-contain mt-2 rounded-md"
-                                />
-                              );
-                            }
+                              if (fileType === "image") {
+                                return (
+                                  <img
+                                    src={fileUrl}
+                                    alt="preview"
+                                    className="w-full h-20 object-contain mt-2 rounded-md"
+                                  />
+                                );
+                              }
 
-                            if (fileType === "pdf") {
+                              if (fileType === "pdf") {
+                                return (
+                                  <div className="flex items-center gap-2 mt-2">
+                                    📄 <span>PDF File</span>
+                                  </div>
+                                );
+                              }
+
+                              if (fileType === "excel") {
+                                return (
+                                  <div className="flex items-center gap-2 mt-2">
+                                    📊 <span>Excel File</span>
+                                  </div>
+                                );
+                              }
+
                               return (
                                 <div className="flex items-center gap-2 mt-2">
-                                  📄 <span>PDF File</span>
+                                  📁 <span>File uploaded</span>
                                 </div>
                               );
-                            }
+                            })()}
+                        </div>
+                      </>
+                    )}
 
-                            if (fileType === "excel") {
-                              return (
-                                <div className="flex items-center gap-2 mt-2">
-                                  📊 <span>Excel File</span>
-                                </div>
-                              );
-                            }
+                    <div className="flex justify-between items-center">
+                      {fields?.length ? (
+                        <button
+                          type="submit"
+                          disabled={!isValid || loading}
+                          className="bg-blue-600 text-white rounded px-4 py-2">
+                          {loading ? "Saving..." : " Submit Boards"}
+                        </button>
+                      ) : (
+                        <div></div>
+                      )}
+                      {fields.length ? (
+                        <div className="flex gap-4">
+                          <Button
+                            onClick={() => remove(index)}
+                            className=""
+                            variant={"outline"}>
+                            <X size={15} />
+                          </Button>
 
-                            return (
-                              <div className="flex items-center gap-2 mt-2">
-                                📁 <span>File uploaded</span>
-                              </div>
-                            );
-                          })()}
-                      </div>
-                    </>
-                  )}
+                          <Button
+                            type="button"
+                            variant={"outline"}
+                            onClick={addBoard}>
+                            <Plus /> Add
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             );
           })}
         </Accordion>
-
-        <div className="flex justify-between items-center">
-          {fields?.length ? (
-            <button
-              type="submit"
-              disabled={!isValid || loading}
-              className="bg-blue-600 text-white rounded px-4 py-2">
-              {loading ? "Saving..." : " Submit Boards"}
-            </button>
-          ) : (
-            <div></div>
-          )}
-          {fields.length ? (
-            <div className="flex gap-4">
-              <Button onClick={resetForm} className="" variant={"outline"}>
-                <X size={15} />
-              </Button>
-
-              <Button type="button" variant={"outline"} onClick={addBoard}>
-                <Plus /> Add
-              </Button>
-            </div>
-          ) : null}
-        </div>
       </form>
     </div>
   );

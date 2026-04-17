@@ -31,3 +31,15 @@ export interface IPayment {
   createdAt: string;
   __v: number;
 }
+
+export interface IPaymentPrint {
+  firstName: string;
+  lastName: string;
+  email: string;
+  amount: number;
+  paymentPlan: string;
+  billingCycle: string;
+  subscribedAt: string;
+  subscriptionEndDate: string;
+  transactionId: number;
+}

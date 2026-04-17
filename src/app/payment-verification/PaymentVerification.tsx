@@ -29,7 +29,7 @@ const PaymentVerification = () => {
     setShow(false);
     // setIsPrinted(false);
     setShow(false);
-    navigate.push("/pricing");
+    navigate.push("/subscriptions");
     // setResData({});
   };
   useEffect(() => {

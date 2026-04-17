@@ -10,6 +10,7 @@ import axiosApi from "@/lib/axios";
 import { toast, ToastContent } from "react-toastify";
 import { AxiosError } from "axios";
 import { formatError } from "@/utils/helper";
+import { ArrowRight } from "lucide-react";
 
 const PasswordResetPage = () => {
   //   const router = useRouter();
@@ -39,7 +40,14 @@ const PasswordResetPage = () => {
   };
 
   return (
-    <div className="h-auto p-6 mx-auto flex flex-col gap-4 shadow-xl p-1 rounded-md">
+    <div className="h-auto p-6 mx-auto flex flex-col gap-4 shadow-xl  rounded-md">
+      <div className="flex justify-end">
+        <Link
+          href="/login"
+          className="text-black link font-semibold flex items-center">
+          Back to Login <ArrowRight className="ml-1" />
+        </Link>
+      </div>
       <div className="flex justify-center mb-6">
         <Link href="/" className="text-primary link font-semibold ">
           <img

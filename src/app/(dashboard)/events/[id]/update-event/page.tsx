@@ -39,6 +39,7 @@ const UodateEventPage: React.FC = () => {
 
   const form = useForm<UpdateEventFormInput>({
     defaultValues: {
+      _id: event?._id,
       title: "",
       categoryId: "",
       description: "",
@@ -119,13 +120,14 @@ const UodateEventPage: React.FC = () => {
     await updateEvent(
       {
         ...values,
+        _id: event?._id as string,
         type: "publish",
         location: {
           type: values.location.type,
           address: values.location.address ?? "",
         },
       },
-      displayImageFile ?? undefined
+      displayImageFile ?? undefined,
     );
     form.reset();
     router.push(`/events?tab=Published`);

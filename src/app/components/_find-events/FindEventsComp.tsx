@@ -10,40 +10,26 @@ import { FaCalendar } from "react-icons/fa";
 import { ICategory } from "@/app/interfaces/category.interface";
 import { Button } from "@/components/ui/button";
 import EventSlide from "./EventSlide";
-import Cookies from "js-cookie";
-import { TOKEN_NAME } from "@/utils/constant";
 
 const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
   events,
   cats,
 }) => {
-  const token = Cookies.get(TOKEN_NAME);
-
   const [showTrending, setShowTrending] = useState(true);
   const [search, setSearch] = useState("");
 
   const filteredEvents = useMemo(() => {
-    if (token) {
-      const data = events.filter(
-        (ev) => ev.isPublished == true && ev.featuredEvent == true,
-      );
-      const searchedData = data.filter(
+    const searchedEvents = events
+      .filter(
+        (event) => event.isPublished == true || event.featuredEvent == true,
+      )
+      .filter(
         (event) =>
           event?.channelName?.toLowerCase().includes(search.toLowerCase()) ||
           event.location?.address?.toLowerCase().includes(search.toLowerCase()),
       );
-      return searchedData;
-    } else {
-      const data = events.filter((ev) => ev.featuredEvent == true);
-
-      const searchedData = data.filter(
-        (event) =>
-          event?.channelName?.toLowerCase().includes(search.toLowerCase()) ||
-          event.location?.address?.toLowerCase().includes(search.toLowerCase()),
-      );
-      return searchedData;
-    }
-  }, [search, events, token]);
+    return searchedEvents;
+  }, [search, events]);
 
   const showLiveEvent = () => {
     setSearch("");
@@ -106,7 +92,7 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
       <div className="">
         {showTrending ? (
           <div className="grid grid-cols-1  md:grid-cols-3  gap-4">
-            {filteredEvents.map((event) => {
+            {filteredEvents?.map((event) => {
               const eventId = event._id;
               const eventUrl = `${window.origin}/find-events/${eventId}?label=Live`;
               return (
@@ -217,7 +203,7 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 max-w-7xl">
             {filteredEvents
-              .filter((ev) => ev.isLive == true)
+              ?.filter((ev) => ev.isLive == true)
               .map((event) => {
                 const eventId = event._id;
                 const eventUrl = `https://www.feroevent.com/find-events/${eventId}?label=Live`;

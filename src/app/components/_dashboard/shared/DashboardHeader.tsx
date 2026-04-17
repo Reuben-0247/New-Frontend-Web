@@ -75,8 +75,9 @@ const DashboardHeader: React.FC<{ toggleAside?: () => void }> = ({
       </div>
       <div className="text-foreground md:block hidden font-bold ">
         <p className="flex gap-2">
-          <span>{mounted ? auth?.firstName : ""}</span>
-          <span>{mounted ? auth?.lastName : ""}</span>
+          Dashboard
+          {/* <span>{mounted ? auth?.firstName : ""}</span>
+          <span>{mounted ? auth?.lastName : ""}</span> */}
         </p>
       </div>
 

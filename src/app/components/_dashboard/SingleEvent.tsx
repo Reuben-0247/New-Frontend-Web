@@ -282,7 +282,7 @@ const SingleEvent: React.FC<{ id: string }> = ({ id }) => {
                   <div
                     key={eventId}
                     className="flex border border-gray-200 rounded-lg shadow-sm h-[91px] hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
-                    onClick={() => router.push(`/findEvents/${eventId}`)}>
+                    onClick={() => router.push(`/find-events/${eventId}`)}>
                     <div className="w-28 h-full shrink-0">
                       <img
                         src={
