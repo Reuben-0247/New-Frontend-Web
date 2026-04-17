@@ -69,10 +69,24 @@ const SubscriptionPage = () => {
       billingCycle: data?.metadata?.billingCycle || "",
       paymentPlan: data?.metadata?.paymentPlan || "",
     });
+  };
+
+  useEffect(() => {
     if (subData) {
-      // printReceipt();
-      console.log(subData);
+      printReceipt();
     }
+  }, [subData]);
+
+  const viewData = (data: IPayment) => {
+    setViewSubData({
+      ...data,
+      firstName: auth?.firstName || "",
+      lastName: auth?.lastName || "",
+      subscribedAt: subscription?.periodStart || "",
+      subscriptionEndDate: subscription?.periodEnd || "",
+      billingCycle: data?.metadata?.billingCycle || "",
+      paymentPlan: data?.metadata?.paymentPlan || "",
+    });
   };
 
   useEffect(() => {
@@ -241,18 +255,7 @@ const SubscriptionPage = () => {
                           <Button
                             size={"icon"}
                             variant={"ghost"}
-                            onClick={() =>
-                              setViewSubData({
-                                ...pay,
-                                firstName: auth?.firstName || "",
-                                lastName: auth?.lastName || "",
-                                subscribedAt: subscription?.periodStart || "",
-                                subscriptionEndDate:
-                                  subscription?.periodEnd || "",
-                                billingCycle: pay?.metadata?.billingCycle || "",
-                                paymentPlan: pay?.metadata?.paymentPlan || "",
-                              })
-                            }>
+                            onClick={() => viewData(pay)}>
                             <View size={15} />
                           </Button>
                           <Button
@@ -276,17 +279,19 @@ const SubscriptionPage = () => {
         )}
       </div>
       {viewSubData && (
-        <div className="absolute top-20  left-0 w-full h-full bg-black opacity-95 flex justify-center items-center">
-          <div className="absolute z-10 -top-12 right-28">
-            <Button
-              size={"icon"}
-              variant={"ghost"}
-              onClick={() => setViewSubData(null)}>
-              <X size={20} className="text-black z-40" />
-            </Button>
-          </div>
-          <div className="">
-            <Reciept resData={viewSubData} />
+        <div className="absolute top-20  left-0 w-full h-full bg-black opacity-95 z-30 flex justify-center items-center">
+          <div className="bg-white rounded-md ">
+            <div className="flex justify-end w-full px-4 shadow-2xl">
+              <Button
+                size={"icon"}
+                variant={"ghost"}
+                onClick={() => setViewSubData(null)}>
+                <X size={30} className="text-black z-40" />
+              </Button>
+            </div>
+            <div className="">
+              <Reciept resData={viewSubData} />
+            </div>
           </div>
         </div>
       )}
