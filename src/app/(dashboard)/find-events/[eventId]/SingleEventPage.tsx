@@ -55,16 +55,25 @@ const SingleEventPage: React.FC<{
     async function fetchEventAndRelated() {
       setLoading(true);
       try {
-        const { data } = await axiosApi.get<{ data: { event: IEvent } }>(
+        const { data } = await axiosApi.get<{ event: IEvent }>(
           `/events/${eventId}`,
         );
 
-        setEvent(data.data.event);
-        if (event?.userId) {
-          const { data: user } = await axiosApi.get<{ data: { user: IUser } }>(
-            `/users/${event?.userId}`,
-          );
-          setUser(user.data.user);
+        setEvent(data.event);
+        if (event?.isLive && event?.userId) {
+          const fetchUser = async () => {
+            try {
+              const { data: user } = await axiosApi.get<{ data: IUser }>(
+                `/users/${event.userId}`,
+              );
+              setUser(user.data);
+            } catch (error) {
+              console.log("Error fetching user:", error);
+            }
+          };
+          fetchUser();
+        } else {
+          setUser(null);
         }
       } catch (error) {
         console.log(error);
@@ -72,10 +81,24 @@ const SingleEventPage: React.FC<{
         setLoading(false);
       }
     }
-    if (!event || event._id !== eventId) {
-      fetchEventAndRelated();
-    }
-  }, [eventId, setEvent, event?.userId, event]);
+
+    // const getUser = async () => {
+    //   try {
+    //     const { data: user } = await axiosApi.get<{ data: IUser }>(
+    //       `/users/${event?.userId}`,
+    //     );
+    //     setUser(user.data);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
+    // fetchEventAndRelated();
+    // getUser();
+    Promise.all([fetchEventAndRelated()]).finally(() => setLoading(false));
+    // if (!event || event._id !== eventId) {
+    // }
+  }, [eventId, setEvent, event?.userId, event?.isLive]);
+
   // console.log(event?.userId);
   const SaveEvent = async () => {
     if (!event?._id) return;
@@ -133,7 +156,7 @@ const SingleEventPage: React.FC<{
             className="text-foreground font-semibold cursor-pointer">
             <ArrowLeft /> <span>Back</span>
           </Button>
-          <p className="font-bold text-2xl text-foreground">Single Event</p>
+          {/* <p className="font-bold text-2xl text-foreground">Single Event</p> */}
         </div>
         <div className="event mt-16 rounded-lg border bg-background">
           <div className="img w-full h-[50vh]">
@@ -181,29 +204,34 @@ const SingleEventPage: React.FC<{
               <p className="text-gray-700 dark:text-white leading-relaxed text-wrap wrap-break-word mb-6 whitespace-pre-wrap">
                 {event?.description}
               </p>
-              <p className="flex items-center gap-2">
-                {event?.requirePassword ? (
-                  <Lock className="w-4 h-4 text-gray-500 dark:text-white" />
-                ) : (
-                  <LockOpen className="w-4 h-4 text-gray-500 dark:text-white" />
-                )}
-                {event?.requirePassword ? "Restricted " : "Free Entry"}
-              </p>
+              {event?.isLive && event?.requirePassword && (
+                <p className="flex items-center gap-2">
+                  {event?.requirePassword ? (
+                    <Lock className="w-4 h-4 text-gray-500 dark:text-white" />
+                  ) : (
+                    <LockOpen className="w-4 h-4 text-gray-500 dark:text-white" />
+                  )}
+                  {event?.requirePassword ? "Restricted " : "Free Entry"}
+                </p>
+              )}
               {/* <div className="flex items-center gap-2 pb-2">
               <LockOpen size={18} />
               <p>{"Open Event"}</p>
             </div> */}
               {/* <p className="">99+ registered</p> */}
-              <p className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-gray-500 dark:text-white" />
-                Organizer: {user?.firstName || "Unknown"} {user?.lastName || ""}
-              </p>
+              {event?.isLive && (
+                <p className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-gray-500 dark:text-white" />
+                  Organizer: {user?.firstName || "Unknown"}{" "}
+                  {user?.lastName || ""}
+                </p>
+              )}
             </div>
 
             <div className="mt-6 ">
               {event?.isLive && (
                 <div>
-                  {event?.requirePassword === false ? (
+                  {!event?.requirePassword ? (
                     <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">
                       <Link
                         href={`/live-event/${event?._id}`}
@@ -254,7 +282,7 @@ const SingleEventPage: React.FC<{
                     <div
                       key={eventId}
                       className="flex border border-gray-200 rounded-lg shadow-sm h-[91px] hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
-                      onClick={() => router.push(`/findEvents/${eventId}`)}>
+                      onClick={() => router.push(`/find-events/${eventId}`)}>
                       <div className="w-28 h-full shrink-0">
                         <img
                           src={

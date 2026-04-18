@@ -21,6 +21,7 @@ import { BiChevronRight, BiChevronLeft } from "react-icons/bi";
 import { HiOutlineXMark } from "react-icons/hi2";
 import { useThemeStore } from "@/app/store/theme.store";
 import { useEventStore } from "@/app/store/event.store";
+// import { useAuthStore } from "@/app/store/auth.store";
 
 interface INav {
   label: string;
@@ -40,6 +41,7 @@ const StreamAside: React.FC<{
   const { theme } = useThemeStore();
   const router = useRouter();
   const { event } = useEventStore();
+  // const { auth } = useAuthStore();
 
   const navLinks: INav[] = [
     {

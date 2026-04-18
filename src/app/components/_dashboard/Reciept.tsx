@@ -3,7 +3,7 @@
 import React from "react";
 import styled from "styled-components";
 
-const Reciept: React.FC<{ resData: any }> = ({ resData }) => {
+const Reciept: React.FC<{ resData?: any }> = ({ resData }) => {
   function formatNaira(amount: number) {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
@@ -23,8 +23,10 @@ const Reciept: React.FC<{ resData: any }> = ({ resData }) => {
           <p className="transcript">
             Your{" "}
             <strong className="strong">
-              {resData?.data?.subscription?.cycle}{" "}
-              {resData?.data?.payment.metadata?.paymentPlan}
+              {resData?.data?.subscription?.billingCycle ||
+                resData?.billingCycle}{" "}
+              {resData?.data?.payment.metadata?.paymentPlan ||
+                resData?.paymentPlan}
             </strong>{" "}
             Subscription Payment Slip
           </p>
@@ -32,48 +34,59 @@ const Reciept: React.FC<{ resData: any }> = ({ resData }) => {
             <div className="details">
               <ul className="details_info">
                 <li>
-                  <span>Firs Name:</span>
-                  {resData?.data?.user.firstName}
+                  <span>First Name:</span>
+                  {resData?.data?.user.firstName || resData?.firstName}
                 </li>
                 <li>
                   <span>Last Name:</span>
-                  {resData?.data?.user?.lastName}
+                  {resData?.data?.user?.lastName || resData?.lastName}
                 </li>
 
                 <li>
                   <span> Email:</span>
-                  {resData?.data?.user.email}
+                  {resData?.data?.user.email || resData?.email}
                 </li>
 
                 <li>
                   <span>Amount Paid:</span>
-                  {formatNaira(resData?.data?.payment?.amount | 0)}
+                  {formatNaira(
+                    resData?.data?.payment?.amount || resData?.amount,
+                  )}
                 </li>
 
                 <li>
                   <span>Payment plan:</span>
-                  {resData?.data?.payment.metadata?.paymentPlan.toUpperCase()}
+                  {resData?.data?.payment.metadata?.paymentPlan.toUpperCase() ||
+                    resData?.paymentPlan.toUpperCase()}
                 </li>
                 <li>
                   <span>Payment cycle: </span>
-                  {resData?.data?.subscription?.cycle.toUpperCase()}
+                  {resData?.data?.subscription?.billingCycle.toUpperCase() ||
+                    resData?.billingCycle.toUpperCase()}
                 </li>
                 <li>
                   <span>Subscribed At:</span>
                   {new Date(
                     resData?.data?.subscription?.periodStart,
-                  ).toLocaleDateString()}
+                  ).toLocaleDateString() ||
+                    new Date(
+                      resData?.subscribedAt as string,
+                    ).toLocaleDateString()}
                 </li>
 
                 <li>
                   <span>Subscription end Date:</span>
                   {new Date(
                     resData?.data?.subscription?.periodEnd,
-                  ).toLocaleDateString()}
+                  ).toLocaleDateString() ||
+                    new Date(
+                      resData?.subscriptionEndDate as string,
+                    ).toLocaleDateString()}
                 </li>
                 <li>
                   <span>Transaction Id </span>
-                  {resData?.data?.payment?.transactionId}
+                  {resData?.data?.payment?.transactionId ||
+                    resData?.transactionId}
                 </li>
               </ul>
             </div>

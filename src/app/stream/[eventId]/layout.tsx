@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
-import MainHeader from "@/app/components/_dashboard/shared/MainHeader";
+import MainHeader from "@/app/components/_dashboard/shared/DashboardHeader";
 import StreamAside from "@/app/components/_dashboard/shared/StreamAside";
 import { Spinner } from "@/app/components/Spinner";
 import { IStreamData } from "@/app/interfaces/castr.interface";
@@ -14,18 +14,20 @@ import { useDestinationStore } from "@/app/store/destination.store";
 import { useEventStore } from "@/app/store/event.store";
 import { useThemeStore } from "@/app/store/theme.store";
 import axiosApi from "@/lib/axios";
+import { AxiosError } from "axios";
 import { use, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const StreamLayout: React.FC<{
   children: React.ReactNode;
   params: Promise<{ eventId: string }>;
 }> = ({ children, params }) => {
   const { eventId } = use(params);
-
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [showAside, setShowAside] = useState(true);
   const [collapse, setCollapse] = useState(false);
-  const { setAuth } = useAuthStore();
+  const { setAuth, auth } = useAuthStore();
   const { setEvents, setEvent, event, setStreamData } = useEventStore();
   const { setCategories } = useCategoryStore();
   const theme = useThemeStore((state) => state.theme);
@@ -85,11 +87,11 @@ const StreamLayout: React.FC<{
 
     const getEvent = async () => {
       try {
-        const { data } = await axiosApi.get<{ data: { event: IEvent } }>(
+        const { data } = await axiosApi.get<{ event: IEvent }>(
           `/events/${eventId}`,
         );
 
-        setEvent(data.data.event);
+        setEvent(data.event);
       } catch (error) {
         console.log(error);
       }
@@ -121,15 +123,52 @@ const StreamLayout: React.FC<{
         const { data } = await axiosApi.get<IStreamData>(
           `/stream/castr-details/${event?._id}`,
         );
-        setStreamData(data);
+        if (event?.isLive) {
+          setStreamData(data);
+        }
       } catch (error) {
         console.error("Error fetching stream stats:", error);
+      }
+    };
+    const getStreamStats = async () => {
+      const castrId = event?.castrStreamId;
+      if (!castrId) {
+        return;
+      }
+      try {
+        await axiosApi.get(`/stream/castr/${castrId}/stats/${auth?._id}`);
+        // console.log(data.response);
+
+        //  setStats(response?.data?.response);
+      } catch (error) {
+        const axiosError = error as AxiosError;
+
+        if (axiosError.response?.status !== 404) {
+          console.warn("Stream stats unavailable");
+        }
       }
     };
     if (event?._id) {
       getStream();
     }
-  }, [event?.isLive, event?._id, setStreamData]);
+
+    getStreamStats();
+    const isStreamPage = pathname.startsWith(`/stream/${event?._id}`);
+    if (!isStreamPage && event?.castrStreamId) {
+      getStreamStats();
+
+      const interval = setInterval(getStreamStats, 5000);
+
+      return () => clearInterval(interval);
+    }
+  }, [
+    event?.isLive,
+    event?._id,
+    setStreamData,
+    auth?._id,
+    event?.castrStreamId,
+    pathname,
+  ]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">

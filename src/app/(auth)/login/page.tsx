@@ -10,7 +10,7 @@ const LogInPage = async ({
   const token = params.token;
   return (
     <div className="md:mt-6 mt-2 shadow-xl p-1 rounded-md">
-      <LoginComp token={token as string} />
+      <LoginComp token={token} />
     </div>
   );
 };

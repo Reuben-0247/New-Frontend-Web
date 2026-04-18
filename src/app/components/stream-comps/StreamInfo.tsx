@@ -1,13 +1,23 @@
 import { IStreamStats } from "@/app/interfaces/castr.interface";
-import { EyeIcon, Signal, Ratio, Volume2 } from "lucide-react";
+import { EyeIcon, Signal, Ratio, Volume2, ArrowDownUp } from "lucide-react";
 import React from "react";
 
-const StreamInfo: React.FC<{ stats: IStreamStats | undefined }> = ({
-  stats,
-}) => {
+const StreamInfo: React.FC<{
+  stats: IStreamStats | undefined;
+  usedBandwidth: string;
+}> = ({ stats, usedBandwidth }) => {
   return (
     <div>
       <div className="bg-[#151E37] px-2 w-full flex items-center justify-between h-[50px] ">
+        <div className="flex flex-col items-center">
+          <div>
+            <span className="text-[#A4A4A4] items-center flex gap-1 text-[8px]">
+              <ArrowDownUp size={15} />
+              Bandwidth
+            </span>
+          </div>
+          <span className="text-white text-[10px] ">{usedBandwidth}</span>
+        </div>
         <div className="flex flex-col items-center">
           <div>
             <span className="text-[#A4A4A4] items-center flex gap-1 text-[10px]">

@@ -1,0 +1,62 @@
+.payment-card {
+  transition: all 400ms ease-in-out;
+
+  &:hover {
+    transform: scale(1.02);
+    // border: 1px solid #0062ff;
+  }
+  &.premium {
+    border: 1px solid #940204;
+
+    &:hover {
+      border: 1px solid #db0307;
+    }
+  }
+  &.advanced {
+    border: 1px solid #0569a7;
+    &:hover {
+      border: 1px solid #059bf8;
+    }
+  }
+  &.intermediat {
+    border: 1px solid #08642c;
+    &:hover {
+      border: 1px solid #05db57;
+    }
+  }
+  &.basic {
+    border: 1px solid oklch(51.568% 0.10859 66.063);
+    &:hover {
+      border: 1px solid oklch(68.451% 0.15737 61.617);
+    }
+  }
+  .sub-button {
+    .btn {
+      &.premium {
+        color: white;
+        &:hover {
+          background: #610e0f;
+        }
+      }
+      &.advanced {
+        color: white;
+        &:hover {
+          background: #054872;
+        }
+      }
+      &.intermediate {
+        color: white;
+        &:hover {
+          background: #0b4d24;
+        }
+      }
+
+      &.basic {
+        color: white;
+        &:hover {
+          background: oklch(46.907% 0.10552 63.089);
+        }
+      }
+    }
+  }
+}

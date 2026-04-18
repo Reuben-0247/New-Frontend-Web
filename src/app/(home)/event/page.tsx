@@ -31,7 +31,7 @@ const page = async () => {
       <div className="hero relative">
         <div className=" -z-5 img-box absolute -top-40 w-full right-0 h-140 bg-[url('/images/Pattern.png')] bg-cover bg-center"></div>
         <Header />
-        <div className="w-full h-[50vh] px-2 md:h-[75vh] flex flex-col items-center justify-center text-center">
+        <div className="w-full h-[50vh] px-2 md:h-[55vh] flex flex-col items-center justify-center text-center">
           <div>
             <img
               src="/images/heroSection.png"

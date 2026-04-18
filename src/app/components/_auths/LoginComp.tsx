@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ToastContent, toast } from "react-toastify";
 // import Cookies from "js-cookie";
 // import axiosApi from "@/lib/axios";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,11 +24,15 @@ import { Input } from "@/components/ui/input";
 // import { useRouter, useSearchParams } from "next/navigation";
 import { formatError } from "@/utils/helper";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 import { Spinner } from "@/app/components/Spinner";
 import { TOKEN_NAME } from "@/utils/constant";
 import SocialAuth from "./SocialAuth";
+import { api } from "@/lib/axios";
+
+const REDIRECT = "redirect";
+
 const formSchema = z.object({
   email: z
     .string()
@@ -39,7 +43,11 @@ const formSchema = z.object({
   }),
 });
 
-const LoginComp: React.FC<{ token: string }> = ({ token }) => {
+const LoginComp: React.FC<{ token?: string }> = ({ token }) => {
+  const searchParams = useSearchParams();
+
+  const redirect = searchParams.get("redirect");
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -53,32 +61,51 @@ const LoginComp: React.FC<{ token: string }> = ({ token }) => {
   });
 
   useEffect(() => {
-    if (!token) return;
-
-    Cookies.set(TOKEN_NAME, token);
-    router.replace("/find-events");
-  }, [token, router]);
+    if (redirect) {
+      localStorage.setItem(REDIRECT, redirect);
+    }
+    if (token) {
+      Cookies.set(TOKEN_NAME, token);
+      const redirectUrl = localStorage.getItem(REDIRECT);
+      const safeRedirect =
+        redirectUrl && redirectUrl.startsWith("/")
+          ? redirectUrl
+          : "/find-events";
+      if (safeRedirect) {
+        router.push(safeRedirect);
+        localStorage.removeItem(REDIRECT);
+      } else {
+        router.push("/find-events");
+      }
+    }
+  }, [token, router, redirect]);
 
   // const email = form.watch("email");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true);
-      const { data } = await axios.post<{ message: string }>(
+      const { data } = await api.post<{ data: { token: string } }>(
         "/auth/login",
         values,
       );
       // console.log("Login response:", values);
       if (data) {
         toast.success("Login successful");
-        router.replace("/find-events");
+        Cookies.set(TOKEN_NAME, data.data.token);
+        const redirectUrl = localStorage.getItem(REDIRECT);
+        const safeRedirect =
+          redirectUrl && redirectUrl.startsWith("/")
+            ? redirectUrl
+            : "/find-events";
+        if (safeRedirect) {
+          router.push(safeRedirect);
+          localStorage.removeItem(REDIRECT);
+        } else {
+          // router.push("/");
+          router.push("/find-events");
+        }
       }
-
-      // if (data.message) {
-      //   toast.success("Login successful");
-      //   router.push("/dashboard");
-      //   setLoading(false);
-      // }
     } catch (error) {
       const axiosError = error as AxiosError;
       const formattedError = formatError(axiosError);

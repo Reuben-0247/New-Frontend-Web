@@ -8,9 +8,7 @@ const SocialAuth: React.FC<{ authType: string }> = ({ authType }) => {
   const [loading, setLoading] = useState(false);
 
   const redirectUrl =
-    process.env.NODE_ENV === "development"
-      ? `http://localhost:3000/login`
-      : `https://feroevent.com/login`;
+    typeof window !== "undefined" ? `${window.location.origin}/login` : "";
 
   const handleAuth = () => {
     setLoading(true);

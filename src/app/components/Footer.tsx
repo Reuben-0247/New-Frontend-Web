@@ -1,12 +1,28 @@
+"use client";
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { MailIcon } from "lucide-react";
 import { FiMapPin } from "react-icons/fi";
 import { BsInstagram, BsTwitterX, BsWhatsapp } from "react-icons/bs";
 import { FaFacebookF, FaLinkedinIn } from "react-icons/fa";
+import { useThemeStore } from "../store/theme.store";
+import Link from "next/link";
 
 const Footer = () => {
+  const { theme } = useThemeStore();
+
+  const [resolvedTheme, setResolvedTheme] = useState<string | null>(null);
+
+  useEffect(() => {
+    setResolvedTheme(theme);
+  }, [theme]);
+
+  const logo =
+    resolvedTheme === "dark"
+      ? "/svgs/FERO_LOGO_light.svg"
+      : "/svgs/Fero_logo_dark.svg";
+
   return (
     <div>
       <div className="h-0.5 w-full bg-linear-to-r from-transparent via-line to-transparent"></div>
@@ -14,11 +30,15 @@ const Footer = () => {
       <footer className="w-full  bg-background pt-8 pb-0 text-foreground font-sans">
         <div className="max-w-7xl w-full mx-auto flex flex-col md:flex-row justify-between gap-4 px-4 md:px-10 lg:px-16">
           <div className="max-w-[220px] flex flex-col ">
-            <img
-              src="/images/logo-f.png"
-              className=" h-[70px] w-[150px]"
-              alt=""
-            />
+            {theme === "dark" ? (
+              <Link href="/" className="">
+                <img src={logo} alt="Fero Events Logo" className="h-[50px] " />
+              </Link>
+            ) : (
+              <Link href="/" className="">
+                <img src={logo} alt="Fero Events Logo" className="h-[50px] " />
+              </Link>
+            )}
             <p className="text-sm text-foreground max-w-xs leading-relaxed mt-8">
               Whether you're hosting a virtual conference, hybrid meetup, or
               live concert, Fero Events scales with you.

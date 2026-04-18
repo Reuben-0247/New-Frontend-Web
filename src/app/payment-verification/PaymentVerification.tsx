@@ -29,7 +29,7 @@ const PaymentVerification = () => {
     setShow(false);
     // setIsPrinted(false);
     setShow(false);
-    navigate.push("/pricing");
+    navigate.push("/subscriptions");
     // setResData({});
   };
   useEffect(() => {
@@ -86,7 +86,7 @@ const PaymentVerification = () => {
           goHome();
         }}
         saveText="Continue"
-        header="">
+        header="Cancel Printing">
         <div className="modal-body">
           Are you sure you want to go back without printing?
         </div>

@@ -36,29 +36,30 @@ const EventSlide: React.FC<{ events: IEvent[] }> = ({ events }) => {
           tabIndex={0}
           role="list"
           aria-label="Scrollable list of events">
-          {[...events, ...events].map((ev, idx) => (
-            <Link
-              key={`${ev?._id}-${idx}`}
-              href={`/find-events/${ev?._id}`}
-              className="card">
-              {/* <div > */}
-              <img
-                src={ev.displayImage || "https://via.placeholder.com/256x144"}
-                alt={ev.title}
-              />
-              <div className="content">
-                <h3>{ev.title}</h3>
-                <div className="meta">
-                  <span>
-                    <Calendar size={12} />
-                    {new Date(ev.startDate || "").toLocaleDateString()}
-                  </span>
-                  <span>{ev.totalParticipants?.length} registered</span>
+          {[...events, ...events]
+            .filter((evn) => evn?.featuredEvent)
+            .map((ev, idx) => (
+              <Link
+                key={`${ev?._id}-${idx}`}
+                href={`/find-events/${ev?._id}`}
+                className="card">
+                {/* <div > */}
+                <img
+                  src={ev.displayImage || "https://via.placeholder.com/256x144"}
+                  alt={ev.title}
+                />
+                <div className="content">
+                  <h3>{ev.title}</h3>
+                  <div className="meta">
+                    <span>
+                      <Calendar size={12} />
+                      {new Date(ev.startDate || "").toLocaleDateString()}
+                    </span>
+                    <span>{ev.totalParticipants?.length} registered</span>
+                  </div>
                 </div>
-              </div>
-              {/* </div> */}
-            </Link>
-          ))}
+              </Link>
+            ))}
         </div>
 
         <button
@@ -75,7 +76,7 @@ const EventSlide: React.FC<{ events: IEvent[] }> = ({ events }) => {
 export default EventSlide;
 
 const Wrapper = styled.div`
-  width: 100%;
+  width: 90%;
   overflow: hidden;
   position: relative;
 

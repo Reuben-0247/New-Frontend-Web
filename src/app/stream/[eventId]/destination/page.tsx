@@ -41,8 +41,10 @@ import { Input } from "@/components/ui/input";
 import { useEventStore } from "@/app/store/event.store";
 import { toast } from "react-toastify";
 import { Switch } from "@/components/ui/switch";
+import { useAuthStore } from "@/app/store/auth.store";
 
 const DestinationsPage: React.FC = () => {
+  const { auth } = useAuthStore();
   const [showAdd, setShowAdd] = useState(false);
   const [adding, setAdding] = useState(false);
   const [enabled, setEnabled] = useState<Record<string, boolean>>({});
@@ -65,7 +67,7 @@ const DestinationsPage: React.FC = () => {
     deleteDestination,
     updateDestination,
   } = useDestinationStore();
-  const { streamData, event } = useEventStore();
+  const { streamData } = useEventStore();
 
   useEffect(() => {
     const initialState: Record<string, boolean> = {};
@@ -129,13 +131,17 @@ const DestinationsPage: React.FC = () => {
   };
 
   const onSubmit = async () => {
-    if (!streamData?.castrStreamId || !event?.castrStreamId) {
-      toast.error(
-        "Stream is not live. Please Please ensure you have started streaming.",
-      );
-      return;
-    }
-    const success = await createDestination(input);
+    // if (!streamData?.castrStreamId || !event?.castrStreamId) {
+    //   toast.error(
+    //     "Stream is not live. Please Please ensure you have started streaming.",
+    //   );
+    //   return;
+    // }
+    const success = await createDestination(
+      input,
+      auth?._id,
+      streamData?.castrStreamId,
+    );
     if (success) {
       setAdding(false);
       setShowAdd(false);
@@ -146,12 +152,15 @@ const DestinationsPage: React.FC = () => {
   const onUpdate = async () => {
     if (!desToEdit) return;
     try {
-      await updateDestination({
-        _id: desToEdit._id,
-        name: input.name,
-        serverKey: input.serverKey,
-        serverUrl: input.serverUrl,
-      });
+      await updateDestination(
+        {
+          _id: desToEdit._id,
+          name: input.name,
+          serverKey: input.serverKey,
+          serverUrl: input.serverUrl,
+        },
+        streamData?.castrStreamId,
+      );
       setOpenModal(false);
       setDesToEdit(null);
       setInput({ name: "", serverUrl: "", serverKey: "" });
@@ -160,30 +169,39 @@ const DestinationsPage: React.FC = () => {
     }
   };
 
-  const onEnableDestination = async (checked: boolean, id: string) => {
+  const onEnableDestination = async (
+    checked: boolean,
+    platform_id: string,
+    server: string,
+    key: string,
+    name: string,
+  ) => {
     if (!streamData?.castrStreamId) {
       toast.warn("Please create a stream...");
       return;
     }
-    setEnabled((prev) => ({ ...prev, [id]: checked }));
-    setLoadingMap((prev) => ({ ...prev, [id]: true }));
+    setEnabled((prev) => ({ ...prev, [platform_id]: checked }));
+    setLoadingMap((prev) => ({ ...prev, [platform_id]: true }));
     try {
       await enableDestination({
         streamId: streamData.castrStreamId,
-        id,
+        platform_id,
         enabled: checked,
+        server,
+        key,
+        name,
       });
     } catch (error) {
       console.log(error);
-      setEnabled((prev) => ({ ...prev, [id]: !checked }));
+      setEnabled((prev) => ({ ...prev, [platform_id]: !checked }));
     } finally {
-      setLoadingMap((prev) => ({ ...prev, [id]: false }));
+      setLoadingMap((prev) => ({ ...prev, [platform_id]: false }));
     }
   };
 
   const deleteData = async (data: IDestination) => {
     try {
-      await deleteDestination(data._id);
+      await deleteDestination(data?.platform_id, streamData?.castrStreamId);
       setOpenDeleteModal(false);
     } catch (error) {
       console.log(error);
@@ -422,26 +440,29 @@ const DestinationsPage: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-8">
                         <Switch
-                          className="text-primary"
-                          checked={!!enabled[destination._id]}
-                          disabled={loadingMap[destination._id]}
+                          className=" data-[state=checked]:bg-red-500 "
+                          checked={destination?.isEnabled}
+                          disabled={loadingMap[destination?.platform_id]}
                           onCheckedChange={(checked) =>
-                            onEnableDestination(checked, destination._id)
+                            onEnableDestination(
+                              checked,
+                              destination?.platform_id,
+                              destination?.serverUrl,
+                              destination?.serverKey,
+                              destination?.name,
+                            )
                           }
                           onClick={(e) => e.stopPropagation()}
                           onPointerDown={(e) => e.stopPropagation()}
                         />
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              type="button"
+                            <span
                               onClick={(e) => e.stopPropagation()}
                               onPointerDown={(e) => e.stopPropagation()}
                               className="cursor-pointer">
                               <EllipsisVertical size={15} />
-                            </Button>
+                            </span>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
                             align="end"

@@ -64,6 +64,9 @@ const LiveComment: React.FC<{ eventId: string }> = ({ eventId }) => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!token) {
+      setShowModal(true);
+    }
     if (!message.trim()) return;
 
     await sendMessage(message.trim());

@@ -5,7 +5,8 @@ export interface IUser {
   password?: string;
 
   email: string;
-
+  hasLiveEvent: boolean;
+  hasPaid: boolean;
   hasSubscribed?: boolean;
   paymentPlan?: string;
 

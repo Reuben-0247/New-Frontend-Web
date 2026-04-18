@@ -17,6 +17,19 @@ export const getCurrentDateTimeLocal = () => {
   return now.toISOString().slice(0, 16);
 };
 
+export const formatDateTime = (dateString: string): string => {
+  const date = new Date(dateString || new Date()).toLocaleString("en-NG", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Africa/Lagos",
+  });
+  return date;
+};
+
 export const formatToLocaleDate = (dateString: string) => {
   const date = new Date(dateString);
   return date
@@ -36,6 +49,50 @@ export function formatTime(timestamp: string | number | Date) {
     hour12: true,
   });
 }
+
+export const formatNaira = (amount: number) => {
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
+
+export const detectCurrency = () => {
+  if (typeof window === "undefined") return "USD";
+
+  const locale = navigator.language;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  if (locale.includes("NG") || timezone.includes("Lagos")) {
+    return "NGN";
+  }
+
+  return "USD";
+};
+
+export const formatUSD = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+};
+export const formatCurrency = (
+  amount: number,
+  options: {
+    currency?: string;
+    isKobo?: boolean;
+  } = {},
+): string => {
+  const { currency = "NGN", isKobo = false } = options;
+
+  const value = isKobo ? amount / 100 : amount;
+
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency,
+  }).format(value);
+};
 
 interface FormattedAxiosError {
   status?: number;
@@ -127,7 +184,7 @@ export const formatError = (error: AxiosError): FormattedAxiosError => {
       method: error?.config?.method,
     };
   }
-
+  console.log(error);
   return {
     message: error.message,
     isAxiosError: true,

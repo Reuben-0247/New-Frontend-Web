@@ -130,3 +130,9 @@ body {
     display: none;
   }
 }
+[data-slot="table-container"] {
+  background: red;
+}
+[data-slot="table-head"] {
+  background: var(--background);
+}

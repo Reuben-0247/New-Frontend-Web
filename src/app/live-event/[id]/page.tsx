@@ -1,5 +1,5 @@
 "use client";
-import MainHeader from "@/app/components/_dashboard/shared/MainHeader";
+import MainHeader from "@/app/components/_dashboard/shared/DashboardHeader";
 import LiveBoard from "@/app/components/_live-events/LiveBoard";
 import LiveComment from "@/app/components/_live-events/LiveComment";
 import LiveNotes from "@/app/components/_live-events/LiveNotes";
