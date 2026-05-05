@@ -286,26 +286,40 @@ const LiveClipingPage = () => {
               <Card className="bg-background mt-8 border-none">
                 <div className="w-full px-4 items-center justify-center flex pt-12">
                   <div>
-                    <p className="text-foreground text-[18px] text-center ">
-                      No live videos yet
-                    </p>
-                    <p className="text-foreground text-[14px] text-center">
-                      Your live videos will be here after every live session so
-                      you can clip them
-                    </p>
-                    <div className="flex items-center justify-center mt-6 mx-auto w-full gap-x-5">
-                      <Button
-                        onClick={() => {
-                          if (!event?.isLive) {
-                            return toast.warn("Event is not live!");
-                          }
-                          setIsNewClippingOpen(true);
-                        }}
-                        className="cursor-pointer text-white">
-                        <ScissorsLineDashed size={24} />
-                        Create Live Clip
-                      </Button>
-                    </div>
+                    {event?.isLive ? (
+                      <div>
+                        <p className="text-foreground text-[18px] text-center ">
+                          You have live event recordings
+                        </p>
+                        <p className="text-foreground text-[14px] text-center">
+                          Create clips from your live videos to share highlights
+                          and engage your audience
+                        </p>
+                        <div className="flex items-center justify-center mt-6 mx-auto w-full gap-x-5">
+                          <Button
+                            onClick={() => {
+                              if (!event?.isLive) {
+                                return toast.warn("Event is not live!");
+                              }
+                              setIsNewClippingOpen(true);
+                            }}
+                            className="cursor-pointer text-white">
+                            <ScissorsLineDashed size={24} />
+                            Create Live Clip
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-foreground text-[18px] text-center ">
+                          No live videos yet
+                        </p>
+                        <p className="text-foreground text-[14px] text-center">
+                          Your live videos will be here after every live session
+                          so you can clip them
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>

@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { formatToLocaleDate } from "@/utils/helper";
 import React from "react";
 import styled from "styled-components";
 
@@ -11,7 +12,6 @@ const Reciept: React.FC<{ resData?: any }> = ({ resData }) => {
       minimumFractionDigits: 0,
     }).format(amount);
   }
-
   return (
     <div className="reciept">
       <div className="payment-slip sans dark:text-dark">
@@ -66,22 +66,18 @@ const Reciept: React.FC<{ resData?: any }> = ({ resData }) => {
                 </li>
                 <li>
                   <span>Subscribed At:</span>
-                  {new Date(
-                    resData?.data?.subscription?.periodStart,
-                  ).toLocaleDateString() ||
-                    new Date(
-                      resData?.subscribedAt as string,
-                    ).toLocaleDateString()}
+                  {formatToLocaleDate(
+                    resData?.data?.subscription?.periodStart ||
+                      resData?.subscribedAt,
+                  )}
                 </li>
 
                 <li>
                   <span>Subscription end Date:</span>
-                  {new Date(
-                    resData?.data?.subscription?.periodEnd,
-                  ).toLocaleDateString() ||
-                    new Date(
-                      resData?.subscriptionEndDate as string,
-                    ).toLocaleDateString()}
+                  {formatToLocaleDate(
+                    resData?.data?.subscription?.periodEnd ||
+                      resData?.subscriptionEndDate,
+                  )}
                 </li>
                 <li>
                   <span>Transaction Id </span>

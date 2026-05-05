@@ -44,6 +44,7 @@ import { toast } from "react-toastify";
 // import { Card, CardContent } from "@/components/ui/card";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 // import Link from "next/link";
+import "quill/dist/quill.snow.css";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -402,10 +403,10 @@ const EventBoardComp = () => {
                 key={board._id}
                 className="border-none hover:border-none">
                 <AccordionTrigger className="cursor-pointer hover:no-underline [&>svg]:hidden pb-4 pt-2 px-2">
-                  <div className="flex py-8   bg-transparent hover:bg-transparent outline-none justify-between w-full">
+                  <div className="flex   py-1 bg-transparent hover:bg-transparent outline-none justify-between w-full">
                     <div className="flex items-center gap-3">
                       <img
-                        className="w-12 h-12 rounded-full object-center"
+                        className="w-10 h-10 rounded-full object-cover"
                         src={auth?.profilePhotoUrl}
                         alt=""
                       />
@@ -463,7 +464,7 @@ const EventBoardComp = () => {
                   {board.type === "note" && (
                     <div
                       dangerouslySetInnerHTML={{ __html: board.content }}
-                      className="prose prose-invert px-4 w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full p-2 mt-2 wrap-break-word whitespace-normal"></div>
+                      className="ql-editor prose prose-invert px-4 w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full p-2 mt-2 wrap-break-word whitespace-normal"></div>
                   )}
 
                   {board.type === "document" && (

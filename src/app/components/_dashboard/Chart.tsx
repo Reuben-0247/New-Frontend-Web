@@ -39,7 +39,7 @@ export const UsageChart = ({
             : "rgba(7, 42, 238, 0.6)",
           type === "doughnut"
             ? "rgba(7, 42, 238, 0.6)"
-            : "rgba(7, 238, 92, 0.6)",
+            : "lab(78.5 -64.93 39.75 / 1)",
         ],
         borderWidth: 0,
       },
@@ -79,7 +79,16 @@ export const UsageChart = ({
       <div className="text-xs text-center text-muted-foreground">
         <p className="font-medium text-foreground">{label}</p>
         <p>
-          {formatBandwidth(used)} / {formatBandwidth(total)}
+          <span
+            className={`${type === "doughnut" ? "text-red-500" : "text-blue-500"}`}>
+            Used:
+          </span>
+          {formatBandwidth(used)} /{" "}
+          <span
+            className={`${type === "doughnut" ? "text-blue-500" : "text-green-400"}`}>
+            Total:
+          </span>
+          {formatBandwidth(total)}
         </p>
       </div>
     </div>

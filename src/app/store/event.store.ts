@@ -36,7 +36,7 @@ interface IProp {
   ) => Promise<IEvent | boolean>;
 
   publishEvent: (id: string) => Promise<IEvent | boolean>;
-  goLiveEvent: (eventId: string) => Promise<IEvent | boolean>;
+  goLiveEvent: (eventId: string, userId: string) => Promise<IEvent | boolean>;
 
   endStream: (eventId: string, userId: string) => Promise<IEvent | boolean>;
   createBoard: (
@@ -194,13 +194,19 @@ export const useEventStore = create<IProp>((set) => ({
       set({ loading: false });
     }
   },
-  goLiveEvent: async (eventId: string): Promise<IEvent | boolean> => {
+  goLiveEvent: async (
+    eventId: string,
+    userId: string,
+  ): Promise<IEvent | boolean> => {
     try {
       set({ loading: true });
-      const { data } = await axiosApi.patch(`/events/live/${eventId}`, {
-        evenId: eventId,
-        streamPlatform: "castr",
-      });
+      const { data } = await axiosApi.patch(
+        `/events/live/${eventId}/${userId}`,
+        {
+          evenId: eventId,
+          streamPlatform: "castr",
+        },
+      );
       set((state) => ({
         event: state.event ? { ...state.event, isLive: true } : null,
       }));

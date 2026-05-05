@@ -15,14 +15,14 @@ import { Input } from "@/components/ui/input";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  setIsConfirmationModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsConfirmationModalOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   event?: IEvent | null;
 }
 
 const EventRegistrationFormModal: React.FC<Props> = ({
   isOpen,
   onClose,
-  setIsConfirmationModalOpen,
+  // setIsConfirmationModalOpen,
   event,
 }) => {
   const token = Cookies.get(TOKEN_NAME);
@@ -39,9 +39,9 @@ const EventRegistrationFormModal: React.FC<Props> = ({
     firstName: string;
     lastName: string;
   }>({
-    confirmEmail: auth?.email || "",
-    firstName: auth?.firstName || "",
-    lastName: auth?.lastName || "",
+    confirmEmail: "",
+    firstName: "",
+    lastName: "",
   });
 
   useEffect(() => {
@@ -77,7 +77,7 @@ const EventRegistrationFormModal: React.FC<Props> = ({
       if (response.status === 200 || response.status === 201) {
         toast.success(response.data?.message || "Registration successful");
 
-        setIsConfirmationModalOpen(true);
+        // setIsConfirmationModalOpen(true);
         onClose();
       }
     } catch (error) {
@@ -109,6 +109,7 @@ const EventRegistrationFormModal: React.FC<Props> = ({
               <Input
                 type="email"
                 className="text-black"
+                disabled={!!auth?.email}
                 value={input.confirmEmail}
                 required
                 onChange={(e) =>

@@ -78,6 +78,8 @@ const StreamPage = () => {
   const [isLive, setIslive] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [streamStats, setStreamStats] = useState<IStreamStats>();
+  const [viewers, setViewers] = useState(0);
+
   useEffect(() => {
     const saved = sessionStorage.getItem("cloud_recording");
     if (saved !== null) {
@@ -120,7 +122,7 @@ const StreamPage = () => {
 
   const goLive = async () => {
     // setIsLoading(true);
-    await goLiveEvent(event?._id || "");
+    await goLiveEvent(event?._id || "", auth?._id || "");
     setIslive(!isLive);
     toast.success(isLive ? "Event is now offline" : "Event is now live", {
       delay: 3000,
@@ -129,6 +131,25 @@ const StreamPage = () => {
   };
 
   const endEventStream = async () => {
+    sessionStorage.setItem("cloud_recording", JSON.stringify(false));
+
+    const body = {
+      settings: {
+        abr: false,
+        cloud_recording: false,
+      },
+      name: event?.title,
+      enabled: true,
+    };
+    const res = await axiosApi.patch(
+      `/stream/castr/${streamData?.castrStreamId}`,
+      body,
+    );
+
+    if (res) {
+      toast.success("Cloud Recording disabled...");
+      setEnabled(false);
+    }
     endStream(event?._id || "", auth?._id || "");
     setOpenModal(false);
   };
@@ -160,14 +181,33 @@ const StreamPage = () => {
         }
       }
     };
+    const getViewers = async () => {
+      try {
+        const { data } = await axiosApi.get<{ viewers: number }>(
+          `/stream/viewers/${event?._id}`,
+        );
+        if (data) {
+          setViewers(data.viewers);
+        }
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        if (!cancelled) {
+          console.debug("Viewers fetch failed, retrying...");
+        }
+        if (axiosError.response?.status !== 404) {
+          console.warn("Viewers count unavailable");
+        }
+      }
+    };
     getStreamStats();
+    getViewers();
     const interval = setInterval(getStreamStats, 5000);
 
     return () => {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [streamData?.castrStreamId, event?.castrStreamId, auth?._id]);
+  }, [streamData?.castrStreamId, event?.castrStreamId, auth?._id, event?._id]);
 
   useEffect(() => {
     if (videoSrc === "Streaming Sofware") {
@@ -314,7 +354,11 @@ const StreamPage = () => {
           </div>
         </div>
         <div className="stream-tab md:w-[50%] w-full p-4 bg-[#151e37]">
-          <StreamInfo stats={streamStats} usedBandwidth={bandWidth} />
+          <StreamInfo
+            stats={streamStats}
+            usedBandwidth={bandWidth}
+            viewers={viewers}
+          />
           <hr />
           {isPublished ? (
             <div className="w-full h-[300px] relative flex mt-2 rounded-md items-center border justify-center bg-[#151E37] ">

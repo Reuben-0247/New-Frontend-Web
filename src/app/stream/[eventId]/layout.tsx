@@ -14,20 +14,17 @@ import { useDestinationStore } from "@/app/store/destination.store";
 import { useEventStore } from "@/app/store/event.store";
 import { useThemeStore } from "@/app/store/theme.store";
 import axiosApi from "@/lib/axios";
-import { AxiosError } from "axios";
 import { use, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 
 const StreamLayout: React.FC<{
   children: React.ReactNode;
   params: Promise<{ eventId: string }>;
 }> = ({ children, params }) => {
   const { eventId } = use(params);
-  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [showAside, setShowAside] = useState(true);
   const [collapse, setCollapse] = useState(false);
-  const { setAuth, auth } = useAuthStore();
+  const { setAuth } = useAuthStore();
   const { setEvents, setEvent, event, setStreamData } = useEventStore();
   const { setCategories } = useCategoryStore();
   const theme = useThemeStore((state) => state.theme);
@@ -117,58 +114,24 @@ const StreamLayout: React.FC<{
   }, [setAuth, setEvents, setCategories, setEvent, eventId, setDestinations]);
 
   useEffect(() => {
-    if (!event?.isLive) return;
+    // if (!event?.isLive) return;
     const getStream = async () => {
       try {
         const { data } = await axiosApi.get<IStreamData>(
           `/stream/castr-details/${event?._id}`,
         );
-        if (event?.isLive) {
-          setStreamData(data);
-        }
+        setStreamData(data);
+        // if (event?.isLive) {
+        // }
       } catch (error) {
         console.error("Error fetching stream stats:", error);
       }
     };
-    const getStreamStats = async () => {
-      const castrId = event?.castrStreamId;
-      if (!castrId) {
-        return;
-      }
-      try {
-        await axiosApi.get(`/stream/castr/${castrId}/stats/${auth?._id}`);
-        // console.log(data.response);
 
-        //  setStats(response?.data?.response);
-      } catch (error) {
-        const axiosError = error as AxiosError;
-
-        if (axiosError.response?.status !== 404) {
-          console.warn("Stream stats unavailable");
-        }
-      }
-    };
-    if (event?._id) {
-      getStream();
-    }
-
-    getStreamStats();
-    const isStreamPage = pathname.startsWith(`/stream/${event?._id}`);
-    if (!isStreamPage && event?.castrStreamId) {
-      getStreamStats();
-
-      const interval = setInterval(getStreamStats, 5000);
-
-      return () => clearInterval(interval);
-    }
-  }, [
-    event?.isLive,
-    event?._id,
-    setStreamData,
-    auth?._id,
-    event?.castrStreamId,
-    pathname,
-  ]);
+    // if (event?._id) {
+    // }
+    getStream();
+  }, [event?._id, setStreamData]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">

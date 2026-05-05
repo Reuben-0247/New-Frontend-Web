@@ -18,15 +18,15 @@ import { useThemeStore } from "../store/theme.store";
 import { useSubscriptionStore } from "../store/subscription.store";
 import { IPayment } from "../interfaces/payment.interface";
 import { ISubscription } from "../interfaces/subscription.interface";
-import { AxiosError } from "axios";
-import { usePathname } from "next/navigation";
+// import { AxiosError } from "axios";
+// import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  // const pathname = usePathname();
 
   const [loading, setLoading] = useState(false);
   const [showAside, setShowAside] = useState(true);
@@ -142,29 +142,29 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!auth?._id) return;
 
-    const getStreamStats = async () => {
-      const castrId = liveEvent?.castrStreamId;
-      if (!castrId) return;
-      try {
-        await axiosApi.get(`/stream/castr/${castrId}/stats/${auth?._id}`);
-      } catch (error) {
-        const axiosError = error as AxiosError;
+    // const getStreamStats = async () => {
+    //   const castrId = liveEvent?.castrStreamId;
+    //   if (!castrId) return;
+    //   try {
+    //     await axiosApi.get(`/stream/castr/${castrId}/stats/${auth?._id}`);
+    //   } catch (error) {
+    //     const axiosError = error as AxiosError;
 
-        if (axiosError.response?.status !== 404) {
-          console.warn("Stream stats unavailable");
-        }
-      }
-    };
+    //     if (axiosError.response?.status !== 404) {
+    //       console.warn("Stream stats unavailable");
+    //     }
+    //   }
+    // };
 
-    const isStreamPage = pathname.startsWith(`/stream}`);
-    if (!isStreamPage && liveEvent?.castrStreamId) {
-      getStreamStats();
+    // const isStreamPage = pathname.startsWith(`/stream}`);
+    // if (!isStreamPage && liveEvent?.castrStreamId) {
+    //   getStreamStats();
 
-      const interval = setInterval(getStreamStats, 5000);
+    //   const interval = setInterval(getStreamStats, 5000);
 
-      return () => clearInterval(interval);
-    }
-  }, [setLiveEvent, pathname, liveEvent, auth?._id]);
+    //   return () => clearInterval(interval);
+    // }
+  }, [setLiveEvent, liveEvent, auth?._id]);
 
   if (loading) {
     return (
