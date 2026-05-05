@@ -25,7 +25,7 @@ const Reciept: React.FC<{ resData?: any }> = ({ resData }) => {
             <strong className="strong">
               {resData?.data?.subscription?.billingCycle ||
                 resData?.billingCycle}{" "}
-              {resData?.data?.payment.metadata?.paymentPlan ||
+              {resData?.data?.payment?.metadata?.paymentPlan ||
                 resData?.paymentPlan}
             </strong>{" "}
             Subscription Payment Slip
@@ -35,7 +35,7 @@ const Reciept: React.FC<{ resData?: any }> = ({ resData }) => {
               <ul className="details_info">
                 <li>
                   <span>First Name:</span>
-                  {resData?.data?.user.firstName || resData?.firstName}
+                  {resData?.data?.user?.firstName || resData?.firstName}
                 </li>
                 <li>
                   <span>Last Name:</span>
@@ -44,7 +44,7 @@ const Reciept: React.FC<{ resData?: any }> = ({ resData }) => {
 
                 <li>
                   <span> Email:</span>
-                  {resData?.data?.user.email || resData?.email}
+                  {resData?.data?.user?.email || resData?.email}
                 </li>
 
                 <li>
@@ -56,13 +56,13 @@ const Reciept: React.FC<{ resData?: any }> = ({ resData }) => {
 
                 <li>
                   <span>Payment plan:</span>
-                  {resData?.data?.payment.metadata?.paymentPlan.toUpperCase() ||
-                    resData?.paymentPlan.toUpperCase()}
+                  {resData?.data?.payment.metadata?.paymentPlan?.toUpperCase() ||
+                    resData?.paymentPlan?.toUpperCase()}
                 </li>
                 <li>
                   <span>Payment cycle: </span>
-                  {resData?.data?.subscription?.billingCycle.toUpperCase() ||
-                    resData?.billingCycle.toUpperCase()}
+                  {resData?.data?.subscription?.billingCycle?.toUpperCase() ||
+                    resData?.billingCycle?.toUpperCase()}
                 </li>
                 <li>
                   <span>Subscribed At:</span>
