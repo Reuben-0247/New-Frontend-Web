@@ -11,10 +11,10 @@ import { toast, ToastContent } from "react-toastify";
 import { Spinner } from "../Spinner";
 import { formatError } from "@/utils/helper";
 import { AxiosError } from "axios";
-import { useAuthStore } from "@/app/store/auth.store";
+// import { useAuthStore } from "@/app/store/auth.store";
 
 const LiveToVOD = () => {
-  const { auth } = useAuthStore();
+  // const { auth } = useAuthStore();
   const [enabled, setEnabled] = useState(false);
   const [vodData, setVodData] = useState<IRecording[]>([]);
   // const [show, setShow] = useState(false);
@@ -26,7 +26,7 @@ const LiveToVOD = () => {
   const [showThumbs, setShowThumbs] = useState<Record<string, boolean>>({});
   useEffect(() => {
     (async () => {
-      if (event?.castrStreamId !== null && event?.isLive == true) {
+      if (event?.castrStreamId !== null && event?.isLive) {
         setLoading(true);
         try {
           const { data } = await axiosApi.get<IRecording[]>(
@@ -44,7 +44,9 @@ const LiveToVOD = () => {
       } else {
         setLoading(true);
         try {
-          const { data } = await axiosApi.get(`/stream/${auth?._id}/recodings`);
+          const { data } = await axiosApi.get(
+            `/stream/event-recording/${event?._id}`,
+          );
 
           if (data) {
             setVodData(data || []);
@@ -57,14 +59,14 @@ const LiveToVOD = () => {
         }
       }
     })();
-  }, [event?.castrStreamId, auth?._id, event?.isLive]);
+  }, [event?.castrStreamId, event?._id, event?.isLive]);
   // console.log(data);
   // const enableVod = async () => {
   //   setEnabled(!enabled);
   // };
 
-  const handleShare = (eventtitle: string, eventId: string) => {
-    const URL = `${window.location.origin}/Live-Event/${eventtitle}/${eventId}`;
+  const handleShare = (eventtitle: string, id: string) => {
+    const URL = `${window.location.origin}/live-event/${id}?title=${encodeURIComponent(eventtitle)}`;
     if (navigator.share) {
       navigator
         .share({
@@ -171,32 +173,56 @@ const LiveToVOD = () => {
       <div className="bg-background   w-full ">
         <div className="w-full vod ">
           <div className="w-full px-2  justify-center flex pt-12 mt-8">
-            <div>
-              {enabled ? (
+            {!event?.isLive ? (
+              <div>
+                {enabled ? (
+                  <p className="text-foreground font-nuni mx-auto w-full text-[14px] text-center">
+                    Auto Recording is enabled. Your streams will be recorded
+                  </p>
+                ) : (
+                  <p className="text-foreground font-nuni mx-auto w-full text-[14px] text-center">
+                    Auto-recording is disabled. Your streams will not be
+                    recorded. Enable this option to automatically record your
+                    live event.
+                  </p>
+                )}
+                <div className="flex w-fit mx-auto items-center">
+                  <p className="text-foreground font-nuni my-0 mr-2 ">Enable</p>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={enabled}
+                      disabled={loadingT}
+                      onChange={enableCloudRecord}
+                    />
+                    <div className="w-11 h-6 border-[#0062FF] border peer-focus:outline-none peer-checked:bg-[#cc0000] rounded-full peer  transition-all duration-300"></div>
+                    <div className="absolute left-0.5 top-0.5 border-[#0062FF] border bg-[#000826] w-5 h-5 rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
+                  </label>
+                </div>
+              </div>
+            ) : (
+              <div>
                 <p className="text-foreground font-nuni mx-auto w-full text-[14px] text-center">
                   Auto Recording is enabled. Your streams will be recorded
                 </p>
-              ) : (
-                <p className="text-foreground font-nuni mx-auto w-full text-[14px] text-center">
-                  Auto-recording is disabled. Your streams will not be recorded.
-                  Enable this option to automatically record your live event.
-                </p>
-              )}
-              <div className="flex w-fit mx-auto items-center">
-                <p className="text-foreground font-nuni my-0 mr-2 ">Enable</p>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={enabled}
-                    disabled={loadingT}
-                    onChange={enableCloudRecord}
-                  />
-                  <div className="w-11 h-6 border-[#0062FF] border peer-focus:outline-none peer-checked:bg-[#cc0000] rounded-full peer  transition-all duration-300"></div>
-                  <div className="absolute left-0.5 top-0.5 border-[#0062FF] border bg-[#000826] w-5 h-5 rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
-                </label>
+                <div className="flex w-fit mx-auto items-center">
+                  <p className="text-foreground font-nuni my-0 mr-2 ">
+                    Enabled
+                  </p>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={true}
+                      disabled
+                    />
+                    <div className="w-11 h-6 border-[#00cc44] border peer-focus:outline-none peer-checked:bg-[#00cc44] rounded-full peer  transition-all duration-300"></div>
+                    <div className="absolute left-0.5 top-0.5 border-[#00cc44] border bg-[#f4f5f8] w-5 h-5 rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
+                  </label>
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div>
             {!vodData.length ? (

@@ -7,6 +7,7 @@ export const formatDate = (date: dayjs.ConfigType) => {
   const formattedDate = dayjs(date).format("dddd, D MMMM, YYYY");
   return formattedDate;
 };
+
 export const formatDateInput = (date: Date | string) => {
   return new Date(date)?.toISOString().split("T")[0];
 };

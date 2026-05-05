@@ -25,6 +25,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast, ToastContent } from "react-toastify";
 import EventRegistrationFormModal from "@/app/components/_find-events/EventRegistrationFormModal";
+import { useAuthStore } from "@/app/store/auth.store";
 
 // async function getEvent(id: string): Promise<IEvent> {
 //   try {
@@ -41,15 +42,18 @@ import EventRegistrationFormModal from "@/app/components/_find-events/EventRegis
 const SingleEventPage: React.FC<{
   params: Promise<{ eventId: string }>;
 }> = ({ params }) => {
-  const router = useRouter();
   const { eventId } = use(params);
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { auth } = useAuthStore();
+
   const label = searchParams.get("label");
   const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(false);
   const { setEvent, event, events } = useEventStore();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  // const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [loadingEnter, setLoadingEnter] = useState(false);
 
   useEffect(() => {
     async function fetchEventAndRelated() {
@@ -99,13 +103,46 @@ const SingleEventPage: React.FC<{
     // }
   }, [eventId, setEvent, event?.userId, event?.isLive]);
 
-  // console.log(event?.userId);
+  const enterEvent = async () => {
+    if (event?.requirePassword && !user?.registeredEvents?.includes(eventId)) {
+      toast.warn("You haven't registered for this event");
+      setIsFormModalOpen(true);
+      return;
+    }
+    if (auth?._id === event?.userId) {
+      router.push(`/live-event/${eventId}`);
+      return;
+    }
+
+    const payload = {
+      eventId,
+      userId: auth?._id,
+      password: event?.password,
+    };
+    try {
+      setLoadingEnter(true);
+      const { data } = await axiosApi.patch(
+        "/stream/enter-stream-event",
+        payload,
+      );
+      if (data) {
+        router.push(`/live-event/${eventId}`);
+      }
+    } catch (error) {
+      console.log(error);
+      const axiosError = error as AxiosError;
+      const formattedError = formatError(axiosError);
+      toast.error(formattedError.message as ToastContent);
+    } finally {
+      setLoadingEnter(false);
+    }
+  };
+
   const SaveEvent = async () => {
     if (!event?._id) return;
 
     const id = event._id;
     try {
-      //   setLoading(true);
       const res = await axiosApi.patch("/events/saved/update", { id });
 
       if (res.status === 200 || res.status === 201) {
@@ -233,19 +270,24 @@ const SingleEventPage: React.FC<{
                 <div>
                   {!event?.requirePassword ? (
                     <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">
-                      <Link
-                        href={`/live-event/${event?._id}`}
-                        // onClick={accessStream}
-                        className="bg-blue-600 text-white w-[214px] flex justify-center items-center h-[47px] rounded-lg font-medium hover:bg-blue-700 transition">
+                      <Button
+                        disabled={loadingEnter}
+                        variant={"default"}
+                        className="w-full sm:w-auto flex justify-center items-center  rounded-lg font-medium"
+                        onClick={enterEvent}>
+                        {/* <Link
+                          href={`/live-event/${event?._id}`}
+                          className=" text-white  flex justify-center items-center  rounded-lg font-medium  transition"> */}
                         Access Event
-                      </Link>
+                        {/* </Link> */}
+                      </Button>
                     </div>
                   ) : (
-                    <button
+                    <Button
                       onClick={() => setIsFormModalOpen(true)}
-                      className={`bg-blue-600 cursor-pointer text-white w-[214px] h-[47px] rounded-lg font-semibold hover:bg-blue-700 transition `}>
+                      className={` cursor-pointer text-white  rounded-lg font-semibold transition `}>
                       Register
-                    </button>
+                    </Button>
                   )}
                 </div>
               )}
@@ -309,7 +351,7 @@ const SingleEventPage: React.FC<{
                         <div className="flex items-center text-gray-500 text-sm">
                           <Users className="w-4 h-4 mr-1 text-gray-500 dark:text-white" />
                           <span className="text-sm text-gray-500">
-                            {ev?.participants?.length || "N/A"} registerd
+                            {ev?.participants?.length || "N/A"} registered
                           </span>
                         </div>
                       </div>
@@ -324,7 +366,7 @@ const SingleEventPage: React.FC<{
       <EventRegistrationFormModal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
-        setIsConfirmationModalOpen={() => setIsConfirmationModalOpen(false)}
+        // setIsConfirmationModalOpen={() => setIsConfirmationModalOpen(false)}
         event={event}
       />
     </div>

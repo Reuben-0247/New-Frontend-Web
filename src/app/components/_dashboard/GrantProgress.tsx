@@ -40,9 +40,7 @@ export const ProgressBar = ({ label, used, total, color }: UsageData) => {
     <div className="w-full space-y-1">
       <div className="flex justify-between text-xs font-medium text-muted-foreground">
         <span>{label}</span>
-        <span>
-          {formatBandwidth(used)} / {formatBandwidth(total)}
-        </span>
+        <span>{formatBandwidth(total)}</span>
       </div>
 
       <div className="w-full h-5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">

@@ -118,13 +118,14 @@ const SubscriptionPage = () => {
           <p className="text-xl font-semibold leading-6 text-foreground">
             Subscription
           </p>
-          {!payments.length && (
-            <Link
-              href={"/pricing"}
-              className=" bg-primary rounded-md px-4 py-1 text-white">
-              Subscribe!
-            </Link>
-          )}
+          {!payments.length ||
+            (subscription?.status === "expired" && (
+              <Link
+                href={"/pricing"}
+                className=" bg-primary rounded-md px-4 py-1 text-white">
+                Subscribe!
+              </Link>
+            ))}
         </div>
         <p className="mt-1 truncate text-sm leading-5 text-foreground">
           Subscribe and manage your subscription across the application and

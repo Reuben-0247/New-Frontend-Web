@@ -24,8 +24,10 @@ const EventReviewsComp: React.FC<{ eventId: string }> = ({ eventId }) => {
   }, [eventId]);
   return (
     <div>
-      <div className="bg-white shadow-md rounded-xl p-6 mt-6">
-        <h2 className="text-lg font-bold mb-4 text-black">Event Reviews</h2>
+      <div className="dark:bg-[#0C1123]  bg-white shadow-md rounded-xl p-6 mt-6">
+        <h2 className="text-lg font-bold mb-4 text-foreground">
+          Event Reviews
+        </h2>
 
         {isLoading ? (
           <p className="text-gray-500">Loading reviews...</p>
@@ -36,13 +38,13 @@ const EventReviewsComp: React.FC<{ eventId: string }> = ({ eventId }) => {
             {reviews.map((review) => (
               <div
                 key={review._id}
-                className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                className="p-4 border dark:bg-[#0C1123] border-gray-200 rounded-lg bg-gray-50">
                 <div className="flex mb-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <span
                       key={star}
                       className={`text-xl ${
-                        review?.rating || 0 >= star
+                        Number(review?.rating) >= star
                           ? "text-yellow-400"
                           : "text-gray-300"
                       }`}>
@@ -51,7 +53,7 @@ const EventReviewsComp: React.FC<{ eventId: string }> = ({ eventId }) => {
                   ))}
                 </div>
 
-                <p className="text-gray-800 mb-2">{review.comment}</p>
+                <p className="text-foreground mb-2">{review.comment}</p>
 
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>
@@ -64,7 +66,7 @@ const EventReviewsComp: React.FC<{ eventId: string }> = ({ eventId }) => {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
-                      }
+                      },
                     )}
                   </span>
                 </div>

@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { FiDownload } from "react-icons/fi";
 import { PhotoProvider, PhotoView } from "react-photo-view";
+import "quill/dist/quill.snow.css";
+
 // import { Card, CardContent } from "@/components/ui/card";
 
 const LiveBoard: React.FC<{ event: IEvent | null }> = ({ event }) => {
@@ -41,10 +43,14 @@ const LiveBoard: React.FC<{ event: IEvent | null }> = ({ event }) => {
         } catch (error) {
           console.log(error);
         } finally {
-          setLoading(false);
+          // setLoading(false);
         }
       }
     };
+    getBoards().finally(() => {
+      setLoading(false);
+    });
+
     const interval = setInterval(() => {
       getBoards();
     }, 5000);
@@ -138,7 +144,7 @@ const LiveBoard: React.FC<{ event: IEvent | null }> = ({ event }) => {
                 {board.type === "note" && (
                   <div
                     dangerouslySetInnerHTML={{ __html: board.content }}
-                    className="prose prose-invert px-4 w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full p-2 mt-2 wrap-break-word whitespace-normal"></div>
+                    className="ql-editor prose prose-invert px-4 w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full p-2 mt-2 wrap-break-word whitespace-normal text-foreground"></div>
                 )}
 
                 {board.type === "document" && (

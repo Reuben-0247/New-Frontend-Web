@@ -2,10 +2,12 @@
 /* eslint-disable @next/next/no-img-element */
 import { IStreamData } from "@/app/interfaces/castr.interface";
 import { IEvent } from "@/app/interfaces/event.interface";
+import { useAuthStore } from "@/app/store/auth.store";
 import axiosApi from "@/lib/axios";
 import EmojiPicker from "emoji-picker-react";
 import { Video } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { use, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import styled from "styled-components";
 
@@ -16,7 +18,8 @@ const LiveVideo: React.FC<{
   const pickerRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const reviewRef = useRef<HTMLDivElement | null>(null);
-
+  const router = useRouter();
+  const { auth } = useAuthStore();
   const [showPicker, setShowPicker] = useState(false);
   // const [message, setMessage] = useState("");
   const [isStreamVisible, setIsStreamVisible] = useState(true);
@@ -85,6 +88,25 @@ const LiveVideo: React.FC<{
     }, 3000);
   };
 
+  const handleLeave = async () => {
+    const payload = {
+      eventId: event?._id,
+      userId: auth?._id,
+    };
+    try {
+      const { data: response } = await axiosApi.patch(
+        `/stream/exit-stream-event`,
+        payload,
+      );
+      if (response) {
+        toast.info("You have successfully left the event!");
+        router.push("/find-events");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Wrapper>
       <div>
@@ -122,7 +144,7 @@ const LiveVideo: React.FC<{
             ))}
           </div>
 
-          {showReview && (
+          {/* {showReview && (
             <div
               ref={reviewRef}
               className="absolute bottom-9 translate-y-[100px] md:-translate-y-[100px] sm:w-[330px] left-1 right-1 md:right-0 md:left-3 bg-[#0C1220] p-4 rounded-xl z-50 text-white shadow-xl">
@@ -169,13 +191,14 @@ const LiveVideo: React.FC<{
                 </p>
               )}
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="w-full md:border-t  bg-[#000826] md:bg-black md:bg-opacity-70 p-2 flex  md:gap-3 justify-between items-center text-white relative">
-          <button
-            className=" h-9 md:h-10 md:ms-7 cursor-pointer px-1 w-[95px] md:w-[150px] text-[9px] sm:text-base flex md:gap-2 border border-[#272A31] rounded items-center"
-            onClick={() => setShowReview(!showReview)}>
+          {/* <button
+            className=" h-9 md:h-10 md:ms-7 cursor-not-allowed px-1 w-[95px] md:w-[150px] text-[9px] sm:text-base flex md:gap-2 border border-[#272A31] rounded items-center"
+            onClick={() => setShowReview(!showReview)}
+            disabled>
             <svg
               width="24"
               height="21"
@@ -189,7 +212,7 @@ const LiveVideo: React.FC<{
               />
             </svg>
             Drop a Review
-          </button>
+          </button> */}
 
           <div className="flex gap-2 md:gap-3 justify-center items-center">
             <button
@@ -235,7 +258,7 @@ const LiveVideo: React.FC<{
             </div>
 
             <button
-              // onClick={handleLeave}
+              onClick={handleLeave}
               className="border cursor-pointer border-gray-700 block rounded-md px-2 h-9 md:h-10">
               <svg
                 width="24"

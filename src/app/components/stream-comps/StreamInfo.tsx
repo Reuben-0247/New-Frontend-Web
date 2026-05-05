@@ -5,7 +5,8 @@ import React from "react";
 const StreamInfo: React.FC<{
   stats: IStreamStats | undefined;
   usedBandwidth: string;
-}> = ({ stats, usedBandwidth }) => {
+  viewers: number;
+}> = ({ stats, usedBandwidth, viewers }) => {
   return (
     <div>
       <div className="bg-[#151E37] px-2 w-full flex items-center justify-between h-[50px] ">
@@ -26,7 +27,7 @@ const StreamInfo: React.FC<{
             </span>
           </div>
           <span className="text-white text-[10px] ">
-            {/* {viewers === 0 ? ".." : viewers}0 */ 0}
+            {viewers === 0 ? ".." : viewers}
           </span>
         </div>
         <div className="flex flex-col items-center">

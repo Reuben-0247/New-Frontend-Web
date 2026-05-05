@@ -1,30 +1,33 @@
 "use client";
+import { IEvent } from "@/app/interfaces/event.interface";
 import axiosApi from "@/lib/axios";
 import { Grid, List } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { ThreeDots } from "react-loader-spinner";
 
-const LiveParticipant: React.FC<{ eventId: string }> = ({ eventId }) => {
+const LiveParticipant: React.FC<{ event: IEvent | null }> = ({ event }) => {
   const [view, setView] = useState("grid");
   const [participants, setParticipants] = useState<
     { user: { name?: string; profilePhotoUrl?: string } }[]
   >([]);
   const [loading, setLoading] = useState(true);
-
+  console.log("Event ID:", event?._id);
   useEffect(() => {
     const getParticipants = async () => {
       setLoading(true);
-      try {
-        const { data } = await axiosApi(`/stream/viewers/${eventId}`);
-        setParticipants(data?.participants || []);
-      } catch (error) {
-        console.error("Error fetching participants:", error);
-      } finally {
-        setLoading(false);
+      if (event?._id) {
+        try {
+          const { data } = await axiosApi(`/stream/viewers/${event._id}`);
+          setParticipants(data?.participants || []);
+        } catch (error) {
+          console.error("Error fetching participants:", error);
+        } finally {
+          setLoading(false);
+        }
       }
     };
     getParticipants();
-  }, [eventId]);
+  }, [event?._id]);
   if (loading) {
     <div className="flex justify-center py-10">
       <ThreeDots

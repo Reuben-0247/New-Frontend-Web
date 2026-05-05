@@ -3,31 +3,53 @@ import axiosApi from "@/lib/axios";
 import { formatError } from "@/utils/helper";
 import { AxiosError } from "axios";
 import React, { useState } from "react";
-import { ThreeDots } from "react-loader-spinner";
+// import { ThreeDots } from "react-loader-spinner";
 import { toast, ToastContent } from "react-toastify";
 import ModalComp from "../ModalComp";
-import { TOKEN_NAME } from "@/utils/constant";
-import Cookies from "js-cookie";
+// import { TOKEN_NAME } from "@/utils/constant";
+// import Cookies from "js-cookie";
 import Link from "next/link";
+import { IEvent } from "@/app/interfaces/event.interface";
 
-const LiveNotes: React.FC<{ title: string }> = ({ title }) => {
-  const token = Cookies.get(TOKEN_NAME);
+const LiveNotes: React.FC<{ event: IEvent | null }> = ({ event }) => {
+  // const token = Cookies.get(TOKEN_NAME);
   const [showModal, setShowModal] = useState(false);
+  const [msg, setMsg] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [input, setInput] = useState<{ content: string; title: string }>({
-    title: title,
-    content: "",
-  });
+  // const [input, setInput] = useState<{ comment: string; rating: number }>({
+  //   comment: "",
+  //   rating: 0,
+  // });
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
 
-  const sendNote = async () => {
+  const sendReview = async () => {
+    if (rating === 0 || comment.trim() === "") {
+      setMsg("Please select a rating and drop your thought.");
+      return;
+    }
+    setMsg("");
+
     try {
       setLoading(true);
-      const { data } = await axiosApi.post(`/notes`, {
-        input,
-      });
-      if (data) {
-        toast.success("Saved note Successfully");
+      const payload = {
+        title: event?.title,
+        comment: comment,
+        rating: rating,
+      };
+      const { data } = await axiosApi.post(
+        `/events/${event?._id}/reviews`,
+        payload,
+      );
+      if (data.status === "success") {
+        setMsg("Review sent successfully");
+        toast.success("Review sent successfull");
+
+        setComment("");
+        setRating(0);
+      } else {
+        setMsg("Failed to send review");
       }
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -37,11 +59,12 @@ const LiveNotes: React.FC<{ title: string }> = ({ title }) => {
       setLoading(false);
     }
   };
-  const checkIsLoggedIn = () => {
-    if (!token) {
-      setShowModal(true);
-    }
-  };
+
+  // const checkIsLoggedIn = () => {
+  //   if (!token) {
+  //     setShowModal(true);
+  //   }
+  // };
 
   return (
     <div>
@@ -60,32 +83,47 @@ const LiveNotes: React.FC<{ title: string }> = ({ title }) => {
           </p>
         </div>
       </ModalComp>
-      <div className="bg-[#0C1123] text-white rounded-lg max-w-2xl mx-auto p-6">
-        <div className="space-y-4">
+      <div className="dark:bg-[#0C1123]  bg-white text-foreground rounded-lg max-w-2xl mx-auto ">
+        <div className=" text-foreground shadow-xl p-2">
+          <h2 className="text-lg font-bold mb-1">Rate this Event</h2>
+          <p className="text-sm text-gray-400 mb-3">
+            Your honest review is anonymously shared only with the event host.
+          </p>
+          <div className="flex gap-1 mb-3">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setRating(star)}
+                className={`text-2xl ${
+                  rating >= star ? "text-yellow-400" : "text-gray-600"
+                }`}>
+                ★
+              </button>
+            ))}
+          </div>
           <textarea
-            className="w-full p-3 rounded-lg bg-white text-gray-800 border border-gray-700 resize-none"
-            style={{ height: "200px" }}
-            placeholder="send a secret review about this even..."
-            value={input.content}
-            onFocus={checkIsLoggedIn}
-            onChange={(e) => setInput({ ...input, content: e.target.value })}
+            className="w-full min-h-[60px] dark:bg-[#1D2331] bg-white p-3 border  rounded-md text-sm text-white placeholder-gray-400"
+            placeholder="The Digital Creators Summit brought together..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
           />
 
-          {loading ? (
-            <div className="flex justify-center items-center">
-              <ThreeDots
-                height="40"
-                width="40"
-                color="#003399"
-                visible={true}
-              />
-            </div>
-          ) : (
-            <button
-              onClick={sendNote}
-              className=" bg-blue-800 px-4 py-2  rounded-md  transition">
-              <p className="text-white font-semibold m-0">Send</p>
-            </button>
+          <button
+            onClick={sendReview}
+            disabled={loading}
+            className={`mt-3 px-4 py-2.5   text-white font-semibold rounded-md bg-[#0062FF]`}>
+            {loading ? "Sending..." : "Send"}
+          </button>
+
+          {msg && (
+            <p
+              className={`mt-2 text-sm ${
+                msg.toLowerCase().includes("success")
+                  ? "text-green-400"
+                  : "text-red-400"
+              }`}>
+              {msg}
+            </p>
           )}
         </div>
       </div>
