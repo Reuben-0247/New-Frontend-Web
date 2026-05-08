@@ -37,7 +37,7 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const pickerRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
-
+  const [loadingSend, setLoadingSend] = useState(false);
   useEffect(() => {
     loadMessages(1);
   }, [loadMessages]);
@@ -66,15 +66,17 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth?.hasSubscribed || !auth?.hasPaid) {
-      return setShowSubModal(true);
-    }
+    // if (!auth?.hasSubscribed || !auth?.hasPaid) {
+    //   return setShowSubModal(true);
+    // }
+    setLoadingSend(true);
     if (!message.trim()) return;
 
     await sendMessage(message.trim());
 
     setMessage("");
     setShowPicker(false);
+    setLoadingSend(false);
   };
 
   return (
@@ -144,9 +146,9 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
                     variant="ghost"
                     className="cursor-pointer text-2xl"
                     onClick={() => {
-                      if (!auth?.hasSubscribed || !auth?.hasPaid) {
-                        return setShowSubModal(true);
-                      }
+                      // if (!auth?.hasSubscribed || !auth?.hasPaid) {
+                      //   return setShowSubModal(true);
+                      // }
                       setShowPicker((p) => !p);
                     }}>
                     😊
@@ -171,11 +173,11 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
 
                 <Input
                   value={message}
-                  onFocus={() => {
-                    if (!auth?.hasSubscribed || !auth?.hasPaid) {
-                      return setShowSubModal(true);
-                    }
-                  }}
+                  // onFocus={() => {
+                  //   if (!auth?.hasSubscribed || !auth?.hasPaid) {
+                  //     return setShowSubModal(true);
+                  //   }
+                  // }}
                   onChange={(e) => {
                     setMessage(e.target.value);
                     sendTyping();
@@ -183,12 +185,13 @@ const HostComments: React.FC<Props> = ({ eventId }) => {
                   placeholder="Type a message..."
                 />
 
-                <div
-                  // variant={"ghost"}
+                <Button
+                  variant={"ghost"}
                   className="cursor-pointer p-1"
-                  onClick={handleSend}>
+                  onClick={handleSend}
+                  disabled={loadingSend}>
                   <SendHorizonal size={28} />
-                </div>
+                </Button>
               </div>
             </form>
           </div>

@@ -79,9 +79,10 @@ const CreateEventForm = () => {
   const [displayImageFile, setDisplayImageFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [loadingDraft, setLoadingDraft] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { auth } = useAuthStore();
   // const [sAction, setSAction] = useState("draft");
-  const { createEvent, loading } = useEventStore();
+  const { createEvent } = useEventStore();
   console.log(auth);
   const form = useForm<CreateEventFormInput>({
     resolver: zodResolver(eventSchema),
@@ -126,6 +127,7 @@ const CreateEventForm = () => {
   }, []);
 
   async function onSubmit(values: z.infer<typeof eventSchema>) {
+    setLoading(true);
     await createEvent(
       {
         ...values,
@@ -138,6 +140,7 @@ const CreateEventForm = () => {
       },
       displayImageFile!,
     );
+    setLoading(false);
     form.reset();
     router.push(`/events?tab=Published`);
   }

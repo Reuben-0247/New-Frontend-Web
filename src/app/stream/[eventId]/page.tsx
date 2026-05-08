@@ -44,16 +44,6 @@ const tabs: { name: string }[] = [
     name: "Reviews",
   },
 ];
-const videoSrcData: { label: string; icon: React.ReactNode }[] = [
-  {
-    label: "Streaming Sofware",
-    icon: <Airplay />,
-  },
-  {
-    label: "Webcam",
-    icon: <Webcam />,
-  },
-];
 
 const StreamPage = () => {
   const [active, setActive] = useState<string>("Board");
@@ -139,14 +129,14 @@ const StreamPage = () => {
         cloud_recording: false,
       },
       name: event?.title,
-      enabled: true,
+      enabled: false,
     };
     const res = await axiosApi.patch(
       `/stream/castr/${streamData?.castrStreamId}`,
       body,
     );
 
-    if (res) {
+    if (res && enabled === true) {
       toast.success("Cloud Recording disabled...");
       setEnabled(false);
     }
@@ -282,6 +272,23 @@ const StreamPage = () => {
   //   }
   // };
 
+  const videoSrcData: {
+    label: string;
+    icon: React.ReactNode;
+    disabled: boolean;
+  }[] = [
+    {
+      label: "Streaming Sofware",
+      icon: <Airplay />,
+      disabled: false,
+    },
+    {
+      label: "Webcam",
+      icon: <Webcam />,
+      disabled: event?.isLive || false,
+    },
+  ];
+
   const playBackUrl = streamData?.playBack?.embedUrl;
 
   return (
@@ -373,7 +380,7 @@ const StreamPage = () => {
                   />
                   <div>
                     {!event?.isLive ? (
-                      <div className="w-full flex absolute bottom-[150px] items-center justify-center">
+                      <div className="w-full gap-4 flex absolute bottom-[150px] items-center justify-center">
                         <button
                           onClick={goLive}
                           disabled={loading}
@@ -383,6 +390,11 @@ const StreamPage = () => {
                             {loading ? <ThreeDots color="white" /> : " Go live"}
                             {/* Go live */}
                           </span>
+                        </button>
+                        <button
+                          onClick={() => setOpenModal(true)}
+                          className=" cursor-pointer rounded-[5px] text-[14px] font-nuni bg-primary text-white px-2 h-[45px] ">
+                          End Stream
                         </button>
                       </div>
                     ) : (
@@ -419,31 +431,36 @@ const StreamPage = () => {
             <div className="flex">
               {videoSrcData.map((src) => (
                 <p
-                  className={`py-2 md:px-4 px-2 text-white flex items-center md:gap-2 gap-1 font-bold cursor-pointer ${
+                  className={`py-2 md:px-4 px-2 text-white flex items-center md:gap-2 gap-1 font-bold ${src.disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${
                     videoSrc === src.label ? "bg-[#232e4e] rounded-md" : ""
                   }`}
                   key={src.label}
-                  onClick={() => setVideoSrc(src.label)}>
+                  onClick={() => !src.disabled && setVideoSrc(src.label)}>
                   <span className="text-white">{src.icon}</span> {src.label}
                 </p>
               ))}
             </div>
-            {auth?.hasSubscribed && (
-              <div className="flex items-center ml-2 gap-2">
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={enabled}
-                    disabled={loadingT}
-                    onChange={enableCloudRecord}
-                  />
-                  <div className="w-8 h-[19px] border-[#0062FF] peer-checked:border-[#cc0000] border-2 peer-focus:outline-none peer-focus:ring-2 peer-focus:bg-[#0f1525] rounded-full peer peer-checked:bg-[#cc0000] p-1 transition-all duration-300"></div>
-                  <div className="absolute left-[3px] top-0.4 bg-[#FFFFFF] w-[13px] h-[13px] rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
-                </label>
-                <small className="text-white">Recording</small>
-              </div>
-            )}
+
+            <div className="flex items-center ml-2 gap-2">
+              <label
+                title={
+                  !auth?.hasSubscribed
+                    ? "Subscribe to enable"
+                    : "Cloud Recording"
+                }
+                className={`relative inline-flex items-center ${!auth?.hasSubscribed ? "cursor-not-allowed" : "cursor-pointer"}`}>
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={enabled}
+                  disabled={loadingT || !auth?.hasSubscribed}
+                  onChange={enableCloudRecord}
+                />
+                <div className="w-8 h-[19px] border-[#0062FF] peer-checked:border-[#cc0000] border-2 peer-focus:outline-none peer-focus:ring-2 peer-focus:bg-[#0f1525] rounded-full peer peer-checked:bg-[#cc0000] p-1 transition-all duration-300"></div>
+                <div className="absolute left-[3px] top-0.4 bg-[#FFFFFF] w-[13px] h-[13px] rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
+              </label>
+              <small className="text-white">Recording</small>
+            </div>
           </div>
           <div className="vsrc flex justify-between items-center   my-4">
             {active && (
