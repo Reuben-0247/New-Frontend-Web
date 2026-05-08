@@ -91,7 +91,7 @@ export const useChat = (eventId: string, userId?: string) => {
   useEffect(() => {
     if (!eventId) return;
 
-    if (!auth?.hasSubscribed || !auth?.hasPaid) return;
+    // if (!auth?.hasSubscribed || !auth?.hasPaid) return;
 
     const interval = setInterval(async () => {
       try {
@@ -106,7 +106,7 @@ export const useChat = (eventId: string, userId?: string) => {
       } catch (err) {
         console.error(err);
       }
-    }, 5000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [eventId, auth, setChats]);

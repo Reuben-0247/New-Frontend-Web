@@ -67,7 +67,7 @@ export const useEventStore = create<IProp>((set) => ({
     displayImage: File | null,
   ): Promise<IEvent | boolean> => {
     try {
-      set({ loading: true });
+      // set({ loading: true });
       const formData = new FormData();
 
       if (displayImage) {
@@ -107,7 +107,7 @@ export const useEventStore = create<IProp>((set) => ({
       toast.error(formattedError.message as ToastContent);
       throw error;
     } finally {
-      set({ loading: false });
+      // set({ loading: false });
     }
   },
   updateEvent: async (
@@ -142,7 +142,7 @@ export const useEventStore = create<IProp>((set) => ({
         formData.append("type", input.type || "");
         formData.append("displayImage", displayImage);
         const { data } = await axiosApi.patch<{ data: { event: IEvent } }>(
-          `/events/publish/${_id}`,
+          `/events/${_id}`,
           formData,
         );
         set((state) => ({
@@ -153,7 +153,7 @@ export const useEventStore = create<IProp>((set) => ({
         return data.data.event;
       } else {
         const { data } = await axiosApi.patch<{ data: { event: IEvent } }>(
-          `/events/publish/${_id}`,
+          `/events/${_id}`,
           input,
         );
         set((state) => ({
@@ -235,6 +235,7 @@ export const useEventStore = create<IProp>((set) => ({
         event: state.event ? { ...state.event, isLive: false } : null,
         streamData: null,
       }));
+      toast.success("Stream ended successfully");
       return data;
     } catch (error) {
       // const axiosError = error as AxiosError;

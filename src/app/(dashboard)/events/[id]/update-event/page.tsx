@@ -29,9 +29,11 @@ import { useEventStore } from "@/app/store/event.store";
 import { useRouter } from "next/navigation";
 import { UpdateEventFormInput } from "@/app/interfaces/event.interface";
 import { formatDateInput } from "@/utils/helper";
+import { useAuthStore } from "@/app/store/auth.store";
 
 const UodateEventPage: React.FC = () => {
   const router = useRouter();
+  const { auth } = useAuthStore();
   const { updateEvent, loading, event } = useEventStore();
   const [displayImage, setDisplayImage] = useState<string | null>(null);
   const [displayImageFile, setDisplayImageFile] = useState<File | null>(null);
@@ -130,7 +132,7 @@ const UodateEventPage: React.FC = () => {
       displayImageFile ?? undefined,
     );
     form.reset();
-    router.push(`/events?tab=Published`);
+    router.back();
   }
 
   return (
@@ -406,38 +408,41 @@ const UodateEventPage: React.FC = () => {
               )}
             />
           </div>
-
-          <div className="">
-            <FormField
-              control={form.control}
-              name="featuredEvent"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Do you want to boost your event to appear on the featured
-                    events?
-                  </FormLabel>
-                  <RadioGroup
-                    value={field.value ? "Yes" : "No"}
-                    onValueChange={(val) => field.onChange(val === "Yes")}>
-                    {["Yes", "No"].map((option) => (
-                      <div key={option} className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value={option}
-                          id={option}
-                          className="border-2 border-gray-600"
-                        />
-                        <label htmlFor={option} className="text-sm">
-                          {option}
-                        </label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                  <FormMessage className="text-red-500" />
-                </FormItem>
-              )}
-            />
-          </div>
+          {auth?.hasSubscribed == true && auth?.hasPaid == true && (
+            <div className="">
+              <FormField
+                control={form.control}
+                name="featuredEvent"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Do you want to boost your event to appear on the featured
+                      events?
+                    </FormLabel>
+                    <RadioGroup
+                      value={field.value ? "Yes" : "No"}
+                      onValueChange={(val) => field.onChange(val === "Yes")}>
+                      {["Yes", "No"].map((option) => (
+                        <div
+                          key={option}
+                          className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value={option}
+                            id={option}
+                            className="border-2 border-gray-600"
+                          />
+                          <label htmlFor={option} className="text-sm">
+                            {option}
+                          </label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                    <FormMessage className="text-red-500" />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
 
           <div className="flex   gap-4  w-full">
             <Button

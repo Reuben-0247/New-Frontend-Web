@@ -30,20 +30,24 @@ import { useEventStore } from "@/app/store/event.store";
 // import { formatError } from "@/utils/helper";
 import { useCategoryStore } from "@/app/store/category.store";
 import { FiCalendar, FiMapPin } from "react-icons/fi";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 // type Checked = DropdownMenuCheckboxItemProps["checked"];
+const labels = ["Published", "Drafts", "Saved", "Registered", "Past"];
 
 const EventsPage = () => {
   const { auth } = useAuthStore();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const { categories } = useCategoryStore();
   const [search, setSearch] = React.useState("");
-  const [components, setComponents] = useState<string>("Published");
-  // const [loadingSave, setLoadingSave] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [isLive, setIsLive] = useState(false);
-  const labels = ["Published", "Drafts", "Saved", "Registered", "Past"];
+  const initialTab = searchParams.get("tab");
+  const [components, setComponents] = useState<string>(
+    initialTab && labels.includes(initialTab) ? initialTab : "Published",
+  );
 
   const { setEvents, events } = useEventStore();
   const filteredEvents = useMemo(() => {
@@ -58,12 +62,12 @@ const EventsPage = () => {
     });
   }, [search, events, isLive]);
 
-  useEffect(() => {
-    const tab = searchParams.get("tab") || "Published";
-    if (tab) {
-      setComponents(tab);
-    }
-  }, [searchParams]);
+  // useEffect(() => {
+  //   const tab = searchParams.get("tab") || "Published";
+  //   if (tab && labels.includes(tab)) {
+  //     setComponents(tab);
+  //   }
+  // }, [searchParams]);
 
   useEffect(() => {
     const fetchEvents = async (url: string) => {
@@ -108,7 +112,7 @@ const EventsPage = () => {
       default:
         break;
     }
-  }, [components, auth?._id, setEvents, searchParams]);
+  }, [components, auth?._id, setEvents]);
 
   const getCategoryName = (categoryId: string) => {
     const category = categories.find((c) => c._id === categoryId);
@@ -190,6 +194,7 @@ const EventsPage = () => {
                   onClick={() => {
                     setIsLive(false);
                     setComponents(ev);
+                    router.push(`?tab=${ev}`, { scroll: false });
                   }}
                   key={i}>
                   {ev}
@@ -207,6 +212,7 @@ const EventsPage = () => {
             onClick={() => {
               setIsLive(false);
               setComponents(labelName);
+              router.push(`?tab=${labelName}`, { scroll: false });
             }}
             className={`text-[10px] md:text-base px-1  md:px-4 w-full md:w-0 cursor-pointer mx-1 md:mx-2 py-2 rounded-lg min-w-1 border md:min-w-45 transition-colors duration-300
                 ${components === labelName ? "ring-2 ring-blue-500" : ""}

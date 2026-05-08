@@ -34,6 +34,7 @@ const SingleEvent: React.FC<{ id: string }> = ({ id }) => {
   const { auth } = useAuthStore();
   const [loadingE, setLoadingE] = useState(false);
   const [loadingS, setLoadingS] = useState<boolean>(false);
+
   useEffect(() => {
     async function fetchEvent() {
       setLoadingE(true);
@@ -100,7 +101,7 @@ const SingleEvent: React.FC<{ id: string }> = ({ id }) => {
         <Button
           size={"sm"}
           variant={"outline"}
-          onClick={() => router.push("/events")}
+          onClick={() => router.push(`/events?tab=${label || "Published"}`)}
           className="text-foreground font-semibold cursor-pointer">
           <ArrowLeft /> <span>Back</span>
         </Button>
