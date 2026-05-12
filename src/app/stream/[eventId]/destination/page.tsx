@@ -47,7 +47,7 @@ const DestinationsPage: React.FC = () => {
   const { auth } = useAuthStore();
   const [showAdd, setShowAdd] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [enabled, setEnabled] = useState<Record<string, boolean>>({});
+  // const [enabled, setEnabled] = useState<Record<string, boolean>>({});
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
   const [openModal, setOpenModal] = useState(false);
   const [desToEdit, setDesToEdit] = useState<IDestination | null>(null);
@@ -76,7 +76,7 @@ const DestinationsPage: React.FC = () => {
       initialState[d._id] = d.enabled;
     });
 
-    setEnabled(initialState);
+    // setEnabled(initialState);
   }, [destinations]);
 
   const destinationLabels = [
@@ -180,7 +180,7 @@ const DestinationsPage: React.FC = () => {
       toast.warn("Please create a stream...");
       return;
     }
-    setEnabled((prev) => ({ ...prev, [platform_id]: checked }));
+    // setEnabled((prev) => ({ ...prev, [platform_id]: checked }));
     setLoadingMap((prev) => ({ ...prev, [platform_id]: true }));
     try {
       await enableDestination({
@@ -193,7 +193,7 @@ const DestinationsPage: React.FC = () => {
       });
     } catch (error) {
       console.log(error);
-      setEnabled((prev) => ({ ...prev, [platform_id]: !checked }));
+      // setEnabled((prev) => ({ ...prev, [platform_id]: !checked }));
     } finally {
       setLoadingMap((prev) => ({ ...prev, [platform_id]: false }));
     }
@@ -201,7 +201,7 @@ const DestinationsPage: React.FC = () => {
 
   const deleteData = async (data: IDestination) => {
     try {
-      await deleteDestination(data?.platform_id, streamData?.castrStreamId);
+      await deleteDestination(data?._id, streamData?.castrStreamId);
       setOpenDeleteModal(false);
     } catch (error) {
       console.log(error);

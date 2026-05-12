@@ -29,6 +29,17 @@ import { useForm, useWatch } from "react-hook-form";
 import { useEventStore } from "@/app/store/event.store";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/app/store/auth.store";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+// import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { TimePicker } from "@/components/ui/time-picker";
 // import { CreateEventFormInput } from "@/app/interfaces/event.interface";
 
 const eventSchema = z
@@ -37,8 +48,8 @@ const eventSchema = z
     description: z.string().min(1, "Description is required"),
     categoryId: z.string().min(1, "Event category is required"),
 
-    startDate: z.string().min(1, "Start date is required"),
-    endDate: z.string().min(1, "End date is required"),
+    startDate: z.date("Start date is required"),
+    endDate: z.date("End date is required"),
     startTime: z.string().min(1, "Start time is required"),
     endTime: z.string().min(1, "End time is required"),
 
@@ -83,10 +94,11 @@ const CreateEventForm = () => {
   const { auth } = useAuthStore();
   // const [sAction, setSAction] = useState("draft");
   const { createEvent } = useEventStore();
-  console.log(auth);
   const form = useForm<CreateEventFormInput>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
+      startDate: undefined,
+      endDate: undefined,
       requirePassword: false,
       featuredEvent: false,
       location: {
@@ -128,40 +140,54 @@ const CreateEventForm = () => {
 
   async function onSubmit(values: z.infer<typeof eventSchema>) {
     setLoading(true);
-    await createEvent(
-      {
-        ...values,
-        // isPublished: true,
-        type: "publish",
-        location: {
-          type: values.location.type,
-          address: values.location.address ?? "",
+    try {
+      await createEvent(
+        {
+          ...values,
+          // isPublished: true,
+          type: "publish",
+          startDate: values.startDate.toISOString().split("T")[0],
+          endDate: values.endDate.toISOString().split("T")[0],
+          location: {
+            type: values.location.type,
+            address: values.location.address ?? "",
+          },
         },
-      },
-      displayImageFile!,
-    );
-    setLoading(false);
-    form.reset();
-    router.push(`/events?tab=Published`);
+        displayImageFile!,
+      );
+      form.reset();
+      router.push(`/events?tab=Published`);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function onSave(values: z.infer<typeof eventSchema>) {
     setLoadingDraft(true);
-    await createEvent(
-      {
-        ...values,
-        // isPublished: false,
-        type: "draft",
-        location: {
-          type: values.location.type,
-          address: values.location.address ?? "",
+    try {
+      await createEvent(
+        {
+          ...values,
+          startDate: values.startDate.toISOString().split("T")[0],
+          endDate: values.endDate.toISOString().split("T")[0],
+          // isPublished: false,
+          type: "draft",
+          location: {
+            type: values.location.type,
+            address: values.location.address ?? "",
+          },
         },
-      },
-      displayImageFile!,
-    );
-    setLoadingDraft(false);
-    form.reset();
-    router.push(`/events?tab=Drafts`);
+        displayImageFile!,
+      );
+      form.reset();
+      router.push(`/events?tab=Drafts`);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingDraft(false);
+    }
   }
 
   return (
@@ -260,7 +286,7 @@ const CreateEventForm = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-4 grid-cols-1 ">
-            <FormField
+            {/* <FormField
               control={form.control}
               name="startDate"
               render={({ field }) => (
@@ -272,17 +298,99 @@ const CreateEventForm = () => {
                   <FormMessage className="text-red-500" />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <FormField
+              control={form.control}
+              name="startDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Start Date *</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground",
+                          )}>
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto p-0 bg-background"
+                      align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        captionLayout="dropdown"
+                        disabled={(date) => date < new Date("1900-01-01")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+
+            {/* <FormField
               control={form.control}
               name="endDate"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>End Date *</FormLabel>
                   <FormControl>
+                   
                     <Input type="date" {...field} className="w-full! block!" />
                   </FormControl>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            /> */}
+            <FormField
+              control={form.control}
+              name="endDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>End Date *</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground",
+                          )}>
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto p-0 bg-background"
+                      align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        captionLayout="dropdown"
+                        disabled={(date) => date < new Date("1900-01-01")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage className="text-red-500" />
                 </FormItem>
               )}
@@ -297,7 +405,8 @@ const CreateEventForm = () => {
                 <FormItem>
                   <FormLabel>Start Time *</FormLabel>
                   <FormControl className="w-full">
-                    <Input type="time" {...field} className="w-full! block!" />
+                    <TimePicker value={field.value} onChange={field.onChange} />
+                    {/* <Input type="time" {...field} className="w-full! block!" /> */}
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
@@ -311,7 +420,8 @@ const CreateEventForm = () => {
                 <FormItem>
                   <FormLabel>End Time *</FormLabel>
                   <FormControl>
-                    <Input type="time" {...field} className="w-full! block!" />
+                    <TimePicker value={field.value} onChange={field.onChange} />
+                    {/* <Input type="time" {...field} className="w-full! block!" /> */}
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
@@ -413,7 +523,7 @@ const CreateEventForm = () => {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
-                      // type="text"
+                      type="password"
                       placeholder="Enter password"
                       {...field}
                       disabled={watchRequirePassword === false}

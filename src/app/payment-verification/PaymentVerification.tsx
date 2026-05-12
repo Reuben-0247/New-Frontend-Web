@@ -24,6 +24,12 @@ const PaymentVerification = () => {
   const printReceipt = useReactToPrint({
     contentRef,
   });
+  useEffect(() => {
+    if (reference) {
+      navigate.push("/subscriptions");
+      return;
+    }
+  }, [reference, navigate]);
 
   const goHome = () => {
     setShow(false);
@@ -35,29 +41,29 @@ const PaymentVerification = () => {
   useEffect(() => {
     (async () => {
       try {
-        setLoading(true);
+        // setLoading(true);
         const { data } = await axiosApi.get(`/payments/verify/${reference}`);
         if (data) {
-          setResData(data);
+          navigate.push("/subscriptions");
         }
       } catch (error) {
         console.log(error);
-      } finally {
-        setLoading(false);
       }
     })();
-  }, [reference]);
+  }, [reference, navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white p-6">
-        <Spinner />
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-white p-6">
+  //       <Spinner />
+  //     </div>
+  //   );
+  // }
   return (
     <div className="min-h-screen bg-white  p-6">
-      <div className="modal-body">
+      <Spinner />
+      {/* <p>verify</p> */}
+      {/* <div className="modal-body">
         <div className="flex justify-between mb-8">
           <Button
             variant="secondary"
@@ -90,7 +96,7 @@ const PaymentVerification = () => {
         <div className="modal-body">
           Are you sure you want to go back without printing?
         </div>
-      </ModalComp>
+      </ModalComp> */}
     </div>
   );
 };

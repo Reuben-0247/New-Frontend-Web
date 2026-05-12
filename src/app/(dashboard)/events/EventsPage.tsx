@@ -1,22 +1,31 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { Forward, ListFilter, Radio, Rss } from "lucide-react";
+import {
+  EllipsisVertical,
+  ListFilter,
+  Radio,
+  Rss,
+  Share2,
+  Trash2,
+  ScanEye,
+} from "lucide-react";
 import Link from "next/link";
 // import { usePathname } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaCalendar, FaSearch } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { IoAdd } from "react-icons/io5";
-import {
-  // DropdownMenuCheckboxItemProps,
-  DropdownMenuItem,
-} from "@radix-ui/react-dropdown-menu";
+// import {
+//   // DropdownMenuCheckboxItemProps,
+//   DropdownMenuItem,
+// } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   // DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -28,9 +37,11 @@ import { useEventStore } from "@/app/store/event.store";
 // import { toast, ToastContent } from "react-toastify";
 // import { AxiosError } from "axios";
 // import { formatError } from "@/utils/helper";
+import ModalComp from "@/app/components/ModalComp";
 import { useCategoryStore } from "@/app/store/category.store";
 import { FiCalendar, FiMapPin } from "react-icons/fi";
 import { useSearchParams, useRouter } from "next/navigation";
+
 // type Checked = DropdownMenuCheckboxItemProps["checked"];
 const labels = ["Published", "Drafts", "Saved", "Registered", "Past"];
 
@@ -45,11 +56,13 @@ const EventsPage = () => {
   const [loading, setLoading] = useState(false);
   const [isLive, setIsLive] = useState(false);
   const initialTab = searchParams.get("tab");
+  const [openModal, setOpenModal] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
   const [components, setComponents] = useState<string>(
     initialTab && labels.includes(initialTab) ? initialTab : "Published",
   );
 
-  const { setEvents, events } = useEventStore();
+  const { setEvents, events, deleteEvent, loadingDel } = useEventStore();
   const filteredEvents = useMemo(() => {
     return events?.filter((event) => {
       const matchesSearch = event.title
@@ -166,6 +179,34 @@ const EventsPage = () => {
           </div>
         </div>
       </div>
+
+      <ModalComp onClose={() => setOpenModal(false)} open={openModal}>
+        <div className="absolute inset-0 flex items-center justify-center z-9999 bg-slate-900 bg-opacity-50">
+          <div className="bg-[#1B2440] rounded-[5px] w-[400px] h-fit p-4">
+            <p className="text-white font-nuni text-[16px] text-center mb-3">
+              Are you sure you want to delete this event?
+            </p>
+
+            <div className="flex items-center justify-center gap-x-5">
+              <Button
+                disabled={loadingDel}
+                onClick={async () => {
+                  await deleteEvent(eventToDelete || "");
+                  setOpenModal(false);
+                }}
+                className="flex items-center justify-center w-fit text-[15px] cursor-pointer text-white rounded-lg bg-[#720013] hover:bg-[#44010d]   transition-colors duration-200">
+                {loadingDel ? "Deleting..." : "Continue"}
+              </Button>
+              <Button
+                variant={"outline"}
+                onClick={() => setOpenModal(false)}
+                className="cursor-pointer">
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      </ModalComp>
       <div className="flex items-center justify-between mb-8 gap-6 w-full">
         <div className="flex   items-center px-3 py-2 border bg-white dark:bg-input rounded-md md:w-[500px] w-full">
           <FaSearch className="text-primary mr-4 text-sm shrink-0" />
@@ -299,7 +340,7 @@ const EventsPage = () => {
                     return (
                       <div
                         key={eventId}
-                        className="rounded-xl  shadow-lg overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.01] h-fit  border bg-background  border-gray-200 dark:border-gray-700">
+                        className="rounded-xl  shadow-lg overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-[1.01] h-fit event-card border bg-background  border-gray-200 dark:border-gray-700">
                         <div className="relative h-48 sm:h-52 lg:h-48 overflow-hidden">
                           <img
                             src={event?.displayImage}
@@ -311,7 +352,7 @@ const EventsPage = () => {
                               LIVE
                             </div>
                           )}
-                          <p className="absolute bottom-0  m-0 left-0 text-sm p-3  h-[25px] w-[95px] flex justify-center items-center  rounded-tl-none rounded-tr-xl  rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
+                          <p className="absolute bottom-0  m-0 left-0 text-sm p-3 mb-1  h-[25px] w-max flex justify-center items-center  rounded-tl-none rounded-tr-xl  rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
                             {getCategoryName(event?.categoryId || "")}
                           </p>
                         </div>
@@ -321,18 +362,49 @@ const EventsPage = () => {
                               {event.title}
                             </h3>
 
-                            {/* {components !== "Saved" && (
-                              <button
-                                onClick={() =>
-                                  handleSaveEvent(event?._id || "")
-                                }
-                                disabled={loading}
-                                className="right-3  bg-opacity-90 z-999 cursor-pointer"
-                                title="Save Event"
-                                type="button">
-                                <Bookmark className="w-4 h-4 text-gray-500 dark:text-white   hover:text-gray-700 dark:hover:text-white" />
-                              </button>
-                            )} */}
+                            {/* <button
+                              onClick={() => deleteEvent(event?._id || "")}
+                              disabled={loadingDel}
+                              className="right-3  bg-opacity-90 z-999 cursor-pointer hidden delete-btn"
+                              title="Delete Event"
+                              type="button">
+                             
+                            </button> */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline">
+                                  <EllipsisVertical />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="bg-background w-40">
+                                <DropdownMenuGroup>
+                                  <DropdownMenuItem
+                                    className="py-2 hover:border-none! outline-none hover:bg-dash-gray cursor-pointer"
+                                    onClick={() =>
+                                      router.push(
+                                        `/events/${event._id}?label=${components}`,
+                                      )
+                                    }>
+                                    <ScanEye className="mr-2 text-primary" />{" "}
+                                    View
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+
+                                  <DropdownMenuItem
+                                    className="py-2 hover:border-none! outline-none hover:bg-dash-gray cursor-pointer"
+                                    onClick={() => {
+                                      setEventToDelete(eventId ?? null);
+                                      setOpenModal(true);
+                                    }}>
+                                    <Trash2
+                                      size={16}
+                                      className="  text-red-400   hover:text-red-500 "
+                                    />{" "}
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
 
                           <div className="flex items-center gap-5 text-sm">
@@ -351,12 +423,11 @@ const EventsPage = () => {
                           <div className="flex items-center gap-5 text-sm ">
                             <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white " />
                             <span className="truncate text-[#434343] dark:text-white ">
-                              {event.location?.address ||
-                                "addres not specifield"}
+                              {event.location?.address || "Online"}
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-5 text-sm ">
+                          {/* <div className="flex items-center gap-5 text-sm ">
                             <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white " />
                             <p className="w-3 h-4 text-[#434343] dark:text-white  m-0">
                               {" "}
@@ -364,7 +435,7 @@ const EventsPage = () => {
                                 event.startDate as string,
                               ).toLocaleDateString()}
                             </p>
-                          </div>
+                          </div> */}
 
                           <div>
                             <div className="flex items-center justify-between mb-2 text-sm">
@@ -395,9 +466,9 @@ const EventsPage = () => {
                                 className="mb-1 cursor-pointer"
                                 title="Share Event"
                                 type="button">
-                                <p className="text-xs flex items-center gap-1 m-0 text-gray-400">
+                                <p className="text-[10px] flex items-center gap-1 m-0 text-gray-400">
                                   {" "}
-                                  Share <Forward />
+                                  Share <Share2 size={15} />
                                   {/* <img
                                     src="/share.png"
                                     className="dark:brightness-200"

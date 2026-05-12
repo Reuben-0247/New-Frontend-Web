@@ -197,13 +197,13 @@ const StreamAside: React.FC<{
           </p>
           <nav
             className={`${
-              collapse ? "px-1" : "px-2 lg:px-4"
+              collapse ? "px-1" : ""
             }  text-sm font-medium  flex-1 overflow-auto`}>
             <div
               className={`${
-                collapse ? "w-max" : ""
+                collapse ? "w-full" : ""
               } flex flex-col  justify-between h-full pb-4`}>
-              <div className="grid gap-1 w-max ">
+              <div className="grid gap-1 w-full px-1">
                 {navLinks
                   .filter((nav) => nav.show === true)
                   .map((item, index) => (
@@ -216,14 +216,14 @@ const StreamAside: React.FC<{
                           ? "text-white rounded-lg font-bold border bg-primary  dark:bg-dash-gray border-none"
                           : "hover:bg-hover hover:rounded"
                       } ${
-                        collapse ? "py-1 px-2" : "py-2 px-6"
+                        collapse ? "py-1 px-2" : "py-2 px-2"
                       }  flex items-center gap-4 capitalize  font-normal transition-all hoverable-link text-foreground`}>
                       <span
                         className={`${
                           isActive(item.href)
                             ? " bg-white text-primary"
                             : "bg-background"
-                        } p-2 rounded-xl`}>
+                        } p-1 rounded-sm`}>
                         {item?.icon}
                       </span>
                       <span

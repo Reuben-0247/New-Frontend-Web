@@ -5,7 +5,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
+  // SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -44,14 +44,14 @@ const SoftwareProp: React.FC<{
       });
   };
 
-  const africa = [
-    { name: "Nigeria", flag: "🇳🇬" },
-    { name: "Ghana", flag: "🇬🇭" },
-    { name: "Kenya", flag: "🇰🇪" },
-    { name: "Algeria", flag: "🇩🇿" },
-    { name: "Cameroon", flag: "🇨🇲" },
-    { name: "Senegal", flag: "🇸🇳" },
-  ];
+  // const africa = [
+  //   { name: "Nigeria", flag: "🇳🇬" },
+  //   { name: "Ghana", flag: "🇬🇭" },
+  //   { name: "Kenya", flag: "🇰🇪" },
+  //   { name: "Algeria", flag: "🇩🇿" },
+  //   { name: "Cameroon", flag: "🇨🇲" },
+  //   { name: "Senegal", flag: "🇸🇳" },
+  // ];
 
   return (
     <div className="w-full">
@@ -188,7 +188,7 @@ const SoftwareProp: React.FC<{
                   </div>
                 </div>
               </div>
-              <Select>
+              {/* <Select>
                 <SelectTrigger className="w-full placeholder:text-white text-white cursor-pointer">
                   <SelectValue
                     placeholder="Choose your region"
@@ -205,7 +205,7 @@ const SoftwareProp: React.FC<{
                     ))}
                   </SelectGroup>
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
           )}
         </div>

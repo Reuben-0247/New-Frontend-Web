@@ -210,3 +210,12 @@ body {
   min-height: 1em;
   margin-bottom: 0.75em;
 }
+
+.event-card {
+  &:hover {
+    .delete-btn {
+      transition: all 400ms ease-in-out;
+      display: block;
+    }
+  }
+}
