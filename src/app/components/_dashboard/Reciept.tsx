@@ -84,6 +84,13 @@ const Reciept: React.FC<{ resData?: any }> = ({ resData }) => {
                   {resData?.data?.payment?.transactionId ||
                     resData?.transactionId}
                 </li>
+                <li>
+                  <span>Reference </span>
+                  <span className="p font-bold">
+                    {resData?.data?.payment?.transactionId ||
+                      resData?.reference}
+                  </span>
+                </li>
               </ul>
             </div>
           </div>

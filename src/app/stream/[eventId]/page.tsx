@@ -18,12 +18,14 @@ import { AxiosError } from "axios";
 import {
   Airplay,
   ArrowLeft,
+  CircleQuestionMark,
   // EyeIcon,
   // Ratio,
   // Signal,
   // Volume2,
   Webcam,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 // import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -191,7 +193,11 @@ const StreamPage = () => {
     };
     getStreamStats();
     getViewers();
-    const interval = setInterval(getStreamStats, 5000);
+
+    const interval = setInterval(() => {
+      getStreamStats();
+      getViewers();
+    }, 5000);
 
     return () => {
       cancelled = true;
@@ -328,11 +334,21 @@ const StreamPage = () => {
           </Button>
           {/* <p className="mt-4 text-2xl font-bold text-foreground">Title</p> */}
         </div>
+
         <p className="font-bold text-2xl text-foreground">{event?.title}</p>
+      </div>
+      <div className="flex justify-end items-center w-full my-4">
+        <Link
+          href={`https://docs.castr.com/en/articles/4825093-recommended-settings-for-encoders`}
+          target="_blank"
+          className="  underline flex items-center gap-1 text-foreground cursor-pointer">
+          <CircleQuestionMark size={20} className="text-amber-300" />{" "}
+          Recommended Settings for Encoders
+        </Link>
       </div>
 
       <div className="md:flex  gap-4 mt-8">
-        <div className="event-details md:w-[50%] w-full">
+        <div className="event-details md:w-[50%] w-full ">
           <div className="tabs w-full flex items-center justify-between  text-white  py-2 px-4  bg-black rounded-md">
             {tabs.map((tab) => (
               <p
@@ -360,7 +376,7 @@ const StreamPage = () => {
             )}
           </div>
         </div>
-        <div className="stream-tab md:w-[50%] w-full p-4 bg-[#151e37]">
+        <div className=" bg-[#151e37] stream-tab md:w-[50%]  w-full p-2">
           <StreamInfo
             stats={streamStats}
             usedBandwidth={bandWidth}

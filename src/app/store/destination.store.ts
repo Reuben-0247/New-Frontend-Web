@@ -97,7 +97,7 @@ export const useDestinationStore = create<IProp>((set) => ({
       await axiosApi.delete(`/stream/platform/${id}/${streamId}`);
       set((state) => {
         const updatedDestinations = state.destinations.filter(
-          (d) => d.platform_id !== id,
+          (d) => d?._id !== id,
         );
 
         return {

@@ -1,7 +1,13 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import { Forward, Radio, Search, SlidersHorizontal } from "lucide-react";
+import {
+  Forward,
+  Radio,
+  Search,
+  Share2,
+  SlidersHorizontal,
+} from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { IEvent } from "@/app/interfaces/event.interface";
 import Link from "next/link";
@@ -108,8 +114,12 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                       alt={event?.title}
                       className="w-full h-full object-cover"
                     />
-
-                    <p className="absolute bottom-0 m-0 left-0 text-sm p-3 h-[25px] w-[95px] flex justify-center items-center rounded-tl-none rounded-tr-xl rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
+                    {event.isLive && (
+                      <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow-md animate-pulse">
+                        LIVE
+                      </div>
+                    )}
+                    <p className="absolute bottom-0 mb-1 left-0 text-sm p-3 h-[25px] w-max flex justify-center items-center rounded-tl-none rounded-tr-xl rounded-bl-xl rounded-br-none bg-[#000826] text-white dark:text-gray-300">
                       {getCategoryName(event?.categoryId || "")}
                     </p>
                   </div>
@@ -134,20 +144,22 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-5 text-sm ">
-                      <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white" />
-                      <span className="truncate link text-[#434343] dark:text-white  ">
-                        {event.location?.address}
-                      </span>
-                    </div>
+                    {event.location?.type == "Hybrid" && (
+                      <div className="flex items-center gap-5 text-sm ">
+                        <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white" />
+                        <span className="truncate link text-[#434343] dark:text-white  ">
+                          {event.location?.address}
+                        </span>
+                      </div>
+                    )}
 
-                    <div className="flex items-center gap-5 text-sm ">
+                    {/* <div className="flex items-center gap-5 text-sm ">
                       <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white" />
                       <p className="w-3 h-4 text-[#434343] m-0 dark:text-white">
                         {" "}
                         {new Date(event.startDate || "").toLocaleDateString()}
                       </p>
-                    </div>
+                    </div> */}
 
                     <div>
                       <div className="flex items-center justify-between text-sm">
@@ -176,9 +188,9 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                           className="m-0"
                           title="Share Event"
                           type="button">
-                          <p className="text-xs flex items-center gap-2 m-0 text-gray-400">
+                          <p className="text-[10px] flex items-center gap-2 m-0 text-gray-400">
                             {" "}
-                            Share <Forward />
+                            Share <Share2 size={15} />
                             {/* <img
                                         src="/share.png"
                                         className="dark:brightness-200"
@@ -189,7 +201,7 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                       </div>
                     </div>
                   </div>
-                  <div className="p-2 w-full">
+                  <div className="p-2 w-full mt-4">
                     <Link
                       href={`/find-events/${eventId}`}
                       className="block link cursor-pointer text-center w-full border border-primary py-2 px-4 rounded-lg mb-3">

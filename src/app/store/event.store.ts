@@ -25,6 +25,7 @@ interface IProp {
   setBoard: (data: Iboard | null) => void;
   setBoards: (data: Iboard[]) => void;
   loading: boolean;
+  loadingDel: boolean;
   setLoading: (loading: boolean) => void;
   createEvent: (
     input: CreateEventFormInput,
@@ -34,6 +35,7 @@ interface IProp {
     input: UpdateEventFormInput,
     displayImage?: File | null,
   ) => Promise<IEvent | boolean>;
+  deleteEvent: (eventId: string) => Promise<boolean>;
 
   publishEvent: (id: string) => Promise<IEvent | boolean>;
   goLiveEvent: (eventId: string, userId: string) => Promise<IEvent | boolean>;
@@ -57,6 +59,7 @@ export const useEventStore = create<IProp>((set) => ({
   setBoard: (board: Iboard | null) => set({ board }),
   setBoards: (boards: Iboard[]) => set({ boards }),
   loading: false,
+  loadingDel: false,
   setLoading: (loading: boolean) => set({ loading }),
   setStreamData: (streamData: IStreamData | null) => set({ streamData }),
   setEvent: (event: IEvent | null) => set({ event }),
@@ -218,6 +221,27 @@ export const useEventStore = create<IProp>((set) => ({
       throw error;
     } finally {
       set({ loading: false });
+    }
+  },
+
+  deleteEvent: async (eventId: string): Promise<boolean> => {
+    try {
+      set({ loadingDel: true });
+      await axiosApi.delete(`/events/${eventId}`);
+      set((state) => ({
+        events: state.events.filter((e) => e._id !== eventId),
+        event: state.event?._id === eventId ? null : state.event,
+        liveEvent: state.liveEvent?._id === eventId ? null : state.liveEvent,
+      }));
+      toast.success("Event deleted successfully");
+      return true;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const formattedError = formatError(axiosError);
+      toast.error(formattedError.message as ToastContent);
+      throw error;
+    } finally {
+      set({ loadingDel: false });
     }
   },
 

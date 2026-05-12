@@ -26,9 +26,7 @@ const StreamInfo: React.FC<{
               Viewers
             </span>
           </div>
-          <span className="text-white text-[10px] ">
-            {viewers === 0 ? ".." : viewers}
-          </span>
+          <span className="text-white text-[10px] ">{viewers || 0}</span>
         </div>
         <div className="flex flex-col items-center">
           <div>

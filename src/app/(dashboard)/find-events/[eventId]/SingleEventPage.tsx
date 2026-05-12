@@ -3,8 +3,8 @@
 import { Spinner } from "@/app/components/Spinner";
 import { useEventStore } from "@/app/store/event.store";
 import { useSearchParams } from "next/navigation";
-import React, { use, useEffect, useState } from "react";
-import { IEvent } from "@/app/interfaces/event.interface";
+import React, { use, useEffect, useMemo, useState } from "react";
+import { IEvent, IRecording } from "@/app/interfaces/event.interface";
 import { IUser } from "@/app/interfaces/user.interface";
 import { Button } from "@/components/ui/button";
 import axiosApi from "@/lib/axios";
@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { toast, ToastContent } from "react-toastify";
 import EventRegistrationFormModal from "@/app/components/_find-events/EventRegistrationFormModal";
 import { useAuthStore } from "@/app/store/auth.store";
+// import { set } from "date-fns";
 
 // async function getEvent(id: string): Promise<IEvent> {
 //   try {
@@ -54,6 +55,7 @@ const SingleEventPage: React.FC<{
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   // const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [loadingEnter, setLoadingEnter] = useState(false);
+  const [vodData, setVodData] = useState<IRecording[]>([]);
 
   useEffect(() => {
     async function fetchEventAndRelated() {
@@ -86,22 +88,27 @@ const SingleEventPage: React.FC<{
       }
     }
 
-    // const getUser = async () => {
-    //   try {
-    //     const { data: user } = await axiosApi.get<{ data: IUser }>(
-    //       `/users/${event?.userId}`,
-    //     );
-    //     setUser(user.data);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // };
+    const getVodData = async () => {
+      try {
+        const { data } = await axiosApi.get(
+          `/stream/event-recording/${event?._id}`,
+        );
+
+        if (data) {
+          setVodData(data || []);
+        }
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    };
     // fetchEventAndRelated();
     // getUser();
-    Promise.all([fetchEventAndRelated()]).finally(() => setLoading(false));
+    Promise.all([fetchEventAndRelated(), getVodData()]).finally(() =>
+      setLoading(false),
+    );
     // if (!event || event._id !== eventId) {
     // }
-  }, [eventId, setEvent, event?.userId, event?.isLive]);
+  }, [eventId, setEvent, event?.userId, event?.isLive, setVodData, event?._id]);
 
   const enterEvent = async () => {
     if (event?.requirePassword && !user?.registeredEvents?.includes(eventId)) {
@@ -173,6 +180,11 @@ const SingleEventPage: React.FC<{
       alert("Event link copied to clipboard!");
     }
   };
+
+  const canAccesseEvent = useMemo(() => {
+    if (event?.isLive || vodData.length > 0) return true;
+    return false;
+  }, [event?.isLive, vodData.length]);
 
   // const event = await getEvent(id);
   if (loading) {
@@ -266,7 +278,7 @@ const SingleEventPage: React.FC<{
             </div>
 
             <div className="mt-6 ">
-              {event?.isLive && (
+              {canAccesseEvent && (
                 <div>
                   {!event?.requirePassword ? (
                     <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6">
