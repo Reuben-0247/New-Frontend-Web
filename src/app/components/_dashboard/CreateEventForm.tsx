@@ -146,8 +146,8 @@ const CreateEventForm = () => {
           ...values,
           // isPublished: true,
           type: "publish",
-          startDate: values.startDate.toISOString().split("T")[0],
-          endDate: values.endDate.toISOString().split("T")[0],
+          startDate: format(values.startDate, "yyyy-MM-dd"),
+          endDate: format(values.endDate, "yyyy-MM-dd"),
           location: {
             type: values.location.type,
             address: values.location.address ?? "",
@@ -170,8 +170,8 @@ const CreateEventForm = () => {
       await createEvent(
         {
           ...values,
-          startDate: values.startDate.toISOString().split("T")[0],
-          endDate: values.endDate.toISOString().split("T")[0],
+          startDate: format(values.startDate, "yyyy-MM-dd"),
+          endDate: format(values.endDate, "yyyy-MM-dd"),
           // isPublished: false,
           type: "draft",
           location: {
