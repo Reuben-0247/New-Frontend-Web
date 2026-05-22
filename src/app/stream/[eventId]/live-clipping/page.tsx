@@ -121,61 +121,109 @@ const LiveClipingPage = () => {
     if (!downloadUrl) return;
     setLoading(true);
     setDownloadTime(0);
-    let fakeProgress = 0;
-    let interval: NodeJS.Timeout | null = null;
 
     try {
-      const response = await fetch(downloadUrl);
-
-      if (!response.ok) throw new Error("Download failed");
-
-      const contentLength = response.headers.get("content-length");
-
-      if (!contentLength) {
-        interval = setInterval(() => {
-          if (fakeProgress < 70) {
-            fakeProgress += Math.random() * 8;
-          } else if (fakeProgress < 90) {
-            fakeProgress += Math.random() * 0.8;
-          } else if (fakeProgress < 99) {
-            fakeProgress += 0.1;
+      const proxyUrl = `/stream/proxy-download?url=${encodeURIComponent(downloadUrl)}`;
+      const response = await axiosApi.get(proxyUrl, {
+        responseType: "blob",
+        onDownloadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            //  Real progress when Content-Length is available
+            const percent = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total,
+            );
+            setDownloadTime(percent);
           } else {
-            fakeProgress = 99;
+            // Fallback fake progress if no content-length
+            setDownloadTime((prev) => Math.min(prev + 5, 90));
           }
-
-          setDownloadTime(Math.floor(fakeProgress));
-        }, 300);
-      }
-
-      const blob = await response.blob();
+        },
+      });
 
       setDownloadTime(100);
 
-      if (interval) clearInterval(interval);
-
+      const blob = new Blob([response.data], { type: "video/mp4" });
       const fileName = `${clipInput.name || "clip"}.mp4`;
+      const objectUrl = window.URL.createObjectURL(blob);
 
-      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-
-      link.href = url;
+      link.href = objectUrl;
       link.download = fileName;
-
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(objectUrl);
 
-      window.URL.revokeObjectURL(url);
-      toast.success(`${fileName} downloaded..`);
+      toast.success(`${fileName} downloaded!`);
       setDownload(false);
       setShowPlayer(false);
     } catch (err) {
-      console.error(err);
+      console.error("Download failed:", err);
+      toast.error("Download failed. Please try again.");
     } finally {
-      if (interval) clearInterval(interval);
       setLoading(false);
     }
   };
+
+  // const handleDownload = async () => {
+  //   if (!downloadUrl) return;
+  //   setLoading(true);
+  //   setDownloadTime(0);
+  //   let fakeProgress = 0;
+  //   let interval: NodeJS.Timeout | null = null;
+
+  //   try {
+  //     const response = await fetch(downloadUrl);
+
+  //     if (!response.ok) throw new Error("Download failed");
+
+  //     const contentLength = response.headers.get("content-length");
+
+  //     if (!contentLength) {
+  //       interval = setInterval(() => {
+  //         if (fakeProgress < 70) {
+  //           fakeProgress += Math.random() * 8;
+  //         } else if (fakeProgress < 90) {
+  //           fakeProgress += Math.random() * 0.8;
+  //         } else if (fakeProgress < 99) {
+  //           fakeProgress += 0.1;
+  //         } else {
+  //           fakeProgress = 99;
+  //         }
+
+  //         setDownloadTime(Math.floor(fakeProgress));
+  //       }, 300);
+  //     }
+
+  //     const blob = await response.blob();
+
+  //     setDownloadTime(100);
+
+  //     if (interval) clearInterval(interval);
+
+  //     const fileName = `${clipInput.name || "clip"}.mp4`;
+
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+
+  //     link.href = url;
+  //     link.download = fileName;
+
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+
+  //     window.URL.revokeObjectURL(url);
+  //     toast.success(`${fileName} downloaded..`);
+  //     setDownload(false);
+  //     setShowPlayer(false);
+  //   } catch (err) {
+  //     console.error(err);
+  //   } finally {
+  //     if (interval) clearInterval(interval);
+  //     setLoading(false);
+  //   }
+  // };
 
   const openLiveVideoPlayer = (e: React.FormEvent) => {
     e.preventDefault();
@@ -193,13 +241,13 @@ const LiveClipingPage = () => {
         <p className="font-bold text-2xl text-foreground">{event?.title}</p>
       </div>
       {/* {loading ? (
-        <div className="flex items-center justify-center h-screen">
-          <div>
-            
-            <p>Getting...</p>
+          <div className="flex items-center justify-center h-screen">
+            <div>
+              
+              <p>Getting...</p>
+            </div>
           </div>
-        </div>
-      ) : ( */}
+        ) : ( */}
       <div>
         {!showPlayer ? (
           <div>

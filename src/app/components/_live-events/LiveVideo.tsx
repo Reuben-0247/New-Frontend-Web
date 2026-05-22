@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import { IStreamData } from "@/app/interfaces/castr.interface";
@@ -7,9 +8,12 @@ import axiosApi from "@/lib/axios";
 import EmojiPicker from "emoji-picker-react";
 import { Video } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { use, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import styled from "styled-components";
+// import Hls from "hls.js";
+
+const APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID as string;
 
 const LiveVideo: React.FC<{
   streamData: IStreamData | null;
@@ -29,6 +33,42 @@ const LiveVideo: React.FC<{
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [reactions, setReactions] = useState<string[]>([]);
+
+  const videoRef = useRef<HTMLDivElement>(null);
+  const clientRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!event?.channelName || !event?.token) return;
+
+    const join = async () => {
+      const { default: AgoraRTC } = await import("agora-rtc-sdk-ng");
+      const client = AgoraRTC.createClient({ mode: "live", codec: "h264" });
+      clientRef.current = client;
+
+      await client.setClientRole("audience");
+      await client.join(
+        APP_ID,
+        event?.channelName || "",
+        event?.token || "",
+        null,
+      );
+
+      client.on("user-published", async (user, mediaType) => {
+        await client.subscribe(user, mediaType);
+        if (mediaType === "video") user.videoTrack?.play(videoRef.current!);
+        if (mediaType === "audio") user.audioTrack?.play();
+      });
+
+      client.on("user-unpublished", (user) => {
+        user.videoTrack?.stop();
+      });
+    };
+
+    join();
+    return () => {
+      clientRef.current?.leave();
+    };
+  }, [event]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -88,32 +128,31 @@ const LiveVideo: React.FC<{
     }, 3000);
   };
 
-  const handleLeave = async () => {
-    const payload = {
-      eventId: event?._id,
-      userId: auth?._id,
-    };
-    try {
-      const { data: response } = await axiosApi.patch(
-        `/stream/exit-stream-event`,
-        payload,
-      );
-      if (response) {
-        toast.info("You have successfully left the event!");
-        router.push("/find-events");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
+  // const handleLeave = async () => {
+  //   const payload = {
+  //     eventId: event?._id,
+  //     userId: auth?._id,
+  //   };
+  //   try {
+  //     const { data: response } = await axiosApi.patch(
+  //       `/stream/exit-stream-event`,
+  //       payload,
+  //     );
+  //     if (response) {
+  //       toast.info("You have successfully left the event!");
+  //       router.push("/find-events");
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
   return (
     <Wrapper>
       <div>
         <div className="relative w-full h-full">
-          {isStreamVisible && streamData?.playBack?.embedUrl ? (
+          {/* {isStreamVisible && videoUrl ? (
             <iframe
-              src={streamData?.playBack?.embedUrl}
+              src={videoUrl as string}
               allow="autoplay; fullscreen"
               allowFullScreen
               className="md:h-[70vh] h-[40vh] w-full"
@@ -126,6 +165,39 @@ const LiveVideo: React.FC<{
               }
               alt="Stream"
               className="w-full md:h-[70vh] h-[40vh] object-cover "
+            />
+          )} */}
+          {isStreamVisible ? (
+            event?.streamProvider === "agora" ? (
+              <div
+                ref={videoRef}
+                className="md:h-[70vh] h-[40vh] w-full bg-black"
+              />
+            ) : streamData?.playBack?.embedUrl ? (
+              <iframe
+                src={streamData.playBack.embedUrl}
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                className="md:h-[70vh] h-[40vh] w-full"
+              />
+            ) : (
+              <img
+                src={
+                  event?.displayImage ||
+                  "https://placehold.co/1280x720/000000/FFFFFF?text=Stream+Offline"
+                }
+                alt="Stream"
+                className="w-full md:h-[70vh] h-[40vh] object-cover"
+              />
+            )
+          ) : (
+            <img
+              src={
+                event?.displayImage ||
+                "https://placehold.co/1280x720/000000/FFFFFF?text=Stream+Offline"
+              }
+              alt="Stream"
+              className="w-full md:h-[70vh] h-[40vh] object-cover"
             />
           )}
 
@@ -258,7 +330,7 @@ const LiveVideo: React.FC<{
             </div>
 
             <button
-              onClick={handleLeave}
+              onClick={() => router.back()}
               className="border cursor-pointer border-gray-700 block rounded-md px-2 h-9 md:h-10">
               <svg
                 width="24"

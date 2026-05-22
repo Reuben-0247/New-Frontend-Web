@@ -1,70 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState, useEffect, useRef } from "react";
-// import StreamLinks from "../components/StreamLinks";
-// import { Share } from "lucide-react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
-// import { MenuIcon } from "lucide-react";
-import axiosApi from "@/lib/axios";
 import { useEventStore } from "@/app/store/event.store";
 import { IRecording } from "@/app/interfaces/event.interface";
-import { toast, ToastContent } from "react-toastify";
-import { Spinner } from "../Spinner";
-import { formatError } from "@/utils/helper";
-import { AxiosError } from "axios";
-// import { useAuthStore } from "@/app/store/auth.store";
 
-const LiveToVOD = () => {
-  // const { auth } = useAuthStore();
-  const [enabled, setEnabled] = useState(false);
-  const [vodData, setVodData] = useState<IRecording[]>([]);
-  // const [show, setShow] = useState(false);
-  const [loadingT, setLoadingT] = useState(false);
-
-  const [loading, setLoading] = useState(false);
+const LiveVOD: React.FC<{ vodData: IRecording[] }> = ({ vodData }) => {
   const { event } = useEventStore();
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   const [showThumbs, setShowThumbs] = useState<Record<string, boolean>>({});
-  useEffect(() => {
-    (async () => {
-      if (event?.castrStreamId !== null && event?.isLive) {
-        setLoading(true);
-        try {
-          const { data } = await axiosApi.get<IRecording[]>(
-            `/stream/castr/${event?.castrStreamId}/retrieve_temp_recordings`,
-          );
-          if (data) {
-            setVodData(data || []);
-          }
-        } catch (err) {
-          setLoading(false);
-          console.error("Error fetching users:", err);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(true);
-        try {
-          const { data } = await axiosApi.get(
-            `/stream/event-recording/${event?._id}`,
-          );
-
-          if (data) {
-            setVodData(data || []);
-          }
-        } catch (err) {
-          setLoading(false);
-          console.error("Error fetching users:", err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    })();
-  }, [event?.castrStreamId, event?._id, event?.isLive]);
-
-  // console.log(data);
-  // const enableVod = async () => {
-  //   setEnabled(!enabled);
-  // };
 
   const handleShare = (eventtitle: string, id: string, date: string) => {
     const URL = `${window.location.origin}/find-events/${id}?label=${encodeURIComponent(eventtitle)}&date=${encodeURIComponent(date)}`;
@@ -96,64 +39,6 @@ const LiveToVOD = () => {
     }
   };
 
-  const enableCloudRecord = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-
-    if (!event?.castrStreamId) {
-      toast.warn("Please create a stream...");
-      return;
-    }
-
-    if (loadingT) return;
-    setLoadingT(true);
-    setEnabled(checked);
-    sessionStorage.setItem("cloud_recording", JSON.stringify(checked));
-
-    const body = {
-      settings: {
-        abr: false,
-        cloud_recording: checked,
-      },
-    };
-
-    try {
-      const { data: res } = await axiosApi.patch(
-        `/stream/castr/${event?.castrStreamId}`,
-        body,
-      );
-
-      if (res) {
-        toast.success(
-          checked
-            ? "Cloud Recording enabled..."
-            : "Cloud Recording disabled...",
-        );
-
-        setLoadingT(false);
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      const formattedError = formatError(axiosError);
-      toast.error(formattedError.message as ToastContent);
-      setEnabled(!checked);
-      console.error(error);
-    } finally {
-      setLoadingT(false);
-    }
-  };
-
-  // const handlePlayPause = (id:string) => {
-  //   const video = videoRefs.current[id];
-  //   if (video) {
-  //     if (video.paused) {
-  //       video.play();
-  //       setShowThumbs((prev) => ({ ...prev, [id]: false }));
-  //     } else {
-  //       video.pause();
-  //       setShowThumbs((prev) => ({ ...prev, [id]: true }));
-  //     }
-  //   }
-  // };
   function formatClock(seconds: number) {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -161,70 +46,11 @@ const LiveToVOD = () => {
 
     return [h, m, s].map((v) => v.toString().padStart(2, "0")).join(":");
   }
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Spinner />{" "}
-      </div>
-    );
-  }
 
   return (
-    <Warpper>
+    <Warpper vodData={vodData}>
       <div className="bg-background   w-full ">
         <div className="w-full vod ">
-          <div className="w-full px-2  justify-center flex pt-12 mt-8">
-            {!event?.isLive ? (
-              <div>
-                {enabled ? (
-                  <p className="text-foreground font-nuni mx-auto w-full text-[14px] text-center">
-                    Auto Recording is enabled. Your streams will be recorded
-                  </p>
-                ) : (
-                  <p className="text-foreground font-nuni mx-auto w-full text-[14px] text-center">
-                    Auto-recording is disabled. Your streams will not be
-                    recorded. Enable this option to automatically record your
-                    live event.
-                  </p>
-                )}
-                <div className="flex w-fit mx-auto items-center">
-                  <p className="text-foreground font-nuni my-0 mr-2 ">Enable</p>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={enabled}
-                      disabled={loadingT}
-                      onChange={enableCloudRecord}
-                    />
-                    <div className="w-11 h-6 border-[#0062FF] border peer-focus:outline-none peer-checked:bg-[#cc0000] rounded-full peer  transition-all duration-300"></div>
-                    <div className="absolute left-0.5 top-0.5 border-[#0062FF] border bg-[#000826] w-5 h-5 rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
-                  </label>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <p className="text-foreground font-nuni mx-auto w-full text-[14px] text-center">
-                  Auto Recording is enabled. Your streams will be recorded
-                </p>
-                <div className="flex w-fit mx-auto items-center">
-                  <p className="text-foreground font-nuni my-0 mr-2 ">
-                    Enabled
-                  </p>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={true}
-                      disabled
-                    />
-                    <div className="w-11 h-6 border-[#00cc44] border peer-focus:outline-none peer-checked:bg-[#00cc44] rounded-full peer  transition-all duration-300"></div>
-                    <div className="absolute left-0.5 top-0.5 border-[#00cc44] border bg-[#f4f5f8] w-5 h-5 rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
-                  </label>
-                </div>
-              </div>
-            )}
-          </div>
           <div>
             {!vodData.length ? (
               <p className="text-foreground mt-6 mb-4 font-nuni mx-auto w-full text-[14px] text-center">
@@ -289,15 +115,15 @@ const LiveToVOD = () => {
                     </div>
                     <div className="action  p-3">
                       <h4 className="mb-3 text-white">{event?.title}</h4>
-                      <div className="flex justify-between items-center">
-                        <button className="text-[#A4A4A4] cursor-pointer">
+                      <div className="flex justify-end items-center">
+                        {/* <button className="text-[#A4A4A4] cursor-pointer">
                           <a
                             href={v?.download_url}
                             download
                             className="text-[#A4A4A4] no-underline">
                             Download stream
                           </a>
-                        </button>
+                        </button> */}
                         <button
                           className="text-[#A4A4A4] cursor-pointer"
                           onClick={() =>
@@ -325,12 +151,14 @@ const LiveToVOD = () => {
   );
 };
 
-export default LiveToVOD;
+export default LiveVOD;
 
-const Warpper = styled.div`
+const Warpper = styled.div<{ vodData?: IRecording[] }>`
   .videos {
+
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: ${({ vodData }) =>
+      vodData && vodData.length > 1 ? "repeat(2, 1fr)" : "repeat(1, 1fr)"}
     padding: 2rem;
     gap: 1.5rem;
     .inner {

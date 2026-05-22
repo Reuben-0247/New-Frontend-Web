@@ -7,7 +7,8 @@ export interface IEvent {
   categoryId?: string;
   title: string;
   description?: string;
-
+  streamProvider: "agora" | "castr";
+  mediaPushConverterId: string;
   startDate?: string;
   endDate?: string;
   startTime: string;
@@ -45,7 +46,7 @@ export interface IEvent {
   token?: string;
   rtmToken?: string;
   uid?: string;
-
+  castrRtmpUrl?: string;
   participants?: string[];
   totalParticipants?: string[];
   likesCount?: number;
@@ -153,4 +154,6 @@ export interface IRecording {
   end_time: string;
   download_url: string;
   duration: number;
+  createdAt: string;
+  eventId: string;
 }
