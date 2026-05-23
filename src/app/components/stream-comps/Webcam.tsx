@@ -8,15 +8,24 @@ import type {
   IMicrophoneAudioTrack,
 } from "agora-rtc-sdk-ng";
 import { ThreeDots } from "react-loader-spinner";
-import { Video, VideoOff, Mic, MicOff, XCircle, Radio } from "lucide-react";
-import { toast } from "react-toastify";
+import { Video, VideoOff, Mic, MicOff, Radio, XCircle } from "lucide-react";
+import { toast, ToastContent } from "react-toastify";
 import { IEvent } from "@/app/interfaces/event.interface";
 import axiosApi from "@/lib/axios";
+import { useAuthStore } from "@/app/store/auth.store";
+import { useEventStore } from "@/app/store/event.store";
+import { IStreamData } from "@/app/interfaces/castr.interface";
+import { formatError } from "@/utils/helper";
+import { AxiosError } from "axios";
 
 const APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID as string;
-const UID: number | null = null;
+const STATS_POLL_INTERVAL_MS = 5000; // poll every 5 seconds — same as OBS flow
 
 const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
+  const { auth } = useAuthStore();
+  const { event, setStreamData, streamData, setEvent, endStream } =
+    useEventStore();
+  const [castrRtmpUrl, setCastrRtmpUrl] = useState<string | null>(null);
   const localVideoRef = useRef<HTMLDivElement | null>(null);
   const [AgoraRTC, setAgoraRTC] = useState<any>(null);
   const [client, setClient] = useState<IAgoraRTCClient | null>(null);
@@ -26,188 +35,314 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
   const [cameraOn, setCameraOn] = useState(true);
   const [micOn, setMicOn] = useState(true);
 
-  // NEW: track whether RTMP push to Castr is active
   const [castrStreaming, setCastrStreaming] = useState(false);
   const [castrLoading, setCastrLoading] = useState(false);
 
-  // Store the UID assigned by Agora after joining, needed for transcoding config
   const assignedUidRef = useRef<number | null>(null);
-
   const [micTrack, setMicTrack] = useState<IMicrophoneAudioTrack | null>(null);
   const [camTrack, setCamTrack] = useState<ICameraVideoTrack | null>(null);
 
+  // ─── Bandwidth polling ref — holds the interval so we can clear it ────────
+  const statsIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // ─── Init Agora SDK ───────────────────────────────────────────────────────
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     import("agora-rtc-sdk-ng").then((mod) => {
       setAgoraRTC(mod.default);
-
-      // IMPORTANT: mode must be "live" for RTMP push to work (you already have this ✅)
-      // IMPORTANT: codec must be "h264" for Castr compatibility — changed from "vp8"
       const rtcClient = mod.default.createClient({
         mode: "live",
-        codec: "h264", // ← changed from "vp8" — Castr requires h264
+        codec: "h264",
       });
-
-      // Listen for RTMP streaming events
-      rtcClient.on("live-streaming-error", (url: string, err: any) => {
-        console.error("Castr RTMP error:", url, err.code);
-        toast.error(`Stream error: ${err.code}`);
-        setCastrStreaming(false);
-      });
-
-      rtcClient.on("live-streaming-warning", (url: string, warning: any) => {
-        console.warn("Castr RTMP warning:", url, warning.code);
-      });
-
       setClient(rtcClient);
     });
   }, []);
 
-  const getStreamStats = async () => {
-    try {
-      const { data: response } = await axiosApi.patch(
-        `/events/live/${data?._id}`,
-        {
-          streamType: "agora",
-          streamPlatform: "agora",
-          isLive: true,
-        },
-      );
-      return response;
-    } catch (error) {
-      console.error("Stream init error:", error);
-      return null;
+  // ─── Sync store from prop on mount ───────────────────────────────────────
+  useEffect(() => {
+    if (data && (!event || event._id !== data._id)) {
+      setEvent(data);
+    }
+  }, [data, event, setEvent]);
+
+  // ─── Bandwidth polling — runs every 5s while Castr stream is active ──────
+  const startBandwidthPolling = () => {
+    // Clear any existing interval first
+    if (statsIntervalRef.current) clearInterval(statsIntervalRef.current);
+
+    statsIntervalRef.current = setInterval(async () => {
+      if (!client || !assignedUidRef.current) return;
+
+      try {
+        // Overall RTC channel stats
+        const rtcStats = client.getRTCStats();
+
+        // Per-track stats
+        const localVideoStatsMap = client.getLocalVideoStats();
+        const localAudioStatsMap = client.getLocalAudioStats();
+
+        const uid = assignedUidRef.current;
+        const videoStats = (localVideoStatsMap as any)[uid] || {};
+        const audioStats = (localAudioStatsMap as any)[uid] || {};
+
+        // sendBitrate is in bps — convert to Mbps for display
+        const videoBitrateBps: number = videoStats?.sendBitrate || 0;
+        const audioBitrateBps: number = audioStats?.sendBitrate || 0;
+        const totalBitrateBps = videoBitrateBps + audioBitrateBps;
+
+        // Calculate GB used this interval:
+        // GB = (bits per second / 8) * interval_seconds / 1024^3
+        const intervalSeconds = STATS_POLL_INTERVAL_MS / 1000;
+        const gbThisInterval =
+          ((totalBitrateBps / 8) * intervalSeconds) / 1024 ** 3;
+
+        const payload = {
+          // Bandwidth
+          totalBitrateBps,
+          videoBitrateBps,
+          audioBitrateBps,
+          gbThisInterval,
+
+          // Video quality
+          sendFrameRate: videoStats?.sendFrameRate || 0,
+          sendResolutionWidth: videoStats?.sendResolutionWidth || 0,
+          sendResolutionHeight: videoStats?.sendResolutionHeight || 0,
+          videoPacketLossRate: videoStats?.sendPacketLossRate || 0,
+
+          // Audio quality
+          audioPacketLossRate: audioStats?.sendPacketLossRate || 0,
+
+          // Session
+          duration: rtcStats?.Duration || 0, // seconds in channel
+          userCount: rtcStats?.UserCount || 0, // users in channel
+          rtt: rtcStats?.RTT || 0, // round trip time ms
+        };
+
+        // Send to your server — same endpoint pattern as OBS bandwidth tracking
+        await axiosApi.post(`/stream/agora/stats/${data?._id}`, payload);
+      } catch (err) {
+        // Don't toast — silent failure is fine for stats polling
+        console.warn("Stats poll error:", err);
+      }
+    }, STATS_POLL_INTERVAL_MS);
+  };
+
+  // ─── Stop polling ─────────────────────────────────────────────────────────
+  const stopBandwidthPolling = () => {
+    if (statsIntervalRef.current) {
+      clearInterval(statsIntervalRef.current);
+      statsIntervalRef.current = null;
     }
   };
 
+  // ─── Create new Castr stream ──────────────────────────────────────────────
+  const createStream = async (): Promise<boolean> => {
+    const eventTitle = event?.title || data?.title;
+    const eventId = event?._id || data?._id;
+
+    if (!eventTitle || !eventId) {
+      toast.error("Event data missing");
+      return false;
+    }
+    try {
+      const { data: res } = await axiosApi.post<{ stream: IStreamData }>(
+        `/stream/castr/create/${auth?._id}`,
+        {
+          name: eventTitle,
+          eventId,
+          enabled: true,
+          settings: { abr: false, cloud_recording: false },
+        },
+      );
+      setCastrRtmpUrl(
+        `${res?.stream?.ingestInfo.primaryUrl}/${res?.stream?.ingestInfo.streamKey}`,
+      );
+      setStreamData(res?.stream);
+      setEvent({
+        ...event,
+        castrStreamId: res?.stream?.castrStreamId,
+      } as IEvent);
+      toast.success("Stream Created Successfully");
+      return true;
+    } catch (error) {
+      toast.error(formatError(error as AxiosError).message as ToastContent);
+      return false;
+    }
+  };
+
+  // ─── Load existing Castr stream ingest info ───────────────────────────────
+  const loadExistingStream = async (): Promise<boolean> => {
+    try {
+      if (streamData?.ingestInfo) {
+        setCastrRtmpUrl(
+          `${streamData.ingestInfo.primaryUrl}/${streamData.ingestInfo.streamKey}`,
+        );
+        return true;
+      }
+      const { data: res } = await axiosApi.get<IStreamData>(
+        `/stream/castr-details/${event?._id}`,
+      );
+      setCastrRtmpUrl(
+        `${res.ingestInfo.primaryUrl}/${res.ingestInfo.streamKey}`,
+      );
+      setStreamData(res);
+      return true;
+    } catch (error) {
+      toast.error("Could not load stream info");
+      console.log(error);
+      return false;
+    }
+  };
+
+  // ─── Join Agora channel as host ───────────────────────────────────────────
   const joinAsHost = async () => {
     if (!AgoraRTC || !client) return;
     if (!APP_ID) {
       toast.warn("Agora App ID missing");
       return;
     }
+    if (!data?.channelName || !data?.token) {
+      toast.error(
+        "Event is missing Agora credentials. Please recreate the event.",
+      );
+      return;
+    }
 
     setLoading(true);
 
     try {
-      const resp = await getStreamStats();
+      const existingCastrId = data?.castrStreamId || event?.castrStreamId;
+      if (!existingCastrId) {
+        const created = await createStream();
+        if (!created) {
+          setLoading(false);
+          return;
+        }
+      } else {
+        const loaded = await loadExistingStream();
+        if (!loaded) {
+          setLoading(false);
+          return;
+        }
+      }
 
-      if (resp?.status !== "success") {
-        toast.error(resp?.message || "Unable to start stream");
+      // Always fetch a fresh token — never use the stored one (may be expired)
+      const { data: tokenRes } = await axiosApi.get(
+        `/events/${data._id}/refresh-token`,
+      );
+      const freshToken = tokenRes?.data?.token;
+      const channelName = tokenRes?.data?.channelName;
+
+      if (!freshToken || !channelName) {
+        toast.error("Could not get stream token");
         setLoading(false);
         return;
       }
 
-      toast.success(resp.data?.message);
-
       await client.setClientRole("host");
-
-      // join() returns the assigned UID — store it for transcoding config later
       const assignedUid = await client.join(
         APP_ID,
-        data?.channelName || "Fero Event",
-        data?.token || null,
-        UID,
+        channelName,
+        freshToken,
+        null,
       );
       assignedUidRef.current = assignedUid as number;
 
       const [mic, cam] = await AgoraRTC.createMicrophoneAndCameraTracks();
-
       setMicTrack(mic);
       setCamTrack(cam);
-
       cam.play(localVideoRef.current!);
       await client.publish([mic, cam]);
 
       setJoined(true);
-    } catch (error) {
+      toast.success("Joined stream successfully");
+    } catch (error: any) {
       console.error("Agora join error:", error);
-      toast.error("Failed to join stream");
+      toast.error(`Failed to join: ${error?.message || error?.code}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // ─── NEW: Start pushing stream to Castr via RTMP ──────────────────────────
+  // ─── Go Live — start Agora Media Push to Castr ───────────────────────────
   const startCastrStream = async () => {
-    if (!client || !assignedUidRef.current) return;
+    if (!assignedUidRef.current) return;
 
-    // Get the Castr RTMP URL from your event data, or fall back to env variable.
-    // Format: rtmp://live-push.castr.com/live/YOUR_STREAM_KEY
-    const castrRtmpUrl =
-      data?.rtmToken || process.env.NEXT_PUBLIC_CASTR_RTMP_URL;
+    const rtmpUrl = castrRtmpUrl;
+    const castrStreamId =
+      streamData?.castrStreamId || event?.castrStreamId || data?.castrStreamId;
 
-    if (!castrRtmpUrl) {
-      toast.error("Castr RTMP URL not configured");
+    if (!rtmpUrl) {
+      toast.error("Castr RTMP URL missing");
+      return;
+    }
+    if (!castrStreamId) {
+      toast.error("Castr stream ID missing");
       return;
     }
 
     setCastrLoading(true);
 
     try {
-      // Step 1: Set the transcoding config
-      // This tells Agora how to encode the merged stream before sending to Castr
-      await client.setLiveTranscoding({
-        width: 1280,
-        height: 720,
-        videoBitrate: 2500,
-        // videoFramerate: 30,
-        audioSampleRate: 48000,
-        audioBitrate: 128,
-        audioChannels: 2,
-        // userCount: 1,
-        backgroundColor: 0x000000,
-        transcodingUsers: [
-          {
-            uid: assignedUidRef.current,
-            x: 0,
-            y: 0,
-            width: 1280,
-            height: 720,
-            zOrder: 1,
-            alpha: 1,
-          },
-        ],
+      const { data: res } = await axiosApi.post("/stream/agora/push-start", {
+        channelName: data?.channelName,
+        uid: assignedUidRef.current,
+        rtmpUrl,
+        castrStreamId,
       });
 
-      // Step 2: Start the RTMP push to Castr
-      // true = use transcoding (required when mixing multiple streams or for
-      //        single-host streams where you need a consistent output format)
-      await client.startLiveStreaming(castrRtmpUrl, true);
+      if (res.status !== "success") {
+        toast.error("Failed to start push");
+        return;
+      }
+
+      await axiosApi.patch(`/events/live/${data?._id}/${auth?._id}`, {
+        streamType: "agora",
+        streamPlatform: "agora",
+        isLive: true,
+      });
 
       setCastrStreaming(true);
-      toast.success("🔴 Live on Castr!");
-    } catch (error: any) {
+      toast.success("🔴 You are now LIVE on Castr!");
+
+      // ✅ Start bandwidth polling now that stream is active
+      startBandwidthPolling();
+    } catch (error) {
+      toast.error(formatError(error as AxiosError).message as ToastContent);
       console.error("Castr stream start error:", error);
-      toast.error(`Failed to start Castr stream: ${error?.message}`);
     } finally {
       setCastrLoading(false);
     }
   };
 
-  // ─── NEW: Stop pushing stream to Castr ────────────────────────────────────
+  // ─── Stop Castr push ──────────────────────────────────────────────────────
   const stopCastrStream = async () => {
-    if (!client) return;
+    const castrStreamId =
+      streamData?.castrStreamId || event?.castrStreamId || data?.castrStreamId;
 
-    const castrRtmpUrl =
-      data?.rtmToken || process.env.NEXT_PUBLIC_CASTR_RTMP_URL;
-
-    if (!castrRtmpUrl) return;
+    // ✅ Stop bandwidth polling first
+    stopBandwidthPolling();
 
     try {
-      await client.stopLiveStreaming(castrRtmpUrl);
+      await axiosApi.post("/stream/agora/push-stop", {
+        channelName: data?.channelName,
+        castrStreamId,
+      });
       setCastrStreaming(false);
-      toast.info("Castr stream stopped");
+      toast.info("Stream stopped");
     } catch (error) {
-      console.error("Castr stop error:", error);
+      console.error("Stop push error:", error);
     }
   };
 
+  // ─── Leave — full cleanup ─────────────────────────────────────────────────
   const leave = async () => {
     try {
-      // Stop Castr stream before leaving
       if (castrStreaming) await stopCastrStream();
+
+      // ✅ Ensure polling is cleared even if stopCastrStream wasn't called
+      stopBandwidthPolling();
 
       micTrack?.stop();
       micTrack?.close();
@@ -217,15 +352,28 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
       await client?.leave();
       setJoined(false);
       assignedUidRef.current = null;
-      const { data: response } = await axiosApi.get<{
-        data: { message: string };
-      }>(`/events/end-live/${data?._id}`);
-      // return response;
-      toast.success(response?.data?.message || "Stream ended");
+
+      await axiosApi.patch(`/stream/castr/${streamData?.castrStreamId}`, {
+        settings: { abr: false, cloud_recording: false },
+        name: event?.title,
+        enabled: false,
+      });
+      endStream(event?._id || "", auth?._id || "", "agora");
+      toast.success("Stream ended");
+      setCastrStreaming(false);
     } catch (error) {
       console.error("Leave error:", error);
     }
   };
+
+  // ─── Cleanup on unmount ───────────────────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      stopBandwidthPolling(); // ✅ always clear interval on unmount
+      leave();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleCamera = async () => {
     if (!camTrack) return;
@@ -239,18 +387,10 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
     setMicOn((p) => !p);
   };
 
-  useEffect(() => {
-    return () => {
-      leave();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <div className="relative w-[430px] h-[300px] bg-black rounded-t-lg">
       <div ref={localVideoRef} className="w-full h-full rounded-t-lg" />
 
-      {/* Live indicator badge */}
       {castrStreaming && (
         <div className="absolute top-3 left-3 flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
           <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
@@ -266,23 +406,20 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
             title={cameraOn ? "Off video" : "On video"}>
             {cameraOn ? <Video /> : <VideoOff />}
           </button>
-
           <button
             onClick={toggleMic}
             className="text-white"
             title={micOn ? "Mute" : "Unmute"}>
             {micOn ? <Mic /> : <MicOff />}
           </button>
-
-          {/* NEW: Castr stream toggle button */}
           <button
-            onClick={castrStreaming ? stopCastrStream : startCastrStream}
+            onClick={castrStreaming ? leave : startCastrStream}
             className={`flex items-center gap-1 px-2 rounded text-white text-xs font-semibold ${
               castrStreaming
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-green-600 hover:bg-green-700"
             }`}
-            title={castrStreaming ? "Stop Castr stream" : "Go live on Castr"}
+            title={castrStreaming ? "Stop Agora stream" : "Go live"}
             disabled={castrLoading}>
             {castrLoading ? (
               <ThreeDots height={16} width={22} color="white" />
@@ -293,10 +430,9 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
               </>
             )}
           </button>
-
-          <button onClick={leave} title="Leave event">
+          {/* <button onClick={leave} title="Leave event">
             <XCircle className="text-red-500" />
-          </button>
+          </button> */}
         </div>
       )}
 

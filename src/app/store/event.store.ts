@@ -40,7 +40,11 @@ interface IProp {
   publishEvent: (id: string) => Promise<IEvent | boolean>;
   goLiveEvent: (eventId: string, userId: string) => Promise<IEvent | boolean>;
 
-  endStream: (eventId: string, userId: string) => Promise<IEvent | boolean>;
+  endStream: (
+    eventId: string,
+    userId: string,
+    streamType?: string,
+  ) => Promise<IEvent | boolean>;
   createBoard: (
     input: FormData,
     eventId: string,
@@ -206,7 +210,7 @@ export const useEventStore = create<IProp>((set) => ({
       const { data } = await axiosApi.patch(
         `/events/live/${eventId}/${userId}`,
         {
-          evenId: eventId,
+          eventId: eventId,
           streamPlatform: "castr",
         },
       );
@@ -248,12 +252,13 @@ export const useEventStore = create<IProp>((set) => ({
   endStream: async (
     eventId: string,
     userId: string,
+    streamType?: string,
   ): Promise<IEvent | boolean> => {
     try {
       set({ loading: true });
       const { data } = await axiosApi.patch(`/stream/end-streaming/${userId}`, {
         eventId: eventId,
-        streamType: "castr",
+        streamType: streamType,
       });
       set((state) => ({
         event: state.event ? { ...state.event, isLive: false } : null,

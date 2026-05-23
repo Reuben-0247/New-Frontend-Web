@@ -16,7 +16,7 @@ const ChatReceived: React.FC<{ chat: IComment }> = ({ chat }) => {
               alt="avatar"
             />
           </div>
-          <div className="flex flex-col  bg-[#011d4e] text-white p-2 reply">
+          <div className="flex flex-col  bg-[#011d4e] text-white p-1 reply">
             <p className="text-[12px] font-bold text-primary">
               {chat?.creator?.name?.split(" ").reverse()[0]}
             </p>

@@ -144,14 +144,12 @@ const FindEventsComp: React.FC<{ events: IEvent[]; cats: ICategory[] }> = ({
                       </span>
                     </div>
 
-                    {event.location?.type == "Hybrid" && (
-                      <div className="flex items-center gap-5 text-sm ">
-                        <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white" />
-                        <span className="truncate link text-[#434343] dark:text-white  ">
-                          {event.location?.address}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-5 text-sm ">
+                      <FiMapPin className="w-4 h-4 text-[#434343] dark:text-white" />
+                      <span className="truncate link text-[#434343] dark:text-white  ">
+                        {event.location?.address || "Online"}
+                      </span>
+                    </div>
 
                     {/* <div className="flex items-center gap-5 text-sm ">
                       <FaCalendar className="w-3 h-4 text-[#434343] dark:text-white" />

@@ -20,6 +20,7 @@ const LiveEventLayout: React.FC<{
   const { setAuth } = useAuthStore();
   const { setEvent, event, setStreamData } = useEventStore();
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const root = document.documentElement;
     if (theme === "dark") {
@@ -74,9 +75,10 @@ const LiveEventLayout: React.FC<{
         console.error("Error fetching stream stats:", error);
       }
     };
-    if (event?._id) {
-      getStream();
-    }
+
+    // if (event?._id) {
+    getStream();
+    // }
   }, [event?._id, setStreamData]);
 
   if (loading) {

@@ -142,7 +142,7 @@ const StreamPage = () => {
       toast.success("Cloud Recording disabled...");
       setEnabled(false);
     }
-    endStream(event?._id || "", auth?._id || "");
+    endStream(event?._id || "", auth?._id || "", "castr");
     setOpenModal(false);
   };
   useEffect(() => {
@@ -291,7 +291,7 @@ const StreamPage = () => {
     {
       label: "Webcam",
       icon: <Webcam />,
-      disabled: event?.isLive || false,
+      disabled: false,
     },
   ];
 

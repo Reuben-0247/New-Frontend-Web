@@ -49,6 +49,7 @@ const SingleEventPage: React.FC<{
   const { auth } = useAuthStore();
 
   const label = searchParams.get("label");
+  const date = searchParams.get("date");
   const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(false);
   const { setEvent, event, events } = useEventStore();
@@ -89,16 +90,32 @@ const SingleEventPage: React.FC<{
     }
 
     const getVodData = async () => {
-      try {
-        const { data } = await axiosApi.get(
-          `/stream/event-recording/${event?._id}`,
-        );
+      if (event?._id) {
+        if (date) {
+          try {
+            const { data } = await axiosApi.get(
+              `/stream/event-attendee-recording/${event?._id}/${date}`,
+            );
 
-        if (data) {
-          setVodData(data || []);
+            if (data) {
+              setVodData(data || []);
+            }
+          } catch (err) {
+            console.error("Error fetching users:", err);
+          }
+        } else {
+          try {
+            const { data } = await axiosApi.get(
+              `/stream/event-recording/${event?._id}`,
+            );
+
+            if (data) {
+              setVodData(data || []);
+            }
+          } catch (err) {
+            console.error("Error fetching users:", err);
+          }
         }
-      } catch (err) {
-        console.error("Error fetching users:", err);
       }
     };
     // fetchEventAndRelated();
@@ -108,7 +125,19 @@ const SingleEventPage: React.FC<{
     );
     // if (!event || event._id !== eventId) {
     // }
-  }, [eventId, setEvent, event?.userId, event?.isLive, setVodData, event?._id]);
+  }, [
+    eventId,
+    setEvent,
+    event?.userId,
+    event?.isLive,
+    setVodData,
+    event?._id,
+    date,
+  ]);
+
+  const isRouting = date
+    ? `/live-event/${eventId}?date=${encodeURIComponent(String(date))}`
+    : `/live-event/${eventId}`;
 
   const enterEvent = async () => {
     if (event?.requirePassword && !user?.registeredEvents?.includes(eventId)) {
@@ -117,7 +146,9 @@ const SingleEventPage: React.FC<{
       return;
     }
     if (auth?._id === event?.userId) {
-      router.push(`/live-event/${eventId}`);
+      toast.warn("You cannot join your own event");
+
+      // router.push(`/live-event/${eventId}`);
       return;
     }
 
@@ -126,22 +157,29 @@ const SingleEventPage: React.FC<{
       userId: auth?._id,
       password: event?.password,
     };
-    try {
-      setLoadingEnter(true);
-      const { data } = await axiosApi.patch(
-        "/stream/enter-stream-event",
-        payload,
-      );
-      if (data) {
-        router.push(`/live-event/${eventId}`);
+    if (auth?._id) {
+      try {
+        setLoadingEnter(true);
+        const { data } = await axiosApi.patch(
+          "/stream/enter-stream-event",
+          payload,
+        );
+        if (data) {
+          toast.success(
+            "Access granted! You have joined the event. Redirecting to the event...",
+          );
+          router.push(isRouting);
+        }
+      } catch (error) {
+        console.log(error);
+        const axiosError = error as AxiosError;
+        const formattedError = formatError(axiosError);
+        toast.error(formattedError.message as ToastContent);
+      } finally {
+        setLoadingEnter(false);
       }
-    } catch (error) {
-      console.log(error);
-      const axiosError = error as AxiosError;
-      const formattedError = formatError(axiosError);
-      toast.error(formattedError.message as ToastContent);
-    } finally {
-      setLoadingEnter(false);
+    } else {
+      router.push(isRouting);
     }
   };
 
@@ -290,7 +328,13 @@ const SingleEventPage: React.FC<{
                         {/* <Link
                           href={`/live-event/${event?._id}`}
                           className=" text-white  flex justify-center items-center  rounded-lg font-medium  transition"> */}
-                        Access Event
+                        {event?.isLive ? (
+                          <span>
+                            {loadingEnter ? "Joining..." : "Join Live Event"}
+                          </span>
+                        ) : (
+                          <span>Access Event</span>
+                        )}
                         {/* </Link> */}
                       </Button>
                     </div>

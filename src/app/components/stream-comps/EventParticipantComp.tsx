@@ -5,7 +5,7 @@ import { ThreeDots } from "react-loader-spinner";
 
 const EventParticipantComp: React.FC<{ eventId: string }> = ({ eventId }) => {
   const [participants, setParticipants] = useState<
-    { user: { name?: string; profilePhotoUrl?: string } }[]
+    { id: string; name?: string; imgUrl?: string }[]
   >([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,18 +40,18 @@ const EventParticipantComp: React.FC<{ eventId: string }> = ({ eventId }) => {
         </div>
       ) : participants.length > 0 ? (
         <div className="space-y-3">
-          {participants.map((p, index) => (
+          {participants.map((p) => (
             <div
-              key={index}
+              key={p.id}
               className="flex items-center bg-gray-50 p-3 rounded-lg shadow-sm">
               <img
-                src={p?.user?.profilePhotoUrl ?? "/images/user.png"}
+                src={p?.imgUrl ?? "/images/user.png"}
                 alt="participant"
                 className="h-10 w-10 rounded-full object-cover border"
               />
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-800">
-                  {p?.user?.name ?? "Unknown User"}
+                  {p?.name ?? "Unknown User"}
                 </p>
                 <p className="text-xs text-gray-500">Participant</p>
               </div>
