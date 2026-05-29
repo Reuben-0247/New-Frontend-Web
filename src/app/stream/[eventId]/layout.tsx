@@ -22,7 +22,7 @@ const StreamLayout: React.FC<{
 }> = ({ children, params }) => {
   const { eventId } = use(params);
   const [loading, setLoading] = useState(false);
-  const [showAside, setShowAside] = useState(true);
+  const [showAside, setShowAside] = useState(false);
   const [collapse, setCollapse] = useState(false);
   const { setAuth } = useAuthStore();
   const { setEvents, setEvent, event, setStreamData } = useEventStore();

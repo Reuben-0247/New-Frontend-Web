@@ -11,18 +11,12 @@ import {
   ScanEye,
 } from "lucide-react";
 import Link from "next/link";
-// import { usePathname } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { IoAdd } from "react-icons/io5";
-// import {
-//   // DropdownMenuCheckboxItemProps,
-//   DropdownMenuItem,
-// } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  // DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -34,15 +28,11 @@ import { useAuthStore } from "@/app/store/auth.store";
 import axiosApi from "@/lib/axios";
 import { IEvent } from "@/app/interfaces/event.interface";
 import { useEventStore } from "@/app/store/event.store";
-// import { toast, ToastContent } from "react-toastify";
-// import { AxiosError } from "axios";
-// import { formatError } from "@/utils/helper";
 import ModalComp from "@/app/components/ModalComp";
 import { useCategoryStore } from "@/app/store/category.store";
 import { FiCalendar, FiMapPin } from "react-icons/fi";
 import { useSearchParams, useRouter } from "next/navigation";
 
-// type Checked = DropdownMenuCheckboxItemProps["checked"];
 const labels = ["Published", "Drafts", "Saved", "Registered", "Past"];
 
 const EventsPage = () => {
@@ -218,49 +208,52 @@ const EventsPage = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <span className="md:block hidden"> Filters </span>
-              <ListFilter />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-background w-40">
-            <DropdownMenuLabel>Event Filters</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              {labels.map((ev, i) => (
-                <DropdownMenuItem
-                  className="py-2 hover:border-none! outline-none hover:bg-dash-gray cursor-pointer"
-                  onClick={() => {
-                    setIsLive(false);
-                    setComponents(ev);
-                    router.push(`?tab=${ev}`, { scroll: false });
-                  }}
-                  key={i}>
-                  {ev}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="block md:hidden">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <span className="md:block hidden"> Filters </span>
+                <ListFilter />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-background w-40">
+              <DropdownMenuLabel>Event Filters</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                {labels.map((ev, i) => (
+                  <DropdownMenuItem
+                    className="py-2 hover:border-none! outline-none hover:bg-dash-gray cursor-pointer"
+                    onClick={() => {
+                      setIsLive(false);
+                      setComponents(ev);
+                      router.push(`?tab=${ev}`, { scroll: false });
+                    }}
+                    key={i}>
+                    {ev}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-
-      <div className="flex event-scroll  gap-1 md:gap-3 my-6  overflow-x-scroll md:w-[900px] sm:w-[500px] ">
-        {labels.map((labelName) => (
-          <button
-            key={labelName}
-            onClick={() => {
-              setIsLive(false);
-              setComponents(labelName);
-              router.push(`?tab=${labelName}`, { scroll: false });
-            }}
-            className={`text-[10px] md:text-base px-1  md:px-4 w-full md:w-0 cursor-pointer mx-1 md:mx-2 py-2 rounded-lg min-w-1 border md:min-w-45 transition-colors duration-300
+      <div className="hidden md:block">
+        <div className="flex event-scroll   gap-1 md:gap-3 my-6  overflow-x-scroll md:w-[900px] sm:w-[500px] ">
+          {labels.map((labelName) => (
+            <button
+              key={labelName}
+              onClick={() => {
+                setIsLive(false);
+                setComponents(labelName);
+                router.push(`?tab=${labelName}`, { scroll: false });
+              }}
+              className={`text-[10px] md:text-base px-1  md:px-4 w-full md:w-0 cursor-pointer mx-1 md:mx-2 py-2 rounded-lg min-w-1 border md:min-w-45 transition-colors duration-300
                 ${components === labelName ? "ring-2 ring-blue-500" : ""}
                 dark:bg-transparent text-gray-700 dark:text-white border-gray-200 dark:border-gray-700`}>
-            {labelName} Events
-          </button>
-        ))}
+              {labelName} Events
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="events">

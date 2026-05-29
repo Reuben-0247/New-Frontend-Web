@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 export const HomeHero = () => {
   return (
     <div className="container mx-auto px-2 md:px-6">
-      <div className="w-full h-full flex flex-col  items-center  justify-center py-10 md:py-24   text-center">
+      <div className="w-full h-full flex flex-col  items-center justify-center py-10 md:py-24 text-center">
         <motion.div
           initial={{ x: -200, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}

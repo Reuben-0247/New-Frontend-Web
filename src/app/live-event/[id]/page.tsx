@@ -143,7 +143,7 @@ const LivePage: React.FC = () => {
       <div className="flex  justify-between">
         <div>
           <Button
-            onClick={() => router.back()}
+            onClick={() => router.push(routeBack)}
             size={"sm"}
             variant={"outline"}
             className="text-foreground font-semibold cursor-pointer">

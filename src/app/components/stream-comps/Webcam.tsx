@@ -8,7 +8,7 @@ import type {
   IMicrophoneAudioTrack,
 } from "agora-rtc-sdk-ng";
 import { ThreeDots } from "react-loader-spinner";
-import { Video, VideoOff, Mic, MicOff, Radio, XCircle } from "lucide-react";
+import { Video, VideoOff, Mic, MicOff, Radio } from "lucide-react";
 import { toast, ToastContent } from "react-toastify";
 import { IEvent } from "@/app/interfaces/event.interface";
 import axiosApi from "@/lib/axios";
@@ -19,7 +19,7 @@ import { formatError } from "@/utils/helper";
 import { AxiosError } from "axios";
 
 const APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID as string;
-const STATS_POLL_INTERVAL_MS = 5000; // poll every 5 seconds — same as OBS flow
+const STATS_POLL_INTERVAL_MS = 3000; // poll every 3 seconds — same as OBS flow
 
 const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
   const { auth } = useAuthStore();
@@ -146,21 +146,25 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
       return false;
     }
     try {
-      const { data: res } = await axiosApi.post<{ stream: IStreamData }>(
-        `/stream/castr/create/${auth?._id}`,
-        {
-          name: eventTitle,
-          eventId,
-          enabled: true,
-          settings: { abr: false, cloud_recording: false },
-        },
-      );
+      const { data: res } = await axiosApi.post<{
+        stream: IStreamData;
+        streamType: string;
+      }>(`/stream/castr/create/${auth?._id}`, {
+        streamType: "agora",
+
+        name: eventTitle,
+        eventId,
+        enabled: true,
+        settings: { abr: false, cloud_recording: false },
+      });
       setCastrRtmpUrl(
         `${res?.stream?.ingestInfo.primaryUrl}/${res?.stream?.ingestInfo.streamKey}`,
       );
       setStreamData(res?.stream);
       setEvent({
         ...event,
+        streamType: res?.streamType,
+
         castrStreamId: res?.stream?.castrStreamId,
       } as IEvent);
       toast.success("Stream Created Successfully");
@@ -388,7 +392,7 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
   };
 
   return (
-    <div className="relative w-[430px] h-[300px] bg-black rounded-t-lg">
+    <div className="relative w-full h-[300px] bg-black rounded-t-lg">
       <div ref={localVideoRef} className="w-full h-full rounded-t-lg" />
 
       {castrStreaming && (

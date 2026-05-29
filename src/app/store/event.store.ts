@@ -261,7 +261,9 @@ export const useEventStore = create<IProp>((set) => ({
         streamType: streamType,
       });
       set((state) => ({
-        event: state.event ? { ...state.event, isLive: false } : null,
+        event: state.event
+          ? { ...state.event, isLive: false, streamType: "" }
+          : null,
         streamData: null,
       }));
       toast.success("Stream ended successfully");
