@@ -13,7 +13,7 @@ export interface IEvent {
   endDate?: string;
   startTime: string;
   endTime: string;
-
+  streamType: string;
   dates?: {
     date: string;
     startTime?: string;

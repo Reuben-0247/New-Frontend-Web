@@ -29,7 +29,7 @@ export default function DashboardLayout({
   // const pathname = usePathname();
 
   const [loading, setLoading] = useState(false);
-  const [showAside, setShowAside] = useState(true);
+  const [showAside, setShowAside] = useState(false);
   const [collapse, setCollapse] = useState(false);
   const { setAuth, auth } = useAuthStore();
   const { setEvents, setLiveEvent, liveEvent } = useEventStore();
@@ -175,7 +175,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       {token && (
         <SideBar
           showAside={showAside}

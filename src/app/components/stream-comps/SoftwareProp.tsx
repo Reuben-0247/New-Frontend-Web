@@ -1,14 +1,14 @@
 import { IStreamData } from "@/app/interfaces/castr.interface";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  // SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectLabel,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { CopyIcon, Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
 const SoftwareProp: React.FC<{
@@ -55,14 +55,17 @@ const SoftwareProp: React.FC<{
 
   return (
     <div className="w-full">
-      <div className="flex text-white justify-between items-center w-full bg-[#2e3c65] p-2 rounded-md mb-4">
-        <p
-          className={`p-2 cursor-pointer ${
-            vOut === "Source Setup" ? "border-b-2" : ""
-          }`}
-          onClick={() => setVOut("Source Setup")}>
-          Source Setup
-        </p>
+      <div
+        className={`flex text-white justify-between items-center w-full bg-[#2e3c65] ${streamType !== "Webcam" ? "p-2" : ""}  rounded-md mb-4`}>
+        {streamType !== "Webcam" && (
+          <p
+            className={`p-2 cursor-pointer ${
+              vOut === "Source Setup" ? "border-b-2" : ""
+            }`}
+            onClick={() => setVOut("Source Setup")}>
+            Source Setup
+          </p>
+        )}
         {/* <p
           className={`p-2 cursor-pointer ${
             vOut === "Playback" ? "border-b-2" : ""
@@ -82,7 +85,7 @@ const SoftwareProp: React.FC<{
         <div>
           {streamType === "Webcam" ? (
             <div className="space-y-4">
-              <Select value="Nigeria">
+              {/* <Select value="Nigeria">
                 <SelectTrigger className="w-full text-white">
                   <SelectValue placeholder="Choose your country" />
                 </SelectTrigger>
@@ -111,7 +114,7 @@ const SoftwareProp: React.FC<{
                     <SelectItem value="Video Input">Video Input</SelectItem>
                   </SelectGroup>
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
           ) : (
             <div>

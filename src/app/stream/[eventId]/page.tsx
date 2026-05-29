@@ -55,7 +55,7 @@ const StreamPage = () => {
   const [loadingT, setLoadingT] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [bandWidth, setBandWidth] = useState("");
-  const [videoSrc, setVideoSrc] = useState("Streaming Sofware");
+  const [videoSrc, setVideoSrc] = useState("");
   const {
     event,
     setStreamData,
@@ -89,16 +89,18 @@ const StreamPage = () => {
           abr: false,
           cloud_recording: false,
         },
+        streamType: "castr",
       };
       setLoadingS(true);
 
-      const { data } = await axiosApi.post<{ stream: IStreamData }>(
-        `/stream/castr/create/${auth?._id}`,
-        body,
-      );
+      const { data } = await axiosApi.post<{
+        stream: IStreamData;
+        streamType: string;
+      }>(`/stream/castr/create/${auth?._id}`, body);
       setStreamData(data?.stream);
       setEvent({
         ...event,
+        streamType: data?.streamType,
         castrStreamId: data?.stream?.castrStreamId,
       } as IEvent);
       toast.success("Stream Created Successfully", { delay: 3000 });
@@ -205,14 +207,34 @@ const StreamPage = () => {
     };
   }, [streamData?.castrStreamId, event?.castrStreamId, auth?._id, event?._id]);
 
+  // Runs ONCE on mount — sets initial values based on screen size
   useEffect(() => {
-    if (videoSrc === "Streaming Sofware") {
-      setIsPublished(true);
+    const isMobile = window.innerWidth < 768;
+    setIsPublished(!isMobile);
+    setVideoSrc(isMobile ? "Webcam" : "Streaming Sofware");
+  }, []); // no dependencies
+
+  // Handles resize only — does NOT depend on videoSrc
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768;
+      setIsPublished(!isMobile);
+      setVideoSrc(isMobile ? "Webcam" : "Streaming Sofware");
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Syncs isPublished when user manually toggles videoSrc
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      setIsPublished(videoSrc !== "Webcam");
     } else {
-      setIsPublished(false);
+      setIsPublished(videoSrc === "Streaming Sofware");
     }
   }, [videoSrc]);
-
   const enableCloudRecord = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
 
@@ -282,16 +304,17 @@ const StreamPage = () => {
     label: string;
     icon: React.ReactNode;
     disabled: boolean;
+    hidden?: boolean;
   }[] = [
     {
       label: "Streaming Sofware",
       icon: <Airplay />,
-      disabled: false,
+      disabled: event?.streamType === "agora",
     },
     {
       label: "Webcam",
       icon: <Webcam />,
-      disabled: false,
+      disabled: event?.streamType === "castr",
     },
   ];
 
@@ -347,9 +370,9 @@ const StreamPage = () => {
         </Link>
       </div>
 
-      <div className="md:flex  gap-4 mt-8">
+      <div className="flex flex-col-reverse md:flex-row gap-4 mt-8">
         <div className="event-details md:w-[50%] w-full ">
-          <div className="tabs w-full flex items-center justify-between  text-white  py-2 px-4  bg-black rounded-md">
+          <div className="tabs w-full flex items-center justify-between  text-white  py-2  md:px-4 px-2  bg-black rounded-md">
             {tabs.map((tab) => (
               <p
                 onClick={() => setActive(tab.name)}
@@ -440,42 +463,44 @@ const StreamPage = () => {
             </div>
           ) : (
             <WebcamP data={event} />
-            // <p>WebCam</p>
           )}
 
-          <div className="vsrc flex justify-between items-center p-2 rounded-md bg-[#2e3c65] my-4">
+          <div className="vsrc flex md:justify-between justify-center items-center p-2 rounded-md bg-[#2e3c65] my-4">
             <div className="flex">
               {videoSrcData.map((src) => (
                 <p
                   className={`py-2 md:px-4 px-2 text-white flex items-center md:gap-2 gap-1 font-bold ${src.disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${
                     videoSrc === src.label ? "bg-[#232e4e] rounded-md" : ""
-                  }`}
+                  } ${src.label === "Streaming Sofware" ? "hidden md:block" : "md:block"}`}
                   key={src.label}
                   onClick={() => !src.disabled && setVideoSrc(src.label)}>
                   <span className="text-white">{src.icon}</span> {src.label}
                 </p>
               ))}
             </div>
-
-            <div className="flex items-center ml-2 gap-2">
-              <label
-                title={
-                  !auth?.hasSubscribed
-                    ? "Subscribe to enable"
-                    : "Cloud Recording"
-                }
-                className={`relative inline-flex items-center ${!auth?.hasSubscribed ? "cursor-not-allowed" : "cursor-pointer"}`}>
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  checked={enabled}
-                  disabled={loadingT || !auth?.hasSubscribed}
-                  onChange={enableCloudRecord}
-                />
-                <div className="w-8 h-[19px] border-[#0062FF] peer-checked:border-[#cc0000] border-2 peer-focus:outline-none peer-focus:ring-2 peer-focus:bg-[#0f1525] rounded-full peer peer-checked:bg-[#cc0000] p-1 transition-all duration-300"></div>
-                <div className="absolute left-[3px] top-0.4 bg-[#FFFFFF] w-[13px] h-[13px] rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
-              </label>
-              <small className="text-white">Recording</small>
+            <div className="hidden md:block">
+              {videoSrc === "Streaming Sofware" && (
+                <div className="flex items-center ml-2 gap-2">
+                  <label
+                    title={
+                      !auth?.hasSubscribed
+                        ? "Subscribe to enable"
+                        : "Cloud Recording"
+                    }
+                    className={`relative inline-flex items-center ${!auth?.hasSubscribed ? "cursor-not-allowed" : "cursor-pointer"}`}>
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={enabled}
+                      disabled={loadingT || !auth?.hasSubscribed}
+                      onChange={enableCloudRecord}
+                    />
+                    <div className="w-8 h-[19px] border-[#0062FF] peer-checked:border-[#cc0000] border-2 peer-focus:outline-none peer-focus:ring-2 peer-focus:bg-[#0f1525] rounded-full peer peer-checked:bg-[#cc0000] p-1 transition-all duration-300"></div>
+                    <div className="absolute left-[3px] top-0.4 bg-[#FFFFFF] w-[13px] h-[13px] rounded-full transition-transform duration-300 transform peer-checked:translate-x-full"></div>
+                  </label>
+                  <small className="text-white">Recording</small>
+                </div>
+              )}
             </div>
           </div>
           <div className="vsrc flex justify-between items-center   my-4">

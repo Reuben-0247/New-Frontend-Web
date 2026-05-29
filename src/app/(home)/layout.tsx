@@ -16,7 +16,7 @@ const HomeLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
   }, [theme]);
   return (
-    <div>
+    <div className="overflow-hidden">
       {children}
       <Footer />
     </div>
