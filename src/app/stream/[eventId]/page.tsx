@@ -55,7 +55,7 @@ const StreamPage = () => {
   const [loadingT, setLoadingT] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [bandWidth, setBandWidth] = useState("");
-  const [videoSrc, setVideoSrc] = useState("");
+  const [videoSrc, setVideoSrc] = useState("Streaming Sofware");
   const {
     event,
     setStreamData,
@@ -235,6 +235,16 @@ const StreamPage = () => {
       setIsPublished(videoSrc === "Streaming Sofware");
     }
   }, [videoSrc]);
+
+  // useEffect(() => {
+  //   //  const isMobile = window.innerWidth < 768;
+  //   if (videoSrc === "Streaming Sofware") {
+  //     setIsPublished(true);
+  //   } else {
+  //     setIsPublished(false);
+  //   }
+  // }, [videoSrc]);
+
   const enableCloudRecord = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
 
