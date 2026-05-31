@@ -373,7 +373,7 @@ const WebcamP: React.FC<{ data: IEvent | null }> = ({ data }) => {
   // ─── Cleanup on unmount ───────────────────────────────────────────────────
   useEffect(() => {
     return () => {
-      stopBandwidthPolling(); // ✅ always clear interval on unmount
+      stopBandwidthPolling();
       leave();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
