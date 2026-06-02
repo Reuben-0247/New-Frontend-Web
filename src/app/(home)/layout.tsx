@@ -3,6 +3,7 @@ import type React from "react";
 import Footer from "@/app/components/Footer";
 import { useThemeStore } from "../store/theme.store";
 import { useEffect } from "react";
+import WhatsAppButton from "../components/WhatsAppButton";
 
 const HomeLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const theme = useThemeStore((state) => state.theme);
@@ -19,6 +20,7 @@ const HomeLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <div className="overflow-hidden">
       {children}
       <Footer />
+      <WhatsAppButton />
     </div>
   );
 };
